@@ -23,6 +23,10 @@ export type Settings = {
   agentWrite: boolean
   agentShell: boolean
   micId: string
+  geminiTts: boolean
+  geminiSearch: boolean
+  geminiStt: boolean
+  geminiFallback: boolean
   theme: string
   quality: string
   reduced: boolean
@@ -39,9 +43,8 @@ export const PROVIDERS: Record<string, { url: string; models: string[]; needsKey
 }
 
 const DEFAULTS: Settings = {
-  provider: 'Gemini',
-  // Flash-Lite: 500 free requests/day (Flash only ~20)
-  model: 'gemini-3.5-flash-lite',
+  provider: 'Groq',
+  model: 'openai/gpt-oss-120b',
   voice: 'lyra',
   userName: 'señor',
   persona: 'butler',
@@ -60,6 +63,11 @@ const DEFAULTS: Settings = {
   agentWrite: true,
   agentShell: true,
   micId: '',
+  // Gemini's free quota is limited: each use is opt-in (the key alone turns nothing on)
+  geminiTts: false,
+  geminiSearch: false,
+  geminiStt: false,
+  geminiFallback: false,
   theme: 'nexus',
   quality: 'ultra',
   reduced: false

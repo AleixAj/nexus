@@ -435,7 +435,7 @@ export async function listen(h: ListenHandlers) {
       const blob = new Blob(chunks, { type: 'audio/webm' })
       text = await api.transcribe(await toWav(blob))
     } catch (e: any) {
-      if (alive()) h.onError(String(e?.message || e).includes('NO_KEY') ? 'Falta la clave de Gemini o Groq en Ajustes' : 'No he podido entenderle')
+      if (alive()) h.onError(String(e?.message || e).includes('NO_KEY') ? 'Para entenderle necesito la clave de Groq (o permitir Gemini en Ajustes)' : 'No he podido entenderle')
       return
     }
     if (alive()) h.onResult(text)

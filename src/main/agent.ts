@@ -5,7 +5,7 @@ import { execFile } from 'child_process'
 import { promises as fs, type Dirent } from 'fs'
 import { basename, dirname, extname, isAbsolute, join, resolve } from 'path'
 import os from 'os'
-import { getKey } from './settings'
+import { getKey, loadSettings } from './settings'
 
 const MAX_READ = 9000
 const MAX_OUT = 5000
@@ -133,7 +133,7 @@ async function geminiSearch(key: string, query: string) {
 }
 
 async function webSearch(query: string) {
-  const gemini = getKey('Gemini')
+  const gemini = loadSettings().geminiSearch ? getKey('Gemini') : ''
   if (gemini) {
     try { const r = await geminiSearch(gemini, query); if (r) return r } catch { /* try the next one */ }
   }

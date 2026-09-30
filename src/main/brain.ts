@@ -160,7 +160,7 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
     if (!res) throw new Error('No se pudo conectar con el modelo')
     if (res.status === 429) {
       // this free tier is used up: continue with another service the user has a key for
-      const alt = ['Gemini', 'Groq', 'Cerebras'].find(n => !tried.has(n) && getKey(n))
+      const alt = [...(s.geminiFallback ? ['Gemini'] : []), 'Groq', 'Cerebras'].find(n => !tried.has(n) && getKey(n))
       if (!alt) throw new Error('Se ha agotado el límite gratuito por ahora; pruebe en un rato')
       tried.add(alt)
       name = alt; p = PROVIDERS[alt]; key = getKey(alt); model = p.models[0]
@@ -253,7 +253,7 @@ async function readStream(body: ReadableStream<Uint8Array>, onDelta: (t: string)
 
 /** Speech to text. `audio` is a 16 kHz mono WAV. Groq Whisper if there is a Groq key, otherwise Gemini. */
 export async function transcribe(audio: ArrayBuffer, lang: string): Promise<string> {
-  const groq = getKey('Groq'), gemini = getKey('Gemini')
+  const groq = getKey('Groq'), gemini = loadSettings().geminiStt ? getKey('Gemini') : ''
   let text = ''
   if (groq) {
     const form = new FormData()

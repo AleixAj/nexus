@@ -191,6 +191,7 @@ export default class NexusApp extends Component {
       provider: s.provider, model: s.model, providers: s.providers, voiceSel: s.voice, userName: s.userName, persona: s.persona,
       theme: s.theme, quality: s.quality, reduced: s.reduced, autostart: !!s.autostart, hotkey: s.hotkey || st.hotkey,
       agent: { web: s.agentWeb, files: s.agentFiles, write: s.agentWrite, shell: s.agentShell }, micId: s.micId || '',
+      gemini: { tts: s.geminiTts, search: s.geminiSearch, stt: s.geminiStt, fallback: s.geminiFallback },
       lang: s.lang, sliders: { ...st.sliders, speed: s.speed, pitch: s.pitch, volume: s.volume, warmth: s.warmth, formal: s.formal, fx: s.fx },
     }));
     return s;
@@ -299,7 +300,7 @@ export default class NexusApp extends Component {
       if (!QUIET) this.say(`${this.greet()}, ${this.name()}. Todos los sistemas operativos.`);
       if (params.get('notice') === 'wallpaper-failed') this.notify('FONDO DE ESCRITORIO', 'No he podido ponerme de fondo', 'Windows no lo ha permitido · sigo en modo ventana', '#FB7185');
       const p = this.state.providers[this.state.provider];
-      if (p && p.needsKey && !p.hasKey) this.later(() => this.notify('CONFIGURACIÓN', 'Falta la clave de la IA', 'Gratis en Google AI Studio · pégala en Ajustes', '#F5B971'), 4000);
+      if (p && p.needsKey && !p.hasKey) this.later(() => this.notify('CONFIGURACIÓN', 'Falta la clave de la IA', 'Gratis en console.groq.com · pégala en Ajustes', '#F5B971'), 4000);
     } });
   }
   notify(app, title, body, dot = '#C4B5FD') {
@@ -396,7 +397,7 @@ export default class NexusApp extends Component {
     if (res.error === 'ABORTED') return;
     if (res.error === 'NO_KEY') {
       this.openPanel('settings', true);
-      this.say(`${this.cap(this.name())}, necesito una clave para pensar. Póngala en Ajustes; la de Gemini es gratuita.`);
+      this.say(`${this.cap(this.name())}, necesito una clave para pensar. Póngala en Ajustes; la de Groq es gratuita.`);
       return;
     }
     this.fail('No puedo conectar con el modelo', res.error);
@@ -600,7 +601,11 @@ export default class NexusApp extends Component {
   // premium voices need the Gemini key; without it they would just sound like another voice
   premiumLocked(id) {
     const v = this.VOICES.find(x => x.id === id);
-    if (!v || !v.premium || (this.state.providers.Gemini || {}).hasKey) return false;
+    if (!v || !v.premium) return false;
+    if ((this.state.providers.Gemini || {}).hasKey) {
+      if (!(this.state.gemini || {}).tts) this.setGemini('tts', true);
+      return false;
+    }
     this.interrupt();
     this.setState({ keyAsk: { voice: id, voiceName: v.name.replace(' ✦', '') }, keyAskInput: '' });
     return true;
@@ -614,6 +619,7 @@ export default class NexusApp extends Component {
     if (!ok) { this.setState({ keyAsk: { ...k, saving: false, error: 'GOOGLE NO ACEPTA ESA CLAVE · REVÍSELA' } }); return; }
     try { await api.setKey('Gemini', key); } catch { this.setState({ keyAsk: { ...k, saving: false, error: 'NO SE HA PODIDO GUARDAR' } }); return; }
     this.setState({ keyAsk: null, keyAskInput: '' });
+    this.setGemini('tts', true);
     await this.loadSettings();
     this.selectVoice(k.voice);
   }
@@ -634,11 +640,16 @@ export default class NexusApp extends Component {
   }
   providerInfo(p) {
     return {
-      Gemini: { name: 'Gemini · recomendado', url: 'https://aistudio.google.com/apikey', note: 'Google Gemini (Flash-Lite): el mejor gratis, 500 preguntas al día. Busca en internet y entiende su voz con la misma clave.', help: 'Gratis y sin tarjeta en aistudio.google.com → Get API key. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos.' },
-      Groq: { name: 'Groq · rápido', url: 'https://console.groq.com/keys', note: 'Muy rápido. El plan gratuito tiene menos margen por minuto para tareas largas.', help: 'Gratis y sin tarjeta en console.groq.com → API Keys. Si la pone, también se usa para entender su voz.' },
+      Gemini: { name: 'Gemini', url: 'https://aistudio.google.com/apikey', note: 'Google Gemini Flash-Lite: 500 preguntas al día. Gasta el cupo de Gemini, el mismo que las voces premium.', help: 'Gratis y sin tarjeta en aistudio.google.com → Get API key. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos.' },
+      Groq: { name: 'Groq · recomendado', url: 'https://console.groq.com/keys', note: 'Gratis y muy rápido: unas 1.000 preguntas al día. También entiende su voz, así que el cupo de Gemini queda para lo que usted elija.', help: 'Gratis y sin tarjeta en console.groq.com → API Keys. También se usa para entender su voz.' },
       Cerebras: { name: 'Cerebras', url: 'https://cloud.cerebras.ai', note: 'Alternativa gratuita con buen margen por minuto.', help: 'Gratis en cloud.cerebras.ai. Para entender su voz hace falta además la clave de Gemini o Groq.' },
       Ollama: { name: 'Local · sin clave', url: 'https://ollama.com/download', note: 'Funciona en su PC sin clave ni internet. Hay que instalar Ollama y descargar un modelo (unos 5 GB).', help: 'Instale Ollama y ejecute «ollama pull qwen2.5:7b». Para entender su voz hace falta la clave de Gemini o Groq.' },
     }[p] || { name: p, url: '', note: '', help: '' };
+  }
+  setGemini(k, on) {
+    const key = { tts: 'geminiTts', search: 'geminiSearch', stt: 'geminiStt', fallback: 'geminiFallback' }[k];
+    this.setState(s => ({ gemini: { ...s.gemini, [k]: on } }));
+    this.save({ [key]: on });
   }
   hotkeyLabel() { return this.state.hotkey.replace('Control', 'Ctrl').replace('Space', 'Espacio').split('+').join(' + ').toUpperCase(); }
   async setAutostart(on) {
@@ -774,6 +785,13 @@ export default class NexusApp extends Component {
       keyAskOpen: () => window.open('https://aistudio.google.com/apikey'),
       confirm: S.confirm, confirmYes: () => this.answerConfirm(true), confirmNo: () => this.answerConfirm(false),
       micOpts: (S.micList || []).map(m => ({ id: m.id, label: m.label, on: !!m.id && m.id === S.micId, pick: () => this.pickMic(m.id) })), micDefault: () => this.pickMic(''), micTesting: !!S.micTesting,
+      geminiToggles: (S.providers.Gemini || {}).hasKey ? [
+        ['tts', 'Voces premium', 'Aura, Zenit, Draco y Selene'],
+        ['search', 'Buscar con Google', 'Si está apagado busco con DuckDuckGo, sin límite'],
+        ['stt', 'Entender mi voz', 'Si está apagado uso Groq para transcribir'],
+        ['fallback', 'Respaldo', 'Si otra IA agota su cupo, sigo con Gemini'],
+      ].map(([k, label, note]) => ({ label, note, ...this.toggleT(!!(S.gemini || {})[k]), toggle: () => this.setGemini(k, !(S.gemini || {})[k]) })) : [],
+      geminiNote: S.provider === 'Gemini' ? 'Gemini es ahora su IA principal: cada pregunta usa su cupo.' : 'Su IA principal es ' + S.provider + '. Gemini solo se usa para lo que active aquí.',
       agentToggles: [
         ['web', 'agentWeb', 'Buscar en internet', 'Actualidad, precios, noticias y cualquier dato reciente'],
         ['files', 'agentFiles', 'Ver mis archivos', 'Buscar, leer y analizar archivos y carpetas'],
@@ -811,7 +829,7 @@ export default class NexusApp extends Component {
       onChatKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.sendChat(); } }, onChatSend: () => this.sendChat(),
       showSlash: S.chatInput.startsWith('/'),
       slashCmds: this.CMDS.filter(c => c.cmd.startsWith(S.chatInput.split(' ')[0]) || S.chatInput === '/').map(c => ({ ...c, pick: () => this.setState({ chatInput: c.cmd + ' ' }) })),
-      voiceCards: this.VOICES.map((v, i) => { const sel = S.voiceSel === v.id; const noKey = v.premium && !(S.providers.Gemini || {}).hasKey; return { ...v, desc: noKey ? v.desc.replace('premium', 'premium · con clave gratis') : v.desc, selected: sel, state: S.preview === v.id ? 'speaking' : sel ? 'idle' : 'idle',
+      voiceCards: this.VOICES.map((v, i) => { const sel = S.voiceSel === v.id; const noKey = v.premium && !(S.providers.Gemini || {}).hasKey; return { ...v, desc: noKey ? v.desc.replace('premium', 'premium · con clave gratis') : v.premium && !(S.gemini || {}).tts ? v.desc.replace('premium', 'premium · usa cupo Gemini') : v.desc, selected: sel, state: S.preview === v.id ? 'speaking' : sel ? 'idle' : 'idle',
         bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.1)', delay: (140 + i * 40) + 'ms',
         previewLabel: S.preview === v.id ? '■ SONANDO…' : '▶ ESCUCHAR',
         select: () => this.selectVoice(v.id), preview: e => { e.stopPropagation(); this.previewVoice(v.id); },
@@ -866,7 +884,7 @@ export default class NexusApp extends Component {
       formalOpts: [['usted', 85], ['tú', 20]].map(([label, val]) => ({ label, on: label === 'usted' ? S.sliders.formal >= 50 : S.sliders.formal < 50, pick: () => { this.setState(s => ({ sliders: { ...s.sliders, formal: val } })); this.save({ formal: val }); } })),
       qualityChips: [['ultra', 'Ultra'], ['equilibrado', 'Equilibrado'], ['ahorro', 'Ahorro']].map(([id, label]) => ({ label, on: S.quality === id, pick: () => this.setQuality(id) })),
       openGroq: () => window.open(this.providerInfo(S.provider).url),
-      providerChips: ['Gemini', 'Groq', 'Ollama'].filter(p => S.providers[p]).map(p => ({ label: this.providerInfo(p).name, on: S.provider === p, pick: () => this.pickProvider(p) })),
+      providerChips: ['Groq', 'Gemini', 'Ollama'].filter(p => S.providers[p]).map(p => ({ label: this.providerInfo(p).name, on: S.provider === p, pick: () => this.pickProvider(p) })),
       providerNote: this.providerInfo(S.provider).note, keyNeeded: !!(S.providers[S.provider] || {}).needsKey, keyTitle: 'Clave de ' + S.provider,
       hotkeyText: this.hotkeyLabel(),
       onbToggles: [

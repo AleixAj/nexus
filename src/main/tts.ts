@@ -1,5 +1,5 @@
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts'
-import { getKey } from './settings'
+import { getKey, loadSettings } from './settings'
 
 // Voices of the app mapped to Microsoft neural voices (free, no key).
 // The "Multilingual" ones are the most natural (the voices of Copilot); they speak
@@ -124,7 +124,7 @@ async function gemini(key: string, voiceName: string, text: string, lang: string
 
 export async function speak(text: string, o: SpeakOptions): Promise<Buffer> {
   const v = Object.hasOwn(VOICES, o.voice) ? VOICES[o.voice] : VOICES.lyra
-  const key = v.gemini ? getKey('Gemini') : ''
+  const key = v.gemini && loadSettings().geminiTts ? getKey('Gemini') : ''
   if (v.gemini && key && Date.now() > geminiPausedUntil) {
     try { return await gemini(key, v.gemini, text, o.lang) } catch { /* fall back to the Microsoft voice */ }
   }

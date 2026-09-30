@@ -27,11 +27,15 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 
 | Opción | Clave | Notas |
 | --- | --- | --- |
-| **Gemini Flash-Lite** (recomendada, 500 preguntas/día) | Gratis y sin tarjeta en [Google AI Studio](https://aistudio.google.com/apikey) | La más capaz del plan gratuito, busca con Google y también entiende la voz. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos. |
-| **Groq** | Gratis y sin tarjeta en [console.groq.com](https://console.groq.com/keys) | Muy rápida; menos margen por minuto para tareas largas. |
+| **Gemini Flash-Lite** (500 preguntas/día) | Gratis y sin tarjeta en [Google AI Studio](https://aistudio.google.com/apikey) | La más capaz del plan gratuito, busca con Google y también entiende la voz. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos. |
+| **Groq** (recomendada) | Gratis y sin tarjeta en [console.groq.com](https://console.groq.com/keys) | Muy rápida, unas 1.000 preguntas al día; también entiende la voz. |
 | **Local con [Ollama](https://ollama.com)** | Sin clave | Funciona en tu PC y sin internet (modelo de unos 5 GB). Para entender la voz hace falta la clave de Gemini o Groq. |
 
 Sin ninguna clave, las búsquedas en internet siguen funcionando (DuckDuckGo).
+
+**Gemini solo gasta su cupo en lo que actives.** Poner la clave no enciende nada por sí sola: en
+**Ajustes → Gemini** eliges si la usa para las voces premium, para buscar con Google, para entender tu voz o
+como respaldo cuando otra IA agote su cupo. Elegir una voz premium activa solo las voces.
 
 ## Arrancar
 

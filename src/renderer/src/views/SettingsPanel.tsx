@@ -170,6 +170,27 @@ export default function SettingsPanel({ v }: { v: any }) {
               </div>
             </div>
             <span data-scramble="1" style={{ marginTop: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
+              GEMINI · QUÉ PUEDE USAR SU CUPO
+            </span>
+            <span style={{ fontSize: "12.5px", lineHeight: "1.5", color: "rgba(226,218,240,.5)" }}>
+              {v.geminiNote}
+            </span>
+            {(v.geminiToggles || []).map((t, tIndex) => (<Fragment key={t?.label ?? tIndex}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "2px 0" }}>
+                <div style={{ flex: "1", display: "flex", flexDirection: "column", gap: "3px" }}>
+                  <span style={{ fontSize: "14.5px", color: "rgba(241,234,248,.88)" }}>
+                    {t.label}
+                  </span>
+                  <span style={{ fontSize: "12.5px", color: "rgba(226,218,240,.45)" }}>
+                    {t.note}
+                  </span>
+                </div>
+                <button onClick={t.toggle} style={{ flex: "none", position: "relative", width: "38px", height: "22px", borderRadius: "999px", border: `1px solid ${t.tBorder}`, background: t.tBg, cursor: "pointer", padding: "0", transition: "background 250ms, border-color 250ms" }}>
+                  <span style={{ position: "absolute", top: "2px", left: t.tLeft, width: "16px", height: "16px", borderRadius: "50%", background: "#FFF6E9", transition: "left 320ms cubic-bezier(.34,1.3,.64,1)" }}></span>
+                </button>
+              </div>
+            </Fragment>))}
+            <span data-scramble="1" style={{ marginTop: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
               AGENTE
             </span>
             {(v.agentToggles || []).map((t, tIndex) => (<Fragment key={t?.label ?? tIndex}>
