@@ -586,10 +586,11 @@
   const minis = new Map(); let waves = [], meters = [], grains = [];
   let tAcc = 0, scanT = 0, last = 0, T = 0;
 
-  // the stage is always 1920x1080 scaled by min(innerWidth/1920, innerHeight/1080)
-  function fit(c, lw, lh) {
+  // the stage is always 1920x1080 scaled by min(innerWidth/1920, innerHeight/1080);
+  // the background canvas covers the whole window instead (object-fit: cover)
+  function fit(c, lw, lh, cover) {
     if (!c.isConnected) return 0;
-    const shown = lw * Math.min(innerWidth / W, innerHeight / H); if (shown < 2) return 0;
+    const shown = lw * (cover ? Math.max : Math.min)(innerWidth / W, innerHeight / H); if (shown < 2) return 0;
     const dpr = Math.min(2, window.devicePixelRatio || 1), qf = QF[QUALITY].res;
     const w = Math.min(2400, Math.round(shown * dpr * qf)), h = Math.round(w * lh / lw);
     if (Math.abs(c.width - w) > 2 || Math.abs(c.height - h) > 2) { c.width = w; c.height = h; }
@@ -626,8 +627,8 @@
       orbits: OD.map((_, i) => expo(clamp((bt - 1.55 - i * .13) / .75, 0, 1))), gal: sstep(2.1, 3.6, bt) };
   }
 
-  let rafId = 0, bgSkip = 0, bgDt = 0;
-  function schedule() { if (!rafId && !document.hidden) rafId = requestAnimationFrame(onRaf); }
+  let rafId = 0, bgSkip = 0, bgDt = 0, paused = false;
+  function schedule() { if (!rafId && !document.hidden && !paused) rafId = requestAnimationFrame(onRaf); }
   function onRaf(now) {
     rafId = 0; schedule();
     if (last && now - last < QF[QUALITY].minDt - 1.5) return;
@@ -659,7 +660,7 @@
       const every = M.bgSlow ? 3 : B ? 1 : QF[QUALITY].bgEvery;
       if (++bgSkip >= every) {
         bgSkip = 0;
-        const k = fit(M.bg, W, H);
+        const k = fit(M.bg, W, H, true);
         if (k) { const c = M.bg.getContext('2d', { alpha: false }); c.setTransform(k, 0, 0, k, 0, 0); drawBg(c, bgDt, T, L, B ? B.gal : M.gal); }
         bgDt = 0;
       }
@@ -725,6 +726,8 @@
     setGalaxy(v) { M.gal = v; },
     // a panel is open and the background is blurred behind it
     setBgSlow(b) { M.bgSlow = !!b; },
+    // stop drawing while a fullscreen app covers the desktop
+    setPaused(b) { b = !!b; if (b === paused) return; paused = b; if (!b) { last = 0; schedule(); } },
     setTheme(n) { THEME_T = THEMES[n] || THEMES.nexus; },
     setQuality(q) { if (!QF[q] || q === QUALITY) return; QUALITY = q; if (M.S) { const st = M.S.state; M.S = makeSim(QF[q].parts, 42, false); M.S.state = st; } },
     setReduced(b) { REDUCED = !!b; },

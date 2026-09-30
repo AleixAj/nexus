@@ -14,6 +14,8 @@ export type Settings = {
   warmth: number
   formal: number
   lang: string
+  mode: string
+  trayHinted: boolean
   theme: string
   quality: string
   reduced: boolean
@@ -36,6 +38,8 @@ const DEFAULTS: Settings = {
   warmth: 70,
   formal: 85,
   lang: 'es-ES',
+  mode: 'window',
+  trayHinted: false,
   theme: 'nexus',
   quality: 'ultra',
   reduced: false
@@ -63,6 +67,7 @@ function clean(patch: Record<string, unknown>) {
     out[k] = typeof v === 'string' ? v.slice(0, 80) : v
   }
   if (out.provider && !Object.hasOwn(PROVIDERS, out.provider as string)) delete out.provider
+  if (out.mode && !['window', 'wallpaper'].includes(out.mode as string)) delete out.mode
   return out
 }
 

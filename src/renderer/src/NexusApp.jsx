@@ -3,6 +3,11 @@ import Stage from './views/Stage'
 import * as voice from './services/voice'
 
 const api = window.nexus
+const params = new URLSearchParams(location.search)
+// "wallpaper": the window lives behind the desktop icons and cannot be clicked
+const WALLPAPER = params.get('mode') === 'wallpaper'
+// the window was re-created by a mode switch: skip the spoken greeting
+const QUIET = params.get('quiet') === '1'
 
 export default class NexusApp extends Component {
   SL = {
@@ -138,6 +143,7 @@ export default class NexusApp extends Component {
       this.offs.push(api.onHotkey(() => this.talk()));
       this.offs.push(api.onDelta((id, t) => this.onDelta(id, t)));
       this.offs.push(api.onAction((id, label) => this.onAction(id, label)));
+      this.offs.push(api.onCovered(covered => { const E = this.E(); E && E.setPaused(covered); }));
     }
     const go = async () => {
       const E = this.E(); if (!E) return setTimeout(go, 50);
@@ -215,7 +221,8 @@ export default class NexusApp extends Component {
     this.setState({ uiIn: false, panel: null, overlay: false, onb: false, words: [], actionLabel: '' });
     E.setState('idle'); E.snapCore({ x: 960, y: 480, s: 1, v: 1 });
     E.boot({ onUI: () => this.setState({ uiIn: true }), onDone: () => {
-      this.say(`${this.greet()}, ${this.name()}. Todos los sistemas operativos.`);
+      if (!QUIET) this.say(`${this.greet()}, ${this.name()}. Todos los sistemas operativos.`);
+      if (params.get('notice') === 'wallpaper-failed') this.notify('FONDO DE ESCRITORIO', 'No he podido ponerme de fondo', 'Windows no lo ha permitido · sigo en modo ventana', '#FB7185');
       const p = this.state.providers[this.state.provider];
       if (p && p.needsKey && !p.hasKey) this.later(() => this.notify('CONFIGURACIÓN', 'Falta la clave de la IA', 'Ábrala en Ajustes · gratis en console.groq.com', '#F5B971'), 4000);
     } });
@@ -223,6 +230,8 @@ export default class NexusApp extends Component {
   notify(app, title, body, dot = '#C4B5FD') {
     const n = { id: Date.now(), app, time: this.hm(), title, body, dot };
     this.setState(s => ({ notifs: [n, ...s.notifs].slice(0, 3) }));
+    // on the wallpaper nobody can close them
+    if (WALLPAPER) setTimeout(() => this.setState(s => ({ notifs: s.notifs.filter(x => x.id !== n.id) })), 15000);
   }
   hm() { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
   // ---------- real voice ----------
@@ -551,7 +560,7 @@ export default class NexusApp extends Component {
     const labels = { idle: 'EN REPOSO', wake: 'ACTIVANDO', listening: 'ESCUCHANDO', thinking: 'PENSANDO', speaking: 'HABLANDO', action: 'EJECUTANDO ACCIÓN', error: 'SIN CONEXIÓN', music: 'MODO MÚSICA' };
     const stateColor = core === 'error' ? '#FB7185' : core === 'thinking' || core === 'action' ? '#F5B971' : core === 'speaking' ? '#FFE4C4' : core === 'music' ? '#FDBA74' : 'rgb(var(--acc2) / .75)';
     const live = ['wake', 'listening', 'thinking', 'speaking', 'action'].includes(core);
-    const pillText = core === 'error' ? 'SIN CONEXIÓN · TOCA PARA REINTENTAR' : live ? 'EN VIVO · TOCA PARA PARAR' : core === 'music' ? 'MÚSICA · TOCA PARA PAUSAR' : 'EN ESPERA · TOCA PARA HABLAR';
+    const pillText = core === 'error' ? 'SIN CONEXIÓN · TOCA PARA REINTENTAR' : live ? 'EN VIVO · TOCA PARA PARAR' : core === 'music' ? 'MÚSICA · TOCA PARA PAUSAR' : WALLPAPER ? 'EN ESPERA · ' + this.hotkeyLabel() + ' PARA HABLAR' : 'EN ESPERA · TOCA PARA HABLAR';
     const pillDot = core === 'error' ? '#FB7185' : live ? '#FB7185' : core === 'music' ? '#FDBA74' : '#34D399';
     const capTop = S.panel === 'system' ? 905 : L.y + 150 * L.s * 2.3 + 12;
     const wk = S.wordsKind;
@@ -594,7 +603,11 @@ export default class NexusApp extends Component {
       bgFilter: S.overlay ? 'blur(12px) brightness(.3)' : P === 'music' ? 'brightness(.85)' : P === 'system' ? 'blur(3px) brightness(.78)' : P ? 'blur(6px) brightness(.7)' : 'none',
       overlay: S.overlay,
       showUI: S.uiIn && !S.overlay && !S.onb,
-      showHud: !P || P === 'chat', showFrame: (S.uiIn && !S.overlay) || S.onb, showMic: !P || P === 'chat', showNotifs: !P,
+      showHud: !P || P === 'chat', showFrame: (S.uiIn && !S.overlay) || S.onb, showMic: !WALLPAPER && (!P || P === 'chat'), showNotifs: !P,
+      // wallpaper: info on the right (desktop icons live on the left), no clickable controls
+      hudPos: WALLPAPER ? { left: 'auto', right: '64px', alignItems: 'flex-end', textAlign: 'right' } : null,
+      notifPos: WALLPAPER ? { top: 'auto', bottom: '150px' } : null,
+      pillPointer: WALLPAPER ? 'none' : 'auto', dismissDisplay: WALLPAPER ? 'none' : 'grid',
       clockDigits, dateStr, greetText: `${this.greet()}, ${this.name()}.`,
       indicators: [{ label: 'IA', color: S.error ? '#FB7185' : '#34D399' }, { label: 'LOCAL', color: '#34D399' }, { label: 'VOZ', color: S.voiceDown ? '#FB7185' : '#34D399' }],
       pillLeft: L.x + 'px', pillText, pillDot, pillAnim: live || core === 'error' ? 'nx-pulse 1.4s ease-in-out infinite' : 'none',
@@ -654,6 +667,7 @@ export default class NexusApp extends Component {
       onKeyInput: e => this.setState({ keyInput: e.target.value }), onKeyEnter: e => { if (e.key === 'Enter') this.saveKey(); }, saveKey: () => this.saveKey(),
       keyBtn: S.showKey ? 'Ocultar' : 'Mostrar', toggleKey: () => this.setState(s => ({ showKey: !s.showKey })),
       sysToggles: [
+        { label: 'Fondo de escritorio', note: 'Nexus se pone detrás de sus iconos · hable con ' + this.hotkeyLabel().toLowerCase() + ' y vuelva desde la bandeja', on: false, toggle: () => api && api.setMode('wallpaper') },
         { label: 'Iniciar con Windows', note: 'Se abre sola al encender el PC', on: S.autostart, toggle: () => this.setAutostart(!S.autostart) },
         { label: `Escuchar «${S.wakeWord}» siempre`, note: 'Próximamente · de momento use el micro o ' + this.hotkeyLabel().toLowerCase(), on: false, toggle: () => {} },
         { label: 'Reducir movimiento', note: 'Sin parallax, estelas ni partículas extra', on: S.reduced, toggle: () => this.setReduced(!S.reduced) },
@@ -673,8 +687,8 @@ export default class NexusApp extends Component {
       onbBack: () => this.setState(s => ({ onbStep: Math.max(1, s.onbStep - 1) })), onbNext: () => this.onbNext(), onbNextLabel: vs === 3 ? 'Empezar' : 'Continuar', askMic: () => this.askMic(),
       micPermText: S.micPerm === 'ok' ? '● MICRÓFONO ACTIVO · HABLE Y MIRE EL NÚCLEO' : S.micPerm === 'no' ? 'PERMISO DENEGADO · PUEDE ACTIVARLO LUEGO EN AJUSTES' : 'EL NAVEGADOR LE PEDIRÁ PERMISO',
       micPermColor: S.micPerm === 'ok' ? '#34D399' : S.micPerm === 'no' ? '#FB7185' : 'rgba(226,218,240,.45)',
-      showDock: (S.uiIn || S.overlay) && !S.onb && !S.overlay, dock, hasHover: !!S.hoverDock && !S.volOpen, hoverLabel: S.hoverDock, volOpen: S.volOpen,
-      showDirector: S.showDirector, dirOpen: S.dirOpen, toggleDir: () => this.setState(s => ({ dirOpen: !s.dirOpen })),
+      showDock: !WALLPAPER && (S.uiIn || S.overlay) && !S.onb && !S.overlay, dock, hasHover: !!S.hoverDock && !S.volOpen, hoverLabel: S.hoverDock, volOpen: S.volOpen,
+      showDirector: !WALLPAPER && S.showDirector, dirOpen: S.dirOpen, toggleDir: () => this.setState(s => ({ dirOpen: !s.dirOpen })),
       dirStates: dirDef.map(([id, label]) => { const a = core === id; return { label, click: () => this.dirSet(id), bg: a ? 'rgb(var(--acc) / .25)' : 'rgba(255,255,255,.03)', border: a ? 'rgb(var(--acc2) / .6)' : 'rgba(196,181,253,.16)', color: a ? '#FFF6E9' : 'rgba(226,218,240,.7)' }; }),
       dirActions: [
         { label: '▶ Demo por voz', click: () => this.demo() }, { label: 'Arranque', click: () => this.bootDesktop() },

@@ -11,6 +11,7 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 - **Personalidad.** Mayordomo británico, copiloto directo o sarcástico, con calidez y formalidad ajustables.
 - **Datos reales en el escritorio.** Hora, tiempo de tu ciudad y efeméride del día.
 - **Temas y calidad gráfica.** Cinco temas de color y tres niveles de calidad para PCs potentes o portátiles.
+- **Fondo de escritorio.** NEXUS puede ponerse detrás de los iconos del escritorio y quedarse ahí en segundo plano.
 
 ## Requisitos
 
@@ -45,10 +46,31 @@ npm run preview
 | Interrumpirle | **Esc** o la píldora de arriba |
 | Escribirle | Icono de chat en el dock |
 | Cambiar voz y personalidad | Icono de ondas en el dock |
+| Poner o quitar el fondo de escritorio | Ajustes → *Fondo de escritorio*, o el icono de NEXUS en la bandeja |
 | Panel de demostración del diseño | **Ctrl + Shift + D** |
 
 Ejemplos: *«abre Spotify»*, *«pon la siguiente canción»*, *«sube el volumen»*,
 *«busca recetas de lentejas en YouTube»*, *«¿cómo va el equipo?»*.
+
+## Fondo de escritorio y segundo plano
+
+NEXUS vive en la **bandeja del sistema** (junto al reloj de Windows). Cerrar la ventana no la apaga: sigue
+escuchando el atajo **Ctrl + Alt + Espacio**. Para cerrarla del todo, usa *Salir* en el menú de la bandeja.
+
+En **modo fondo de escritorio** la animación sustituye a tu fondo de pantalla, detrás de los iconos:
+
+- No se puede hacer clic en ella, así que desaparecen el dock y los botones. El reloj y el tiempo pasan a la derecha para no chocar con los iconos.
+- Se le habla con **Ctrl + Alt + Espacio**. Para configurarla, *Abrir ventana* en la bandeja.
+- Se pausa sola mientras una aplicación maximizada o a pantalla completa (un juego, por ejemplo) tapa el escritorio.
+- Al salir se restaura tu fondo de pantalla normal.
+- Con **Iniciar con Windows** activado, arranca en el último modo que usaste.
+
+Funciona en el monitor principal y en cualquier proporción (también ultrapanorámicos). Por dentro usa la
+misma técnica que Lively Wallpaper: la ventana se coloca dentro de la capa *WorkerW* del escritorio mediante
+llamadas a Win32 hechas desde un pequeño script de PowerShell, sin módulos nativos que compilar.
+
+Si la app se cierra de golpe (por ejemplo, desde el Administrador de tareas) mientras es el fondo, puede
+quedarse la última imagen en el escritorio hasta que vuelvas a abrir NEXUS o cambies el fondo de Windows.
 
 ## Cómo está hecho
 
@@ -60,6 +82,7 @@ src/
     tools.ts            acciones en el PC: apps, webs, teclas multimedia y estado del sistema
     tts.ts              voz neuronal de Microsoft Edge (gratis, sin clave)
     world.ts            ubicación aproximada, tiempo (Open-Meteo) y efemérides (Wikipedia)
+    wallpaper.ts        modo fondo de escritorio y detección de apps a pantalla completa
     settings.ts         ajustes en JSON y claves cifradas con safeStorage
   preload/index.ts      puente seguro entre la interfaz y el proceso principal
   renderer/src/
@@ -67,6 +90,7 @@ src/
     services/voice.ts   micrófono con detección de silencio, cola de voz y audio para el halo
     engine/             motor gráfico en Canvas 2D: galaxia, núcleo, halo y partículas
     views/              pantallas generadas a partir del diseño
+resources/              iconos de la app y de la bandeja (scripts/make-icon.mjs)
 design/                 diseño original de Claude Design (referencia)
 scripts/                conversor del diseño a componentes React
 ```
@@ -94,5 +118,5 @@ Open-Meteo (tiempo), Wikipedia (efemérides) e ipapi.co (ciudad aproximada).
 - Palabra de activación «Hey Nexus» siempre escuchando.
 - Música real (ahora el panel de música es una demostración), memoria y rutinas editables.
 - Panel de sistema: CPU y RAM son reales; GPU, red y temperatura todavía son simuladas.
-- Modo fondo de escritorio y mini overlay flotante sobre otras apps.
+- Mini overlay flotante sobre otras apps y fondo de escritorio en varios monitores a la vez.
 - Instalador (`electron-builder`).

@@ -18,6 +18,8 @@ contextBridge.exposeInMainWorld('nexus', {
   systemStatus: () => ipcRenderer.invoke('system:status'),
   getWorld: () => ipcRenderer.invoke('world:get'),
   setAutostart: (on: boolean) => ipcRenderer.invoke('app:autostart', on),
+  setMode: (mode: 'window' | 'wallpaper') => ipcRenderer.invoke('app:mode', mode),
+  onCovered: (fn: (covered: boolean) => void) => on('app:covered', fn),
   onDelta: (fn: (id: number, t: string) => void) => on('brain:delta', fn),
   onAction: (fn: (id: number, label: string) => void) => on('brain:action', fn),
   onHotkey: (fn: () => void) => on('hotkey:talk', fn)

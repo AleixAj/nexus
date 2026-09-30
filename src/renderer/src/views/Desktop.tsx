@@ -4,7 +4,6 @@ import { Fragment } from 'react'
 export default function Desktop({ v }: { v: any }) {
   return (
     <>
-    <canvas data-nexus-main="bg" style={{ position: "absolute", inset: "0", width: "100%", height: "100%", filter: v.bgFilter, transition: "filter 1000ms cubic-bezier(.16,1,.3,1)" }} />
     {v.overlay && (<>
       <div style={{ position: "absolute", inset: "0", background: "repeating-linear-gradient(135deg, rgba(255,255,255,.025) 0 2px, transparent 2px 14px), #0B0B10", display: "flex", alignItems: "flex-end", justifyContent: "flex-start", padding: "48px", boxSizing: "border-box", animation: "nx-in 500ms cubic-bezier(.16,1,.3,1) both" }}>
         <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".2em", color: "rgba(255,255,255,.28)" }}>
@@ -13,8 +12,6 @@ export default function Desktop({ v }: { v: any }) {
       </div>
     </>)}
     <canvas data-nexus-main="core" style={{ position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none" }} />
-    <div data-nexus-grain="1" style={{ position: "absolute", inset: "0", pointerEvents: "none", opacity: ".55", mixBlendMode: "overlay" }}></div>
-    <div style={{ position: "absolute", inset: "0", pointerEvents: "none", background: "repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px)" }}></div>
     {v.showFrame && (<>
       <div style={{ position: "absolute", inset: "14px", pointerEvents: "none", animation: "nx-in 1000ms cubic-bezier(.16,1,.3,1) both", background: "linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 0 / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 0 / 1px 26px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 0 / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 0 / 1px 26px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 100% / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 100% / 1px 26px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 100% / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 100% / 1px 26px no-repeat" }}></div>
       <div style={{ position: "absolute", left: "64px", right: "64px", top: "12px", display: "flex", justifyContent: "space-between", pointerEvents: "none", fontFamily: "'JetBrains Mono',monospace", fontSize: "9.5px", letterSpacing: ".22em", color: "rgba(226,218,240,.4)", animation: "nx-down 900ms cubic-bezier(.16,1,.3,1) 300ms both" }}>
@@ -66,7 +63,7 @@ export default function Desktop({ v }: { v: any }) {
     {v.showUI && (<>
       {/* top-left HUD */}
       {v.showHud && (<>
-        <div style={{ position: "absolute", left: "64px", top: "52px", display: "flex", flexDirection: "column", gap: "22px", width: "440px" }}>
+        <div style={{ position: "absolute", left: "64px", top: "52px", display: "flex", flexDirection: "column", gap: "22px", width: "440px", ...v.hudPos }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "6px", animation: "nx-left 800ms cubic-bezier(.16,1,.3,1) both" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", letterSpacing: ".24em", color: "rgb(var(--acc2) / .5)" }}>
               <span style={{ width: "6px", height: "6px", border: "1px solid rgb(var(--acc2) / .7)", transform: "rotate(45deg)" }}></span>
@@ -167,7 +164,7 @@ export default function Desktop({ v }: { v: any }) {
       </>)}
       {/* status pill */}
       <div style={{ position: "absolute", top: "28px", left: v.pillLeft, width: "0", display: "flex", justifyContent: "center", transition: "left 1000ms cubic-bezier(.16,1,.3,1)" }}>
-        <button onClick={v.onPill} style={{ flex: "none", display: "flex", alignItems: "center", gap: "10px", height: "36px", padding: "0 18px", borderRadius: "999px", cursor: "pointer", background: "linear-gradient(rgba(7,5,14,.55),rgba(7,5,14,.55)) padding-box, linear-gradient(90deg, rgb(var(--acc) / .5), rgb(var(--acc2) / .15), rgb(var(--acc) / .5)) border-box", border: "1px solid transparent", backdropFilter: "blur(20px)", color: "rgba(241,234,248,.9)", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", whiteSpace: "nowrap", animation: "nx-down 700ms cubic-bezier(.16,1,.3,1) 200ms both" }}>
+        <button onClick={v.onPill} style={{ pointerEvents: v.pillPointer, flex: "none", display: "flex", alignItems: "center", gap: "10px", height: "36px", padding: "0 18px", borderRadius: "999px", cursor: "pointer", background: "linear-gradient(rgba(7,5,14,.55),rgba(7,5,14,.55)) padding-box, linear-gradient(90deg, rgb(var(--acc) / .5), rgb(var(--acc2) / .15), rgb(var(--acc) / .5)) border-box", border: "1px solid transparent", backdropFilter: "blur(20px)", color: "rgba(241,234,248,.9)", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", whiteSpace: "nowrap", animation: "nx-down 700ms cubic-bezier(.16,1,.3,1) 200ms both" }}>
           <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: v.pillDot, boxShadow: `0 0 10px ${v.pillDot}`, animation: v.pillAnim }}></span>
           <span data-scramble="1">
             {v.pillText}
@@ -176,7 +173,7 @@ export default function Desktop({ v }: { v: any }) {
       </div>
       {/* notifications */}
       {v.showNotifs && (<>
-        <div style={{ position: "absolute", right: "40px", top: "40px", width: "360px", display: "flex", flexDirection: "column", gap: "10px" }}>
+        <div style={{ position: "absolute", right: "40px", top: "40px", width: "360px", display: "flex", flexDirection: "column", gap: "10px", ...v.notifPos }}>
           {(v.notifs || []).map((n, nIndex) => (<Fragment key={n?.id ?? nIndex}>
             <div data-spot="1" style={{ position: "relative", padding: "16px 18px", display: "flex", flexDirection: "column", gap: "6px", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07)", animation: "nx-right 700ms cubic-bezier(.16,1,.3,1) both" }} className="dc1">
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -184,7 +181,7 @@ export default function Desktop({ v }: { v: any }) {
                   <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: n.dot }}></span>
                   {n.app} · {n.time}
                 </span>
-                <button onClick={n.dismiss} style={{ width: "22px", height: "22px", display: "grid", placeItems: "center", border: "none", background: "none", color: "rgba(226,218,240,.45)", cursor: "pointer", padding: "0" }} className="dc2">
+                <button onClick={n.dismiss} style={{ width: "22px", height: "22px", display: v.dismissDisplay, placeItems: "center", border: "none", background: "none", color: "rgba(226,218,240,.45)", cursor: "pointer", padding: "0" }} className="dc2">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M6 6l12 12M18 6L6 18" />
                   </svg>
