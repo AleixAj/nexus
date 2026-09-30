@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;background:#05030A;-webkit-font-smoothing:antialiased}
+a{color:#C4B5FD;text-decoration:none}a:hover{color:#FFF6E9}
+button,input{font:inherit}
+@keyframes ds-move{0%,15%{transform:translateX(0)}65%,100%{transform:translateX(220px)}}
+@keyframes ds-flow{from{background-position:0 -60px}to{background-position:0 60px}}
+@keyframes ds-pulse{0%,100%{opacity:1}50%{opacity:.3}}
+</style>
+<script src="nexus-engine.js"></script>
+</helmet>
+<div style="min-height:100vh; background:radial-gradient(1200px 600px at 70% -10%, rgba(139,92,246,.16), transparent 60%), radial-gradient(900px 500px at 0% 30%, rgba(217,70,239,.06), transparent 60%), #05030A; color:#F1EAF8; font-family:'Space Grotesk',system-ui,sans-serif; --acc:139 92 246; --acc2:196 181 253">
+  <div style="max-width:1440px; margin:0 auto; padding:64px 48px 120px; display:flex; flex-direction:column; gap:88px">
+
+    <header style="display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:24px">
+      <div style="display:flex; flex-direction:column; gap:14px">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.24em; color:rgb(var(--acc2) / .7)">NEXUS · SISTEMA DE DISEÑO · V2.4</span>
+        <h1 style="margin:0; font-size:64px; font-weight:300; letter-spacing:-.02em; line-height:1">El núcleo y su lenguaje</h1>
+        <p style="margin:0; max-width:620px; font-size:17px; line-height:1.6; color:rgba(226,218,240,.65); text-wrap:pretty">Estados del núcleo, color, tipografía, componentes y movimiento. Todos los núcleos de esta página se renderizan en vivo con el mismo motor que el escritorio.</p>
+      </div>
+      <a href="NEXUS.dc.html" style="display:flex; align-items:center; gap:10px; height:44px; padding:0 20px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:linear-gradient(180deg, rgb(var(--acc) / .95), rgb(var(--acc) / .7)); color:#fff; font-size:14px; font-weight:500; box-shadow:0 0 24px rgb(var(--acc) / .4)">Abrir el prototipo →</a>
+    </header>
+
+    <section style="display:flex; flex-direction:column; gap:28px">
+      <div style="display:flex; align-items:baseline; gap:16px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:#F5B971">01</span><h2 style="margin:0; font-size:32px; font-weight:400">Fotogramas clave del núcleo</h2></div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px">
+        <sc-for list="{{ states }}" as="s" hint-placeholder-count="8">
+          <div style="display:flex; flex-direction:column; border-radius:14px; overflow:hidden; background:linear-gradient(rgba(7,5,14,.6),rgba(7,5,14,.6)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .45), rgb(var(--acc) / 0) 55%) border-box; border:1px solid transparent">
+            <div style="position:relative; aspect-ratio:1 / .82; background:radial-gradient(circle at 50% 50%, rgba(139,92,246,.1), transparent 65%)">
+              <canvas data-nexus-core="1" data-state="{{ s.id }}" data-particles="700" data-r=".2" style="position:absolute; inset:0; width:100%; height:100%"></canvas>
+              <span style="position:absolute; left:16px; top:14px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.2em; color:{{ s.color }}">{{ s.n }} · {{ s.label }}</span>
+            </div>
+            <div style="padding:16px 18px 20px; display:flex; flex-direction:column; gap:8px; border-top:1px solid rgba(196,181,253,.08)">
+              <span style="font-size:14.5px; line-height:1.5; color:rgba(226,218,240,.78); text-wrap:pretty">{{ s.desc }}</span>
+              <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.08em; color:rgba(226,218,240,.45)">{{ s.spec }}</span>
+            </div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display:flex; flex-direction:column; gap:28px">
+      <div style="display:flex; align-items:baseline; gap:16px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:#F5B971">02</span><h2 style="margin:0; font-size:32px; font-weight:400">Color</h2></div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(190px, 1fr)); gap:12px">
+        <sc-for list="{{ colors }}" as="c" hint-placeholder-count="9">
+          <div style="display:flex; flex-direction:column; gap:12px; padding:12px; border-radius:14px; background:rgba(255,255,255,.02); border:1px solid rgba(196,181,253,.1)">
+            <span style="height:84px; border-radius:10px; background:{{ c.v }}; box-shadow:inset 0 0 0 1px rgba(255,255,255,.08), 0 0 30px {{ c.glow }}"></span>
+            <div style="display:flex; flex-direction:column; gap:4px; padding:0 4px 4px"><span style="font-size:15px; color:#FFF6E9">{{ c.name }}</span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(226,218,240,.5)">{{ c.hex }} · {{ c.role }}</span></div>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(220px, 1fr)); gap:12px">
+        <sc-for list="{{ themes }}" as="t" hint-placeholder-count="5">
+          <div style="display:flex; align-items:center; gap:14px; padding:14px 16px; border-radius:14px; background:rgba(255,255,255,.02); border:1px solid rgba(196,181,253,.1)">
+            <span style="width:44px; height:44px; flex:none; border-radius:50%; background:radial-gradient(circle, #FFF6E9 0 12%, {{ t.c2 }} 24%, {{ t.c1 }} 48%, #05030A 72%); box-shadow:0 0 0 1.5px {{ t.c2 }}, 0 0 18px {{ t.c1 }}"></span>
+            <div style="display:flex; flex-direction:column; gap:4px"><span style="font-size:15px">Tema {{ t.name }}</span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(226,218,240,.5)">{{ t.c1 }} / {{ t.c2 }}</span></div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display:grid; grid-template-columns:minmax(0,1.3fr) minmax(0,1fr); gap:48px">
+      <div style="display:flex; flex-direction:column; gap:28px">
+        <div style="display:flex; align-items:baseline; gap:16px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:#F5B971">03</span><h2 style="margin:0; font-size:32px; font-weight:400">Tipografía</h2></div>
+        <div style="display:flex; flex-direction:column">
+          <div style="display:grid; grid-template-columns:150px minmax(0,1fr); align-items:baseline; gap:20px; padding:16px 0; border-bottom:1px solid rgba(196,181,253,.08)"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(226,218,240,.5)">DISPLAY · 124/300</span><span style="font-size:96px; font-weight:300; line-height:1; letter-spacing:-.03em; color:#FFF6E9">21:47</span></div>
+          <div style="display:grid; grid-template-columns:150px minmax(0,1fr); align-items:baseline; gap:20px; padding:16px 0; border-bottom:1px solid rgba(196,181,253,.08)"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(226,218,240,.5)">TÍTULO · 40/300</span><span style="font-size:40px; font-weight:300">¿Cómo quiere que le llame?</span></div>
+          <div style="display:grid; grid-template-columns:150px minmax(0,1fr); align-items:baseline; gap:20px; padding:16px 0; border-bottom:1px solid rgba(196,181,253,.08)"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(226,218,240,.5)">PANEL · 30/400</span><span style="font-size:30px">Cómo habla Nexus</span></div>
+          <div style="display:grid; grid-template-columns:150px minmax(0,1fr); align-items:baseline; gap:20px; padding:16px 0; border-bottom:1px solid rgba(196,181,253,.08)"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(226,218,240,.5)">SUBTÍTULO · 30/400</span><span style="font-size:30px; color:#FFE9D2">Buenas noches, señor.</span></div>
+          <div style="display:grid; grid-template-columns:150px minmax(0,1fr); align-items:baseline; gap:20px; padding:16px 0; border-bottom:1px solid rgba(196,181,253,.08)"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(226,218,240,.5)">CUERPO · 15.5/400</span><span style="font-size:15.5px; line-height:1.6; color:rgba(241,234,248,.88)">Dos compromisos: revisión de diseño a las 9:30 con Laura y el dentista a las 12:00.</span></div>
+          <div style="display:grid; grid-template-columns:150px minmax(0,1fr); align-items:baseline; gap:20px; padding:16px 0"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(226,218,240,.5)">ETIQUETA · MONO 11</span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .7)">EN VIVO · TOCA PARA PARAR</span></div>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:28px">
+        <div style="display:flex; align-items:baseline; gap:16px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:#F5B971">04</span><h2 style="margin:0; font-size:32px; font-weight:400">Espaciado</h2></div>
+        <div style="display:flex; flex-direction:column; gap:12px">
+          <sc-for list="{{ spacing }}" as="sp" hint-placeholder-count="8">
+            <div style="display:flex; align-items:center; gap:16px"><span style="width:44px; font-family:'JetBrains Mono',monospace; font-size:12px; color:rgba(226,218,240,.55)">{{ sp.v }}</span><span style="height:10px; width:{{ sp.w }}; border-radius:2px; background:linear-gradient(90deg, rgb(var(--acc) / .5), rgb(var(--acc2) / .9))"></span><span style="font-size:13px; color:rgba(226,218,240,.5)">{{ sp.use }}</span></div>
+          </sc-for>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; padding:18px; border-radius:14px; background:rgba(255,255,255,.02); border:1px solid rgba(196,181,253,.1)">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">REJILLA 1920 × 1080</span>
+          <span style="font-size:14px; line-height:1.6; color:rgba(226,218,240,.7)">Márgenes de 64 px para el HUD, 24 px para paneles y dock. Paneles laterales de 600 px (chat) o 1080 px (ajustes, rutinas, voz, memoria). El núcleo se reubica al centro del espacio libre y escala a 0,8 o 0,62.</span>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:flex; flex-direction:column; gap:28px">
+      <div style="display:flex; align-items:baseline; gap:16px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:#F5B971">05</span><h2 style="margin:0; font-size:32px; font-weight:400">Componentes</h2></div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(420px, 1fr)); gap:16px">
+
+        <div style="padding:24px; display:flex; flex-direction:column; gap:18px; border-radius:14px; background:linear-gradient(rgba(7,5,14,.6),rgba(7,5,14,.6)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box; border:1px solid transparent; box-shadow:inset 0 1px 0 rgba(255,255,255,.07)">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">BOTONES</span>
+          <div style="display:flex; flex-wrap:wrap; gap:10px; align-items:center">
+            <button style="height:44px; padding:0 20px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:linear-gradient(180deg, rgb(var(--acc) / .95), rgb(var(--acc) / .7)); color:#fff; font-size:14px; font-weight:500; cursor:pointer; box-shadow:0 0 24px rgb(var(--acc) / .4), inset 0 1px 0 rgba(255,255,255,.25); transition:transform 250ms cubic-bezier(.34,1.3,.64,1)" style-hover="transform:translateY(-1px)" style-active="transform:scale(.97)">Primario</button>
+            <button style="height:44px; padding:0 20px; border-radius:10px; border:1px solid rgba(196,181,253,.22); background:rgba(0,0,0,.3); color:rgba(241,234,248,.9); font-size:14px; cursor:pointer; transition:border-color 250ms" style-hover="border-color:rgb(var(--acc2) / .6)">Secundario</button>
+            <button style="height:44px; padding:0 16px; border-radius:10px; border:none; background:transparent; color:rgba(226,218,240,.75); font-size:14px; cursor:pointer" style-hover="color:#FFF6E9; background:rgba(255,255,255,.04)">Fantasma</button>
+            <button style="height:44px; padding:0 20px; border-radius:10px; border:1px solid rgba(251,113,133,.35); background:rgba(251,113,133,.06); color:#FDA4AF; font-size:14px; cursor:pointer" style-hover="background:rgba(251,113,133,.14)">Borrar</button>
+            <button style="width:56px; height:56px; border-radius:50%; display:grid; place-items:center; cursor:pointer; color:#FFF6E9; background:radial-gradient(circle at 50% 30%, rgb(var(--acc) / .35), rgba(7,5,14,.7) 70%) padding-box, linear-gradient(160deg, rgb(var(--acc2) / .8), rgb(var(--acc) / .1)) border-box; border:1px solid transparent; box-shadow:0 0 30px rgb(var(--acc) / .35)"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></button>
+          </div>
+        </div>
+
+        <div style="padding:24px; display:flex; flex-direction:column; gap:18px; border-radius:14px; background:linear-gradient(rgba(7,5,14,.6),rgba(7,5,14,.6)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box; border:1px solid transparent; box-shadow:inset 0 1px 0 rgba(255,255,255,.07)">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">CAMPOS</span>
+          <div style="display:flex; align-items:center; gap:8px; height:52px; padding:0 8px 0 16px; border-radius:12px; background:rgba(0,0,0,.35); border:1px solid rgb(var(--acc2) / .45); box-shadow:0 0 0 4px rgb(var(--acc) / .12)">
+            <input value="{{ demoInput }}" onChange="{{ onDemoInput }}" style="flex:1; background:none; border:none; outline:none; color:#FFF6E9; font-size:15px"></input>
+            <span style="padding:4px 8px; border-radius:6px; border:1px solid rgba(196,181,253,.25); border-bottom-width:2px; font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(226,218,240,.7)">↵</span>
+          </div>
+          <div style="display:flex; align-items:center; height:44px; padding:0 14px; border-radius:10px; background:rgba(0,0,0,.3); border:1px solid rgba(196,181,253,.16); color:rgba(196,181,253,.4); font-size:14px">Buscar en conversaciones y recuerdos</div>
+        </div>
+
+        <div style="padding:24px; display:flex; flex-direction:column; gap:20px; border-radius:14px; background:linear-gradient(rgba(7,5,14,.6),rgba(7,5,14,.6)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box; border:1px solid transparent; box-shadow:inset 0 1px 0 rgba(255,255,255,.07)">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">SLIDER · TOGGLE · SEGMENTADO</span>
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <div style="display:flex; justify-content:space-between; font-size:14.5px"><span>Calidez</span><span style="font-family:'JetBrains Mono',monospace; font-size:12.5px; color:rgb(var(--acc2))">{{ sliderVal }}</span></div>
+            <div onPointerDown="{{ onSlider }}" style="position:relative; height:20px; cursor:pointer; touch-action:none">
+              <div style="position:absolute; left:0; right:0; top:9px; height:2px; border-radius:2px; background:rgba(196,181,253,.14)"></div>
+              <div style="position:absolute; left:0; top:9px; height:2px; width:{{ sliderPct }}; background:linear-gradient(90deg, rgb(var(--acc) / .6), rgb(var(--acc2))); box-shadow:0 0 10px rgb(var(--acc) / .6)"></div>
+              <div style="position:absolute; top:3px; left:{{ sliderPct }}; width:14px; height:14px; margin-left:-7px; border-radius:50%; background:#FFF6E9; box-shadow:0 0 0 4px rgb(var(--acc) / .25), 0 0 14px rgb(var(--acc2) / .8)"></div>
+            </div>
+          </div>
+          <div style="display:flex; align-items:center; gap:24px">
+            <button onClick="{{ toggle }}" style="position:relative; width:38px; height:22px; border-radius:999px; border:1px solid {{ tg.border }}; background:{{ tg.bg }}; cursor:pointer; padding:0; transition:background 300ms"><span style="position:absolute; top:2px; left:{{ tg.left }}; width:16px; height:16px; border-radius:50%; background:#FFF6E9; box-shadow:0 0 10px rgba(255,246,233,.5); transition:left 320ms cubic-bezier(.34,1.4,.64,1)"></span></button>
+            <div style="flex:1; display:flex; padding:3px; border-radius:10px; background:rgba(0,0,0,.3); border:1px solid rgba(196,181,253,.12)">
+              <sc-for list="{{ segs }}" as="o" hint-placeholder-count="3"><button onClick="{{ o.pick }}" style="flex:1; height:32px; border-radius:8px; border:none; cursor:pointer; font-size:13px; background:{{ o.bg }}; color:{{ o.color }}; transition:background 250ms">{{ o.label }}</button></sc-for>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:24px; display:flex; flex-direction:column; gap:18px; border-radius:14px; background:linear-gradient(rgba(7,5,14,.6),rgba(7,5,14,.6)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box; border:1px solid transparent; box-shadow:inset 0 1px 0 rgba(255,255,255,.07)">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">CHIPS DE ESTADO</span>
+          <div style="display:flex; flex-wrap:wrap; gap:8px">
+            <sc-for list="{{ chips }}" as="c" hint-placeholder-count="6">
+              <span style="display:flex; align-items:center; gap:8px; padding:7px 12px; border-radius:999px; border:1px solid {{ c.border }}; background:{{ c.bg }}; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.2em; color:{{ c.color }}"><span style="width:6px; height:6px; border-radius:50%; background:{{ c.color }}; box-shadow:0 0 8px {{ c.color }}; animation:{{ c.anim }}"></span>{{ c.label }}</span>
+            </sc-for>
+          </div>
+        </div>
+
+        <div data-spot="1" style="position:relative; padding:24px; display:flex; flex-direction:column; gap:10px; border-radius:14px; background:linear-gradient(rgba(7,5,14,.6),rgba(7,5,14,.6)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box; border:1px solid transparent; box-shadow:inset 0 1px 0 rgba(255,255,255,.07); transition:transform 300ms cubic-bezier(.34,1.2,.64,1)" style-hover="transform:translateY(-2px)" style-before="content:''; position:absolute; inset:-1px; border-radius:inherit; padding:1px; background:radial-gradient(200px circle at var(--mx,-500px) var(--my,-500px), rgb(var(--acc2) / .9), transparent 70%); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">TARJETA DE CRISTAL · PASE EL CURSOR</span>
+          <span style="font-size:18px; color:#FFF6E9">Fondo negro al 40 %, desenfoque de 24 px</span>
+          <span style="font-size:14px; line-height:1.6; color:rgba(226,218,240,.65)">Borde de 1 px con degradado violeta → transparente, radio de 14 px y brillo interior en el borde superior. El borde se ilumina siguiendo al cursor.</span>
+        </div>
+
+        <div style="padding:24px; display:flex; flex-direction:column; gap:18px; border-radius:14px; background:linear-gradient(rgba(7,5,14,.6),rgba(7,5,14,.6)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box; border:1px solid transparent; box-shadow:inset 0 1px 0 rgba(255,255,255,.07)">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">ICONOS · LÍNEA 1,5 PX</span>
+          <div style="display:grid; grid-template-columns:repeat(8, 1fr); gap:6px">
+            <sc-for list="{{ icons }}" as="i" hint-placeholder-count="16">
+              <span title="{{ i.name }}" style="aspect-ratio:1; display:grid; place-items:center; border-radius:10px; color:rgba(214,204,236,.75); transition:color 250ms, filter 250ms, background 250ms" style-hover="color:#FFF6E9; background:rgb(var(--acc) / .14); filter:drop-shadow(0 0 7px rgb(var(--acc2) / .9))"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ i.d }}"></path></svg></span>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="display:flex; flex-direction:column; gap:28px">
+      <div style="display:flex; align-items:baseline; gap:16px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:#F5B971">06</span><h2 style="margin:0; font-size:32px; font-weight:400">Movimiento</h2></div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:16px">
+        <sc-for list="{{ curves }}" as="c" hint-placeholder-count="3">
+          <div style="padding:22px; display:flex; flex-direction:column; gap:16px; border-radius:14px; background:rgba(255,255,255,.02); border:1px solid rgba(196,181,253,.1)">
+            <div style="display:flex; justify-content:space-between; align-items:baseline"><span style="font-size:17px; color:#FFF6E9">{{ c.name }}</span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(226,218,240,.5)">{{ c.dur }}</span></div>
+            <svg viewBox="-10 -50 220 190" style="width:100%; height:150px">
+              <path d="M0 120H200M0 0H200" stroke="rgba(196,181,253,.1)" stroke-dasharray="2 4" fill="none"></path>
+              <path d="{{ c.path }}" fill="none" stroke-width="2" style="stroke:rgb(var(--acc2)); filter:drop-shadow(0 0 4px rgb(var(--acc)))"></path>
+            </svg>
+            <div style="position:relative; height:14px; border-radius:7px; background:rgba(196,181,253,.06)"><span style="position:absolute; left:4px; top:2px; width:10px; height:10px; border-radius:50%; background:#FFF6E9; box-shadow:0 0 12px rgb(var(--acc2)); animation:ds-move 2400ms infinite; animation-timing-function:{{ c.fn }}"></span></div>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:rgb(var(--acc2) / .8)">{{ c.fn }}</span>
+            <span style="font-size:13.5px; line-height:1.5; color:rgba(226,218,240,.6)">{{ c.use }}</span>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(260px, 1fr)); gap:1px; border-radius:14px; overflow:hidden; border:1px solid rgba(196,181,253,.1); background:rgba(196,181,253,.1)">
+        <sc-for list="{{ timings }}" as="t" hint-placeholder-count="6">
+          <div style="padding:18px 20px; display:flex; flex-direction:column; gap:6px; background:#08060F"><span style="font-family:'JetBrains Mono',monospace; font-size:12px; color:#F5B971">{{ t.v }}</span><span style="font-size:14px; color:rgba(226,218,240,.75)">{{ t.use }}</span></div>
+        </sc-for>
+      </div>
+    </section>
+
+    <section style="display:flex; flex-direction:column; gap:28px">
+      <div style="display:flex; align-items:baseline; gap:16px"><span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:#F5B971">07</span><h2 style="margin:0; font-size:32px; font-weight:400">Implementación</h2></div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(300px, 1fr)); gap:16px">
+        <sc-for list="{{ tech }}" as="t" hint-placeholder-count="4">
+          <div style="padding:22px; display:flex; flex-direction:column; gap:10px; border-radius:14px; background:rgba(255,255,255,.02); border:1px solid rgba(196,181,253,.1)">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">{{ t.k }}</span>
+            <span style="font-size:14.5px; line-height:1.6; color:rgba(226,218,240,.75); text-wrap:pretty">{{ t.v }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = { demoInput: '/rutina modo trabajo', warm: 70, on: true, seg: 'Equilibrado' };
+  onSlider = e => {
+    const el = e.currentTarget;
+    const set = x => { const r = el.getBoundingClientRect(); this.setState({ warm: Math.round(Math.max(0, Math.min(1, (x - r.left) / r.width)) * 100) }); };
+    set(e.clientX);
+    const mv = ev => set(ev.clientX), up = () => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up); };
+    addEventListener('pointermove', mv); addEventListener('pointerup', up);
+  };
+  renderVals() {
+    const S = this.state;
+    const ICONS = { Chat: 'M4 5h16v11H9l-5 4z', Voz: 'M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4', Rutinas: 'M6 4a2 2 0 1 0 0 4a2 2 0 1 0 0-4M18 16a2 2 0 1 0 0 4a2 2 0 1 0 0-4M8 6h5a3 3 0 0 1 0 6h-2a3 3 0 0 0 0 6h5',
+      Sistema: 'M7 6h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM10 10h4v4h-4zM9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4', Música: 'M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0a3 3 0 1 1 6 0M20 16a3 3 0 1 1-6 0a3 3 0 1 1 6 0',
+      Memoria: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 7v5l3 2', Ajustes: 'M4 7h10M18 7h2M4 17h4M12 17h8M16 5a2 2 0 1 0 0 4a2 2 0 1 0 0-4M10 15a2 2 0 1 0 0 4a2 2 0 1 0 0-4', Volumen: 'M4 9h4l5-4v14l-5-4H4zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11',
+      Micrófono: 'M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3', Enviar: 'M4 12l16-8-6 16-2-6z', Buscar: 'M11 5a6 6 0 1 0 0 12a6 6 0 1 0 0-12M20 20l-4.5-4.5', Borrar: 'M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13',
+      Disparador: 'M12 3l9 9-9 9-9-9z', Luces: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5V16h8v-2.5A6 6 0 0 0 12 3z', Apagar: 'M12 3v9M6.3 6.3a8 8 0 1 0 11.4 0', Hecho: 'M5 12l5 5 9-10' };
+    return {
+      states: [
+        { id: 'idle', n: '01', label: 'REPOSO', color: 'rgb(196 181 253 / .8)', desc: 'Respira en ciclos de 6 s. Órbitas lentas, halo casi plano y brillo tenue.', spec: 'ESCALA 1,00 ↔ 1,014 · BLOOM 0,65' },
+        { id: 'wake', n: '02', label: 'DESPERTAR', color: '#FFF6E9', desc: 'Onda expansiva desde el centro y el halo se enciende en espiral en 600 ms.', spec: 'EXPO-OUT 1300 MS · IGNICIÓN 600 MS' },
+        { id: 'listening', n: '03', label: 'ESCUCHANDO', color: 'rgb(196 181 253 / .9)', desc: 'El halo sigue la voz del usuario: graves laten, medios ondulan, agudos lanzan chispas.', spec: 'WEB AUDIO · 3 BANDAS · SPRING K170' },
+        { id: 'thinking', n: '04', label: 'PENSANDO', color: '#F5B971', desc: 'Las órbitas se alinean en planos concéntricos, el cúmulo se contrae y destellos ámbar recorren los anillos.', spec: 'GIRO ×4,5 · CONTRACCIÓN 0,55' },
+        { id: 'speaking', n: '05', label: 'HABLANDO', color: '#FFE4C4', desc: 'Halo cálido reaccionando a la voz sintetizada. Subtítulos palabra a palabra con blur → nítido.', spec: 'CALIDEZ 1,0 · 200 MS / PALABRA' },
+        { id: 'action', n: '06', label: 'EJECUTANDO', color: '#F5B971', desc: 'Una partícula sale del núcleo hacia el icono o panel afectado, dejando estela.', spec: 'BÉZIER CUADRÁTICA · 1050 MS' },
+        { id: 'error', n: '07', label: 'SIN CONEXIÓN', color: '#FB7185', desc: 'Núcleo desaturado, energía mínima y parpadeo coral irregular en el anillo.', spec: 'DESATURACIÓN 0,85 · GIRO 0,25' },
+        { id: 'music', n: '08', label: 'MÚSICA', color: '#FDBA74', desc: 'El halo es el visualizador del audio del sistema y adopta los tonos de la carátula.', spec: '118 BPM SIMULADO · TINTE DE CARÁTULA' },
+      ],
+      colors: [
+        { name: 'Espacio', hex: '#05030A', role: 'Fondo', v: '#05030A', glow: 'transparent' },
+        { name: 'Violeta eléctrico', hex: '#8B5CF6', role: 'Acento principal', v: '#8B5CF6', glow: 'rgba(139,92,246,.35)' },
+        { name: 'Lavanda', hex: '#C4B5FD', role: 'Etiquetas, halo', v: '#C4B5FD', glow: 'rgba(196,181,253,.25)' },
+        { name: 'Magenta nebulosa', hex: '#D946EF · 40 %', role: 'Nebulosa', v: 'rgba(217,70,239,.4)', glow: 'rgba(217,70,239,.25)' },
+        { name: 'Blanco cálido', hex: '#FFF6E9', role: 'Brillos, texto', v: '#FFF6E9', glow: 'rgba(255,246,233,.2)' },
+        { name: 'Ámbar', hex: '#F5B971', role: 'Solo acento', v: '#F5B971', glow: 'rgba(245,185,113,.3)' },
+        { name: 'Menta', hex: '#34D399', role: 'En línea', v: '#34D399', glow: 'rgba(52,211,153,.3)' },
+        { name: 'Coral', hex: '#FB7185', role: 'Error', v: '#FB7185', glow: 'rgba(251,113,133,.3)' },
+        { name: 'Cristal', hex: 'rgba(7,5,14,.5)', role: 'Paneles', v: 'linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgba(139,92,246,.6), transparent 55%) border-box', glow: 'transparent' },
+      ],
+      themes: [['Nexus', '#8B5CF6', '#C4B5FD'], ['Arc', '#22D3EE', '#A5F3FC'], ['Mark III', '#EF4444', '#FCD34D'], ['Esmeralda', '#10B981', '#A7F3D0'], ['Solar', '#F97316', '#FED7AA']].map(([name, c1, c2]) => ({ name, c1, c2 })),
+      spacing: [[4, 'Icono ↔ texto'], [8, 'Chips, grupos'], [12, 'Tarjetas en rejilla'], [16, 'Interior compacto'], [24, 'Interior de panel'], [32, 'Márgenes de panel'], [48, 'Bloques'], [64, 'Márgenes del HUD']].map(([v, use]) => ({ v: v + ' px', w: v * 3 + 'px', use })),
+      demoInput: S.demoInput, onDemoInput: e => this.setState({ demoInput: e.target.value }),
+      sliderVal: S.warm + ' %', sliderPct: S.warm + '%', onSlider: this.onSlider,
+      toggle: () => this.setState(s => ({ on: !s.on })), tg: { bg: S.on ? 'rgb(var(--acc) / .85)' : 'rgba(255,255,255,.06)', border: S.on ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.2)', left: S.on ? '18px' : '2px' },
+      segs: ['Ultra', 'Equilibrado', 'Ahorro'].map(l => ({ label: l, bg: S.seg === l ? 'rgb(var(--acc) / .28)' : 'transparent', color: S.seg === l ? '#FFF6E9' : 'rgba(226,218,240,.6)', pick: () => this.setState({ seg: l }) })),
+      chips: [
+        { label: 'EN LÍNEA', color: '#34D399', anim: 'none' }, { label: 'EN VIVO', color: '#FB7185', anim: 'ds-pulse 1.4s ease-in-out infinite' }, { label: 'ESCUCHANDO', color: '#C4B5FD', anim: 'ds-pulse 1.4s ease-in-out infinite' },
+        { label: 'PENSANDO', color: '#F5B971', anim: 'ds-pulse .9s ease-in-out infinite' }, { label: 'SIN CONEXIÓN', color: '#FB7185', anim: 'none' }, { label: 'LOCAL', color: 'rgba(226,218,240,.6)', anim: 'none' },
+      ].map(c => ({ ...c, border: 'rgba(196,181,253,.16)', bg: 'rgba(0,0,0,.25)' })),
+      icons: Object.keys(ICONS).map(k => ({ name: k, d: ICONS[k] })),
+      curves: [
+        { name: 'Entrada · ease-out-expo', fn: 'cubic-bezier(.16, 1, .3, 1)', path: 'M0 120C32 0 60 0 200 0', dur: '600–1200 MS', use: 'Paneles, subtítulos, transiciones cinemáticas y el desplazamiento del núcleo.' },
+        { name: 'Interacción · spring suave', fn: 'cubic-bezier(.34, 1.3, .64, 1)', path: 'M0 120C68 -36 128 0 200 0', dur: '200–400 MS', use: 'Toggles, botones, hover con elevación. Rebote máximo de 1,3.' },
+        { name: 'Salida · estándar', fn: 'cubic-bezier(.4, 0, .2, 1)', path: 'M0 120C80 120 40 0 200 0', dur: '200–300 MS', use: 'Cierre de paneles y desaparición de chips.' },
+      ],
+      timings: [
+        { v: '40 MS', use: 'Cascada entre elementos internos' }, { v: '12 PX + BLUR 8 → 0', use: 'Entrada de paneles' }, { v: '200 MS / PALABRA', use: 'Subtítulos del asistente' },
+        { v: '600 MS', use: 'Ignición del halo en espiral' }, { v: '800 MS', use: 'Odómetro de la hora' }, { v: '≈ 4 S', use: 'Secuencia de arranque completa' },
+      ],
+      tech: [
+        { k: 'RENDER', v: 'Dos capas de canvas: galaxia (nebulosa pre-generada con ruido fbm, 3 capas de estrellas, líneas de campo) y núcleo con composición aditiva. Portable a Three.js con shaders para bloom real.' },
+        { k: 'AUDIO', v: 'AnalyserNode de Web Audio (FFT 512) dividido en graves, medios y agudos; ataque rápido y liberación lenta. El audio del sistema llega por captura de loopback en la app de Windows.' },
+        { k: 'ESTADOS', v: 'Máquina de estados con parámetros interpolados (energía, contracción, alineación, giro, calidez, desaturación). Cada transición se suaviza, nunca salta.' },
+        { k: 'RENDIMIENTO', v: 'Ultra: 2 600 partículas a resolución nativa. Equilibrado: 1 500 al 80 %. Ahorro: 700 al 55 %, sin grano. Respeta «reducir movimiento» del sistema.' },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

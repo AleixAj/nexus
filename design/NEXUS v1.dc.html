@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+html,body{margin:0;height:100%;background:#05030A;overflow:hidden;-webkit-font-smoothing:antialiased}
+a{color:#C4B5FD;text-decoration:none}a:hover{color:#FFF6E9}
+input{font:inherit}input::placeholder{color:rgba(196,181,253,.38)}
+button{font:inherit}
+@keyframes nx-in{from{opacity:0;transform:translateY(12px);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes nx-left{from{opacity:0;transform:translateX(-18px);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes nx-right{from{opacity:0;transform:translateX(18px);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes nx-up{from{opacity:0;transform:translateY(18px);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes nx-down{from{opacity:0;transform:translateY(-14px);filter:blur(8px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes nx-word{from{opacity:0;filter:blur(10px);transform:translateY(5px)}to{opacity:1;filter:blur(0);transform:none}}
+@keyframes nx-check{from{stroke-dashoffset:24}to{stroke-dashoffset:0}}
+@keyframes nx-pulse{0%,100%{opacity:1}50%{opacity:.3}}
+@keyframes nx-flow{from{background-position:0 -60px}to{background-position:0 60px}}
+@keyframes nx-ring{from{transform:scale(1);opacity:.6}to{transform:scale(1.9);opacity:0}}
+@keyframes nx-caret{50%{opacity:0}}
+@keyframes nx-spin{to{transform:rotate(360deg)}}
+[data-reduced="1"] *{animation-duration:1ms!important;transition-duration:1ms!important}
+@media (prefers-reduced-motion: reduce){*{animation-duration:1ms!important;transition-duration:1ms!important}}
+</style>
+<script src="nexus-engine.js"></script>
+</helmet>
+<div style="position:fixed; inset:0; background:#05030A; overflow:hidden">
+<div data-reduced="{{ reducedAttr }}" style="position:absolute; left:50%; top:50%; width:1920px; height:1080px; margin-left:-960px; margin-top:-540px; transform:scale({{ k }}); --acc:{{ acc }}; --acc2:{{ acc2 }}; overflow:hidden; font-family:'Space Grotesk',system-ui,sans-serif; color:#F1EAF8; background:#05030A">
+
+  <canvas data-nexus-main="bg" style="position:absolute; inset:0; width:100%; height:100%; filter:{{ bgFilter }}; transition:filter 1000ms cubic-bezier(.16,1,.3,1)"></canvas>
+
+  <sc-if value="{{ overlay }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; inset:0; background:repeating-linear-gradient(135deg, rgba(255,255,255,.025) 0 2px, transparent 2px 14px), #0B0B10; display:flex; align-items:flex-end; justify-content:flex-start; padding:48px; box-sizing:border-box; animation:nx-in 500ms cubic-bezier(.16,1,.3,1) both">
+      <span style="font-family:'JetBrains Mono',monospace; font-size:13px; letter-spacing:.2em; color:rgba(255,255,255,.28)">APLICACIÓN EN PRIMER PLANO · P. EJ. VS CODE, NAVEGADOR, JUEGO</span>
+    </div>
+  </sc-if>
+
+  <canvas data-nexus-main="core" style="position:absolute; inset:0; width:100%; height:100%; pointer-events:none"></canvas>
+  <div data-nexus-grain="1" style="position:absolute; inset:0; pointer-events:none; opacity:.55; mix-blend-mode:overlay"></div>
+
+  <sc-if value="{{ showUI }}" hint-placeholder-val="{{ false }}">
+    <!-- top-left HUD -->
+    <sc-if value="{{ showHud }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute; left:64px; top:52px; display:flex; flex-direction:column; gap:22px; width:440px">
+        <div style="display:flex; flex-direction:column; gap:6px; animation:nx-left 800ms cubic-bezier(.16,1,.3,1) both">
+          <div style="display:flex; align-items:flex-start; font-size:124px; font-weight:300; line-height:1; letter-spacing:-.03em; color:#FFF6E9; margin-left:-6px">
+            <sc-for list="{{ clockDigits }}" as="d" hint-placeholder-count="5">
+              <sc-if value="{{ d.sep }}" hint-placeholder-val="{{ false }}"><span style="width:.3em; text-align:center; height:1em; line-height:.92; opacity:.45; animation:nx-pulse 2s ease-in-out infinite">:</span></sc-if>
+              <sc-if value="{{ d.num }}" hint-placeholder-val="{{ true }}">
+                <span style="display:inline-block; height:1em; line-height:1em; overflow:hidden; width:.6em; text-align:center">
+                  <span style="display:flex; flex-direction:column; transform:translateY({{ d.ty }}); transition:transform 800ms cubic-bezier(.16,1,.3,1)">
+                    <span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span>
+                  </span>
+                </span>
+              </sc-if>
+            </sc-for>
+          </div>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:.2em; text-transform:uppercase; color:rgb(var(--acc2) / .7)">{{ dateStr }}</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:18px; animation:nx-left 800ms cubic-bezier(.16,1,.3,1) 80ms both">
+          <span style="font-size:52px; font-weight:300; line-height:1; color:#FFF6E9">14°</span>
+          <div style="display:flex; flex-direction:column; gap:6px">
+            <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgba(226,218,240,.8)">MADRID · DESPEJADO</span>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgba(226,218,240,.5)">MÁX 19° · MÍN 9° · HUMEDAD 48 %</span>
+          </div>
+        </div>
+        <span style="font-size:24px; font-weight:400; color:rgba(255,246,233,.92); animation:nx-left 800ms cubic-bezier(.16,1,.3,1) 160ms both">{{ greetText }}</span>
+        <div style="display:flex; flex-direction:column; gap:8px; max-width:380px; animation:nx-left 800ms cubic-bezier(.16,1,.3,1) 240ms both">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .6)">EN UN DÍA COMO HOY · 1791</span>
+          <span style="font-size:15px; line-height:1.5; color:rgba(226,218,240,.72); text-wrap:pretty">Se estrena en Viena «La flauta mágica», la última ópera que Mozart vio representada.</span>
+        </div>
+        <div style="display:flex; gap:8px; animation:nx-left 800ms cubic-bezier(.16,1,.3,1) 320ms both">
+          <sc-for list="{{ indicators }}" as="ind" hint-placeholder-count="3">
+            <span style="display:flex; align-items:center; gap:8px; padding:6px 11px; border-radius:999px; border:1px solid rgba(196,181,253,.16); background:rgba(0,0,0,.25); font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.2em; color:rgba(226,218,240,.78)">
+              <span style="width:6px; height:6px; border-radius:50%; background:{{ ind.color }}; box-shadow:0 0 8px {{ ind.color }}"></span>{{ ind.label }}
+            </span>
+          </sc-for>
+        </div>
+      </div>
+    </sc-if>
+
+    <!-- status pill -->
+    <div style="position:absolute; top:28px; left:{{ pillLeft }}; width:0; display:flex; justify-content:center; transition:left 1000ms cubic-bezier(.16,1,.3,1)"><button onClick="{{ onPill }}" style="flex:none; display:flex; align-items:center; gap:10px; height:36px; padding:0 18px; border-radius:999px; cursor:pointer; background:linear-gradient(rgba(7,5,14,.55),rgba(7,5,14,.55)) padding-box, linear-gradient(90deg, rgb(var(--acc) / .5), rgb(var(--acc2) / .15), rgb(var(--acc) / .5)) border-box; border:1px solid transparent; backdrop-filter:blur(20px); color:rgba(241,234,248,.9); font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; white-space:nowrap; animation:nx-down 700ms cubic-bezier(.16,1,.3,1) 200ms both">
+      <span style="width:7px; height:7px; border-radius:50%; background:{{ pillDot }}; box-shadow:0 0 10px {{ pillDot }}; animation:{{ pillAnim }}"></span>{{ pillText }}
+    </button></div>
+
+    <!-- notifications -->
+    <sc-if value="{{ showNotifs }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute; right:40px; top:40px; width:360px; display:flex; flex-direction:column; gap:10px">
+        <sc-for list="{{ notifs }}" as="n" hint-placeholder-count="1">
+          <div data-spot="1" style="position:relative; padding:16px 18px; display:flex; flex-direction:column; gap:6px; background:linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box; border:1px solid transparent; border-radius:14px; backdrop-filter:blur(24px); box-shadow:inset 0 1px 0 rgba(255,255,255,.07); animation:nx-right 700ms cubic-bezier(.16,1,.3,1) both" style-before="content:''; position:absolute; inset:-1px; border-radius:inherit; padding:1px; background:radial-gradient(180px circle at var(--mx,-500px) var(--my,-500px), rgb(var(--acc2) / .8), transparent 70%); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none">
+            <div style="display:flex; align-items:center; justify-content:space-between">
+              <span style="display:flex; align-items:center; gap:8px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.2em; color:rgb(var(--acc2) / .7)"><span style="width:5px; height:5px; border-radius:50%; background:{{ n.dot }}"></span>{{ n.app }} · {{ n.time }}</span>
+              <button onClick="{{ n.dismiss }}" style="width:22px; height:22px; display:grid; place-items:center; border:none; background:none; color:rgba(226,218,240,.45); cursor:pointer; padding:0" style-hover="color:#FFF6E9"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+            </div>
+            <span style="font-size:16px; font-weight:500; color:#FFF6E9">{{ n.title }}</span>
+            <span style="font-size:13.5px; color:rgba(226,218,240,.62)">{{ n.body }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </sc-if>
+
+    <!-- core caption -->
+    <div style="position:absolute; left:{{ capLeft }}; top:{{ capTop }}; transform:translateX(-50%); width:{{ capWidth }}; display:flex; flex-direction:column; align-items:center; gap:14px; text-align:center; pointer-events:none; transition:left 1000ms cubic-bezier(.16,1,.3,1), top 1000ms cubic-bezier(.16,1,.3,1)">
+      <span style="display:flex; align-items:center; gap:10px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.3em; color:{{ stateColor }}; transition:color 400ms"><span style="width:18px; height:1px; background:currentColor; opacity:.5"></span>{{ stateLabel }}<span style="width:18px; height:1px; background:currentColor; opacity:.5"></span></span>
+      <sc-if value="{{ showWave }}" hint-placeholder-val="{{ false }}">
+        <canvas data-nexus-wave="1" style="width:440px; height:44px; animation:nx-in 500ms cubic-bezier(.16,1,.3,1) both"></canvas>
+      </sc-if>
+      <div style="font-size:{{ wordsSize }}; line-height:1.35; font-weight:400; color:{{ wordsColor }}; opacity:{{ wordsOpacity }}; transition:opacity 500ms, color 500ms; text-wrap:balance; min-height:1.35em">
+        <sc-for list="{{ words }}" as="w" hint-placeholder-count="0"><span style="display:inline-block; margin-right:.26em; animation:nx-word 560ms cubic-bezier(.16,1,.3,1) both">{{ w }}</span></sc-for>
+      </div>
+      <sc-if value="{{ hasAction }}" hint-placeholder-val="{{ false }}">
+        <span style="display:flex; align-items:center; gap:10px; padding:8px 14px; border-radius:999px; border:1px solid rgba(245,185,113,.35); background:rgba(245,185,113,.08); font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:#F5B971; animation:nx-in 400ms cubic-bezier(.16,1,.3,1) both"><span style="width:10px; height:10px; border-radius:50%; border:1.5px solid #F5B971; border-top-color:transparent; animation:nx-spin 800ms linear infinite"></span>{{ actionLabel }}</span>
+      </sc-if>
+      <sc-if value="{{ hasError }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:6px; align-items:center; animation:nx-in 500ms cubic-bezier(.16,1,.3,1) both">
+          <span style="font-size:20px; color:#FDA4AF">No puedo conectar con el modelo</span>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgba(251,113,133,.7)">REINTENTANDO EN 8 S · EL MODO LOCAL SIGUE DISPONIBLE</span>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- mic -->
+    <sc-if value="{{ showMic }}" hint-placeholder-val="{{ true }}">
+      <div style="position:absolute; left:0; right:0; bottom:28px; display:flex; justify-content:center; pointer-events:none"><div style="display:flex; flex-direction:column; align-items:center; gap:10px; pointer-events:auto; animation:nx-up 800ms cubic-bezier(.16,1,.3,1) 250ms both">
+        <div style="position:relative; width:560px; height:76px; display:grid; place-items:center">
+          <canvas data-nexus-wave="1" style="position:absolute; inset:16px 0; width:560px; height:44px; opacity:.7"></canvas>
+          <sc-if value="{{ micRing }}" hint-placeholder-val="{{ false }}"><span style="position:absolute; width:76px; height:76px; border-radius:50%; border:1px solid rgb(var(--acc2) / .6); animation:nx-ring 1600ms cubic-bezier(.16,1,.3,1) infinite"></span></sc-if>
+          <button onClick="{{ onMic }}" style="position:relative; width:76px; height:76px; border-radius:50%; display:grid; place-items:center; cursor:pointer; color:#FFF6E9; background:radial-gradient(circle at 50% 30%, rgb(var(--acc) / .35), rgba(7,5,14,.7) 70%) padding-box, linear-gradient(160deg, rgb(var(--acc2) / .8), rgb(var(--acc) / .1)) border-box; border:1px solid transparent; backdrop-filter:blur(20px); box-shadow:0 0 40px rgb(var(--acc) / .35), inset 0 1px 0 rgba(255,255,255,.2); transition:transform 300ms cubic-bezier(.34,1.3,.64,1)" style-hover="transform:scale(1.05)" style-active="transform:scale(.96)">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3"></path></svg>
+          </button>
+        </div>
+        <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.24em; color:rgba(226,218,240,.5); white-space:nowrap">{{ micStatus }}</span>
+      </div></div>
+    </sc-if>
+
+    <!-- music mini card -->
+    <sc-if value="{{ showMusicMini }}" hint-placeholder-val="{{ false }}">
+      <div data-spot="1" style="position:absolute; right:24px; bottom:112px; width:360px; padding:14px; display:flex; gap:14px; align-items:center; background:linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgba(251,146,60,.45), rgb(var(--acc) / .1) 55%) border-box; border:1px solid transparent; border-radius:14px; backdrop-filter:blur(24px); box-shadow:inset 0 1px 0 rgba(255,255,255,.07); animation:nx-up 700ms cubic-bezier(.16,1,.3,1) both" style-before="content:''; position:absolute; inset:-1px; border-radius:inherit; padding:1px; background:radial-gradient(180px circle at var(--mx,-500px) var(--my,-500px), rgb(var(--acc2) / .8), transparent 70%); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none">
+        <button onClick="{{ openMusic }}" style="width:64px; height:64px; flex:none; border-radius:10px; border:none; cursor:pointer; background:repeating-linear-gradient(135deg, rgba(255,255,255,.08) 0 2px, transparent 2px 8px), linear-gradient(135deg,#FB923C,#9333EA 60%,#1E1B4B); display:grid; place-items:center; font-family:'JetBrains Mono',monospace; font-size:8px; letter-spacing:.15em; color:rgba(255,255,255,.7)">CARÁTULA</button>
+        <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.2em; color:#FDBA74">SPOTIFY · REPRODUCIENDO</span>
+          <span style="font-size:15px; font-weight:500; color:#FFF6E9; white-space:nowrap; overflow:hidden; text-overflow:ellipsis">Horizonte de sucesos</span>
+          <span style="font-size:12.5px; color:rgba(226,218,240,.6)">Aurora Lineal</span>
+          <div style="height:2px; border-radius:2px; background:rgba(255,255,255,.1); overflow:hidden"><div style="height:100%; width:{{ musicPct }}; background:linear-gradient(90deg,#FB923C,rgb(var(--acc2))); transition:width 1000ms linear"></div></div>
+        </div>
+        <div style="display:flex; gap:2px">
+          <button onClick="{{ togglePlay }}" style="width:36px; height:36px; border-radius:50%; border:1px solid rgba(255,255,255,.16); background:rgba(255,255,255,.06); color:#FFF6E9; display:grid; place-items:center; cursor:pointer" style-hover="background:rgba(255,255,255,.12)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="{{ playIcon }}"></path></svg></button>
+          <button onClick="{{ nextTrack }}" style="width:36px; height:36px; border-radius:50%; border:none; background:none; color:rgba(226,218,240,.7); display:grid; place-items:center; cursor:pointer" style-hover="color:#FFF6E9"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M6 6v12l9-6zM18 6v12"></path></svg></button>
+        </div>
+      </div>
+    </sc-if>
+  </sc-if>
+
+  <!-- ============ CHAT ============ -->
+  <sc-if value="{{ isChat }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; right:24px; top:24px; bottom:112px; width:600px; display:flex; flex-direction:column; background:linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / .06) 45%, rgb(var(--acc) / 0)) border-box; border:1px solid transparent; border-radius:14px; backdrop-filter:blur(24px) saturate(1.2); box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 24px 70px rgba(0,0,0,.35); animation:nx-right 600ms cubic-bezier(.16,1,.3,1) both">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; padding:26px 28px 18px; border-bottom:1px solid rgba(196,181,253,.08)">
+        <div style="display:flex; flex-direction:column; gap:8px; animation:nx-in 500ms cubic-bezier(.16,1,.3,1) 80ms both">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">CHAT · {{ modelName }}</span>
+          <span style="font-size:28px; font-weight:400">Conversación de hoy</span>
+        </div>
+        <button onClick="{{ closePanel }}" style="width:36px; height:36px; border-radius:10px; border:1px solid rgba(196,181,253,.14); background:rgba(255,255,255,.02); color:rgba(226,218,240,.7); display:grid; place-items:center; cursor:pointer" style-hover="border-color:rgba(196,181,253,.4); color:#FFF6E9"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <div ref="{{ chatRef }}" style="flex:1; overflow-y:auto; padding:24px 28px; display:flex; flex-direction:column; gap:18px; scroll-behavior:smooth">
+        <sc-for list="{{ chatMsgs }}" as="m" hint-placeholder-count="3">
+          <sc-if value="{{ m.isUser }}" hint-placeholder-val="{{ false }}">
+            <div style="align-self:flex-end; max-width:78%; padding:12px 16px; border-radius:14px 14px 4px 14px; background:rgb(var(--acc) / .16); border:1px solid rgb(var(--acc) / .28); font-size:15.5px; line-height:1.5; color:#FFF6E9; animation:{{ m.anim }}">{{ m.text }}</div>
+          </sc-if>
+          <sc-if value="{{ m.isNexus }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex; gap:12px; max-width:92%; animation:{{ m.anim }}">
+              <span style="flex:none; width:22px; height:22px; margin-top:2px; border-radius:50%; background:radial-gradient(circle, #FFF6E9 0 18%, rgb(var(--acc2) / .7) 30%, transparent 62%); box-shadow:0 0 0 1px rgb(var(--acc2) / .5), 0 0 14px rgb(var(--acc) / .6)"></span>
+              <span style="font-size:15.5px; line-height:1.6; color:rgba(241,234,248,.9); text-wrap:pretty">{{ m.shown }}<sc-if value="{{ m.streaming }}" hint-placeholder-val="{{ false }}"><span style="display:inline-block; width:7px; height:1em; margin-left:3px; vertical-align:-2px; background:rgb(var(--acc2)); animation:nx-caret 900ms steps(1) infinite"></span></sc-if></span>
+            </div>
+          </sc-if>
+          <sc-if value="{{ m.isAction }}" hint-placeholder-val="{{ false }}">
+            <div style="margin-left:34px; padding:12px 14px; display:flex; flex-direction:column; gap:10px; border-radius:12px; background:rgba(52,211,153,.04); border:1px solid rgba(52,211,153,.2); animation:{{ m.anim }}">
+              <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.2em; color:rgba(52,211,153,.75)">ACCIONES EJECUTADAS</span>
+              <sc-for list="{{ m.items }}" as="it" hint-placeholder-count="2">
+                <div style="display:flex; align-items:center; gap:10px; font-size:14px; color:rgba(241,234,248,.88)">
+                  <span style="width:20px; height:20px; border-radius:50%; display:grid; place-items:center; background:rgba(52,211,153,.14); box-shadow:0 0 12px rgba(52,211,153,.3)"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#34D399" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12l5 5 9-10" style="stroke-dasharray:24; animation:nx-check 600ms cubic-bezier(.16,1,.3,1) both; animation-delay:{{ it.delay }}"></path></svg></span>
+                  {{ it.t }}
+                </div>
+              </sc-for>
+            </div>
+          </sc-if>
+        </sc-for>
+      </div>
+      <div style="position:relative; padding:16px 20px 20px; border-top:1px solid rgba(196,181,253,.08); display:flex; flex-direction:column; gap:10px">
+        <sc-if value="{{ showSlash }}" hint-placeholder-val="{{ false }}">
+          <div style="position:absolute; left:20px; right:20px; bottom:100%; margin-bottom:-6px; padding:8px; display:flex; flex-direction:column; gap:2px; border-radius:12px; background:rgba(12,9,22,.92); border:1px solid rgb(var(--acc) / .35); backdrop-filter:blur(24px); box-shadow:0 20px 60px rgba(0,0,0,.5); animation:nx-in 260ms cubic-bezier(.16,1,.3,1) both">
+            <sc-for list="{{ slashCmds }}" as="c" hint-placeholder-count="4">
+              <button onClick="{{ c.pick }}" style="display:flex; align-items:center; gap:14px; padding:10px 12px; border-radius:8px; border:none; background:transparent; color:#F1EAF8; cursor:pointer; text-align:left" style-hover="background:rgb(var(--acc) / .14)">
+                <span style="font-family:'JetBrains Mono',monospace; font-size:13px; color:rgb(var(--acc2)); width:96px">{{ c.cmd }}</span>
+                <span style="font-size:14px; color:rgba(226,218,240,.7)">{{ c.desc }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <div style="display:flex; align-items:center; gap:8px; height:52px; padding:0 8px 0 16px; border-radius:12px; background:rgba(0,0,0,.35); border:1px solid rgba(196,181,253,.16); transition:border-color 250ms, box-shadow 250ms" style-focus="border-color:rgb(var(--acc2) / .5)">
+          <input value="{{ chatInput }}" onChange="{{ onChatInput }}" onKeyDown="{{ onChatKey }}" placeholder="Escriba a Nexus o pulse / para comandos" style="flex:1; background:none; border:none; outline:none; color:#FFF6E9; font-size:15px"></input>
+          <button onClick="{{ onMic }}" style="width:38px; height:38px; border-radius:9px; border:none; background:transparent; color:rgba(226,218,240,.7); display:grid; place-items:center; cursor:pointer" style-hover="color:#FFF6E9; filter:drop-shadow(0 0 6px rgb(var(--acc2)))"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3"></path></svg></button>
+          <button onClick="{{ onChatSend }}" style="width:38px; height:38px; border-radius:9px; border:1px solid rgba(255,255,255,.16); background:rgb(var(--acc) / .8); color:#fff; display:grid; place-items:center; cursor:pointer; box-shadow:0 0 18px rgb(var(--acc) / .45)" style-hover="background:rgb(var(--acc))"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M4 12l16-8-6 16-2-6z"></path></svg></button>
+        </div>
+        <div style="display:flex; gap:16px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.14em; color:rgba(226,218,240,.42)">
+          <span>↵ ENVIAR</span><span>/ COMANDOS</span><span style="margin-left:auto">CTRL + ESPACIO DESDE CUALQUIER APP</span>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ VOZ Y PERSONALIDAD ============ -->
+  <sc-if value="{{ isVoice }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; right:24px; top:24px; bottom:112px; width:1080px; display:flex; flex-direction:column; background:linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / .06) 45%, rgb(var(--acc) / 0)) border-box; border:1px solid transparent; border-radius:14px; backdrop-filter:blur(24px) saturate(1.2); box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 24px 70px rgba(0,0,0,.35); animation:nx-right 600ms cubic-bezier(.16,1,.3,1) both">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; padding:26px 32px 18px">
+        <div style="display:flex; flex-direction:column; gap:8px; animation:nx-in 500ms cubic-bezier(.16,1,.3,1) 80ms both">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">VOZ Y PERSONALIDAD</span>
+          <span style="font-size:30px; font-weight:400">Cómo habla Nexus</span>
+        </div>
+        <div style="display:flex; gap:10px">
+          <button onClick="{{ testVoice }}" style="display:flex; align-items:center; gap:10px; height:40px; padding:0 18px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:linear-gradient(180deg, rgb(var(--acc) / .95), rgb(var(--acc) / .7)); color:#fff; font-size:14px; font-weight:500; white-space:nowrap; cursor:pointer; box-shadow:0 0 24px rgb(var(--acc) / .4), inset 0 1px 0 rgba(255,255,255,.25); transition:transform 250ms cubic-bezier(.34,1.3,.64,1)" style-hover="transform:translateY(-1px)" style-active="transform:scale(.97)"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>Probar en el núcleo</button>
+          <button onClick="{{ closePanel }}" style="width:40px; height:40px; border-radius:10px; border:1px solid rgba(196,181,253,.14); background:rgba(255,255,255,.02); color:rgba(226,218,240,.7); display:grid; place-items:center; cursor:pointer" style-hover="border-color:rgba(196,181,253,.4); color:#FFF6E9"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+        </div>
+      </div>
+      <div style="flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1.35fr) minmax(0,1fr); gap:32px; padding:4px 32px 28px">
+        <div style="display:flex; flex-direction:column; gap:14px; min-height:0">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62); animation:nx-in 500ms cubic-bezier(.16,1,.3,1) 120ms both">VOCES</span>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:12px">
+            <sc-for list="{{ voiceCards }}" as="v" hint-placeholder-count="4">
+              <div data-spot="1" onClick="{{ v.select }}" style="position:relative; padding:16px; display:flex; gap:14px; align-items:center; cursor:pointer; border-radius:12px; background:{{ v.bg }}; border:1px solid {{ v.border }}; transition:transform 300ms cubic-bezier(.34,1.2,.64,1), border-color 300ms, background 300ms; animation:nx-in 600ms cubic-bezier(.16,1,.3,1) both; animation-delay:{{ v.delay }}" style-hover="transform:translateY(-2px)" style-before="content:''; position:absolute; inset:-1px; border-radius:inherit; padding:1px; background:radial-gradient(180px circle at var(--mx,-500px) var(--my,-500px), rgb(var(--acc2) / .8), transparent 70%); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none">
+                <canvas data-nexus-core="1" data-state="{{ v.state }}" data-particles="260" data-r=".2" style="width:96px; height:96px; flex:none"></canvas>
+                <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:6px">
+                  <div style="display:flex; align-items:center; gap:8px"><span style="font-size:19px; font-weight:500; color:#FFF6E9">{{ v.name }}</span><sc-if value="{{ v.selected }}" hint-placeholder-val="{{ false }}"><span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.2em; color:#34D399">● ACTIVA</span></sc-if></div>
+                  <span style="font-size:13px; color:rgba(226,218,240,.6)">{{ v.desc }}</span>
+                  <button onClick="{{ v.preview }}" style="align-self:flex-start; margin-top:4px; display:flex; align-items:center; gap:8px; height:28px; padding:0 12px; border-radius:999px; border:1px solid rgba(196,181,253,.2); background:rgba(255,255,255,.03); color:rgba(241,234,248,.85); font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; white-space:nowrap; cursor:pointer" style-hover="border-color:rgb(var(--acc2) / .6)">{{ v.previewLabel }}</button>
+                </div>
+              </div>
+            </sc-for>
+          </div>
+          <span style="margin-top:12px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62); animation:nx-in 500ms cubic-bezier(.16,1,.3,1) 300ms both">PERSONALIDAD</span>
+          <div style="display:grid; grid-template-columns:repeat(3,1fr); gap:12px">
+            <sc-for list="{{ personaCards }}" as="p" hint-placeholder-count="3">
+              <button onClick="{{ p.select }}" style="text-align:left; padding:16px; display:flex; flex-direction:column; gap:10px; border-radius:12px; cursor:pointer; background:{{ p.bg }}; border:1px solid {{ p.border }}; color:#F1EAF8; transition:transform 300ms cubic-bezier(.34,1.2,.64,1), border-color 300ms; animation:nx-in 600ms cubic-bezier(.16,1,.3,1) both; animation-delay:{{ p.delay }}" style-hover="transform:translateY(-2px)">
+                <span style="font-size:15.5px; font-weight:500">{{ p.name }}</span>
+                <span style="font-size:13px; line-height:1.45; color:rgba(226,218,240,.6); text-wrap:pretty">{{ p.line }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:22px">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62); animation:nx-in 500ms cubic-bezier(.16,1,.3,1) 160ms both">AJUSTE FINO</span>
+          <sc-for list="{{ voiceSliders }}" as="s" hint-placeholder-count="4">
+            <div style="display:flex; flex-direction:column; gap:10px; animation:nx-in 600ms cubic-bezier(.16,1,.3,1) both; animation-delay:{{ s.delay }}">
+              <div style="display:flex; justify-content:space-between; font-size:14.5px; color:rgba(241,234,248,.85)"><span>{{ s.label }}</span><span style="font-family:'JetBrains Mono',monospace; font-size:12.5px; color:rgb(var(--acc2))">{{ s.val }}</span></div>
+              <div data-key="{{ s.key }}" onPointerDown="{{ onSlider }}" style="position:relative; height:20px; cursor:pointer; touch-action:none">
+                <div style="position:absolute; left:0; right:0; top:9px; height:2px; border-radius:2px; background:rgba(196,181,253,.14)"></div>
+                <div style="position:absolute; left:0; top:9px; height:2px; width:{{ s.pct }}; border-radius:2px; background:linear-gradient(90deg, rgb(var(--acc) / .6), rgb(var(--acc2))); box-shadow:0 0 10px rgb(var(--acc) / .6)"></div>
+                <div style="position:absolute; top:3px; left:{{ s.pct }}; width:14px; height:14px; margin-left:-7px; border-radius:50%; background:#FFF6E9; box-shadow:0 0 0 4px rgb(var(--acc) / .25), 0 0 14px rgb(var(--acc2) / .8)"></div>
+              </div>
+            </div>
+          </sc-for>
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <span style="font-size:14.5px; color:rgba(241,234,248,.85)">Idioma</span>
+            <div style="display:flex; padding:3px; border-radius:10px; background:rgba(0,0,0,.3); border:1px solid rgba(196,181,253,.12)">
+              <sc-for list="{{ langOpts }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.pick }}" style="flex:1; height:32px; border-radius:8px; border:none; cursor:pointer; font-size:13px; background:{{ o.bg }}; color:{{ o.color }}; transition:background 250ms, color 250ms">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:14px">
+            <div style="display:flex; flex-direction:column; gap:10px">
+              <span style="font-size:14.5px; color:rgba(241,234,248,.85)">Palabra de activación</span>
+              <input value="{{ wakeWord }}" onChange="{{ onWake }}" style="height:40px; padding:0 14px; border-radius:10px; background:rgba(0,0,0,.3); border:1px solid rgba(196,181,253,.16); color:#FFF6E9; font-size:14px; outline:none"></input>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:10px">
+              <span style="font-size:14.5px; color:rgba(241,234,248,.85)">Cómo le llamo</span>
+              <input value="{{ userName }}" onChange="{{ onName }}" style="height:40px; padding:0 14px; border-radius:10px; background:rgba(0,0,0,.3); border:1px solid rgba(196,181,253,.16); color:#FFF6E9; font-size:14px; outline:none"></input>
+            </div>
+          </div>
+          <div style="display:flex; flex-wrap:wrap; gap:8px">
+            <sc-for list="{{ nameChips }}" as="c" hint-placeholder-count="4">
+              <button onClick="{{ c.pick }}" style="height:30px; padding:0 14px; border-radius:999px; cursor:pointer; font-size:13px; border:1px solid {{ c.border }}; background:{{ c.bg }}; color:rgba(241,234,248,.9)">{{ c.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ RUTINAS ============ -->
+  <sc-if value="{{ isRoutines }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; right:24px; top:24px; bottom:112px; width:1080px; display:flex; flex-direction:column; background:linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / .06) 45%, rgb(var(--acc) / 0)) border-box; border:1px solid transparent; border-radius:14px; backdrop-filter:blur(24px) saturate(1.2); box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 24px 70px rgba(0,0,0,.35); animation:nx-right 600ms cubic-bezier(.16,1,.3,1) both">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; padding:26px 32px 18px">
+        <div style="display:flex; flex-direction:column; gap:8px; animation:nx-in 500ms cubic-bezier(.16,1,.3,1) 80ms both">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">RUTINAS Y COMANDOS</span>
+          <span style="font-size:30px; font-weight:400">Automatizaciones</span>
+        </div>
+        <button onClick="{{ closePanel }}" style="width:40px; height:40px; border-radius:10px; border:1px solid rgba(196,181,253,.14); background:rgba(255,255,255,.02); color:rgba(226,218,240,.7); display:grid; place-items:center; cursor:pointer" style-hover="border-color:rgba(196,181,253,.4); color:#FFF6E9"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <div style="flex:1; min-height:0; display:grid; grid-template-columns:400px minmax(0,1fr); gap:28px; padding:4px 32px 28px">
+        <div style="display:flex; flex-direction:column; gap:10px; min-height:0; overflow:auto">
+          <sc-for list="{{ routineCards }}" as="r" hint-placeholder-count="4">
+            <div data-spot="1" onClick="{{ r.select }}" style="position:relative; padding:14px 16px; display:flex; align-items:center; gap:14px; cursor:pointer; border-radius:12px; background:{{ r.bg }}; border:1px solid {{ r.border }}; transition:transform 300ms cubic-bezier(.34,1.2,.64,1), border-color 300ms, background 300ms; animation:nx-in 600ms cubic-bezier(.16,1,.3,1) both; animation-delay:{{ r.delay }}" style-hover="transform:translateY(-2px)" style-before="content:''; position:absolute; inset:-1px; border-radius:inherit; padding:1px; background:radial-gradient(180px circle at var(--mx,-500px) var(--my,-500px), rgb(var(--acc2) / .8), transparent 70%); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none">
+              <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:5px">
+                <span style="font-size:17px; font-weight:500; color:#FFF6E9">{{ r.name }}</span>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.12em; color:rgba(226,218,240,.52)">{{ r.trigger }} · {{ r.count }} PASOS</span>
+              </div>
+              <button onClick="{{ r.toggle }}" style="flex:none; position:relative; width:38px; height:22px; border-radius:999px; border:1px solid {{ r.tBorder }}; background:{{ r.tBg }}; cursor:pointer; padding:0; transition:background 300ms">
+                <span style="position:absolute; top:2px; left:{{ r.tLeft }}; width:16px; height:16px; border-radius:50%; background:#FFF6E9; box-shadow:0 0 10px rgba(255,246,233,.5); transition:left 320ms cubic-bezier(.34,1.4,.64,1)"></span>
+              </button>
+            </div>
+          </sc-for>
+          <span style="margin-top:14px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">PERMISOS · QUÉ PUEDE CONTROLAR</span>
+          <sc-for list="{{ permRows }}" as="p" hint-placeholder-count="6">
+            <div style="display:flex; align-items:center; gap:12px; padding:9px 2px; border-bottom:1px solid rgba(196,181,253,.07)">
+              <div style="flex:1; display:flex; flex-direction:column; gap:3px"><span style="font-size:14px; color:rgba(241,234,248,.88)">{{ p.label }}</span><span style="font-size:12px; color:rgba(226,218,240,.45)">{{ p.note }}</span></div>
+              <button onClick="{{ p.toggle }}" style="flex:none; position:relative; width:38px; height:22px; border-radius:999px; border:1px solid {{ p.tBorder }}; background:{{ p.tBg }}; cursor:pointer; padding:0; transition:background 300ms">
+                <span style="position:absolute; top:2px; left:{{ p.tLeft }}; width:16px; height:16px; border-radius:50%; background:#FFF6E9; transition:left 320ms cubic-bezier(.34,1.4,.64,1)"></span>
+              </button>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex; flex-direction:column; min-height:0; border-radius:12px; border:1px solid rgba(196,181,253,.1); background:radial-gradient(circle at 1px 1px, rgba(196,181,253,.09) 1px, transparent 0) 0 0 / 22px 22px, rgba(0,0,0,.22)">
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:20px 24px">
+            <div style="display:flex; flex-direction:column; gap:6px">
+              <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">EDITOR POR PASOS</span>
+              <span style="font-size:22px; font-weight:400; color:#FFF6E9">{{ selRoutine.name }}</span>
+            </div>
+            <button onClick="{{ runRoutine }}" style="display:flex; align-items:center; gap:10px; height:40px; padding:0 18px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:linear-gradient(180deg, rgb(var(--acc) / .95), rgb(var(--acc) / .7)); color:#fff; font-size:14px; font-weight:500; white-space:nowrap; cursor:pointer; box-shadow:0 0 24px rgb(var(--acc) / .4), inset 0 1px 0 rgba(255,255,255,.25)" style-active="transform:scale(.97)"><svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"></path></svg>Ejecutar ahora</button>
+          </div>
+          <div style="flex:1; overflow:auto; padding:6px 24px 24px; display:flex; flex-direction:column; align-items:center">
+            <sc-for list="{{ routineSteps }}" as="st" hint-placeholder-count="5">
+              <sc-if value="{{ st.notFirst }}" hint-placeholder-val="{{ false }}">
+                <div style="width:2px; height:26px; background:linear-gradient(180deg, transparent, rgb(var(--acc2) / .95), transparent) 0 0 / 2px 60px repeat-y, rgb(var(--acc) / .3); box-shadow:0 0 8px rgb(var(--acc) / .6); animation:nx-flow 1400ms linear infinite"></div>
+              </sc-if>
+              <div style="width:100%; max-width:520px; display:flex; align-items:center; gap:14px; padding:12px 16px; border-radius:12px; background:{{ st.bg }}; border:1px solid {{ st.border }}; box-shadow:{{ st.glow }}; transition:background 300ms, border-color 300ms, box-shadow 300ms; animation:nx-in 500ms cubic-bezier(.16,1,.3,1) both; animation-delay:{{ st.delay }}">
+                <span style="width:32px; height:32px; flex:none; border-radius:9px; display:grid; place-items:center; background:rgb(var(--acc) / .12); border:1px solid rgb(var(--acc) / .3); color:{{ st.iconColor }}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ st.icon }}"></path></svg></span>
+                <div style="flex:1; display:flex; flex-direction:column; gap:3px">
+                  <span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.2em; color:rgba(226,218,240,.45)">{{ st.kind }}</span>
+                  <span style="font-size:15px; color:#FFF6E9">{{ st.title }}</span>
+                </div>
+                <span style="font-family:'JetBrains Mono',monospace; font-size:11.5px; white-space:nowrap; color:rgba(226,218,240,.55)">{{ st.detail }}</span>
+              </div>
+            </sc-for>
+            <div style="width:2px; height:22px; background:rgba(196,181,253,.15)"></div>
+            <button style="display:flex; align-items:center; gap:8px; height:36px; padding:0 16px; border-radius:999px; border:1px dashed rgba(196,181,253,.3); background:transparent; color:rgba(226,218,240,.7); font-size:13px; cursor:pointer" style-hover="border-color:rgb(var(--acc2) / .7); color:#FFF6E9">+ Añadir paso</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ SISTEMA ============ -->
+  <sc-if value="{{ isSystem }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; left:64px; top:48px; display:flex; flex-direction:column; gap:8px; animation:nx-left 700ms cubic-bezier(.16,1,.3,1) both">
+      <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">SISTEMA · NEXUS-PC · WINDOWS 11</span>
+      <span style="font-size:34px; font-weight:400">Estado del equipo</span>
+    </div>
+    <button onClick="{{ closePanel }}" style="position:absolute; right:64px; top:56px; width:40px; height:40px; border-radius:10px; border:1px solid rgba(196,181,253,.14); background:rgba(7,5,14,.4); color:rgba(226,218,240,.7); display:grid; place-items:center; cursor:pointer" style-hover="border-color:rgba(196,181,253,.4); color:#FFF6E9"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+    <svg width="1920" height="1080" style="position:absolute; inset:0; pointer-events:none; animation:nx-in 1000ms cubic-bezier(.16,1,.3,1) both">
+      <ellipse cx="960" cy="520" rx="300" ry="262" fill="none" style="stroke:rgb(var(--acc2) / .16)" stroke-width="1" stroke-dasharray="2 6"></ellipse>
+      <ellipse cx="960" cy="520" rx="220" ry="190" fill="none" style="stroke:rgb(var(--acc) / .1)" stroke-width="1"></ellipse>
+    </svg>
+    <sc-for list="{{ gauges }}" as="g" hint-placeholder-count="6">
+      <div style="position:absolute; left:{{ g.left }}; top:{{ g.top }}; width:170px; height:170px; display:grid; place-items:center; animation:nx-in 800ms cubic-bezier(.16,1,.3,1) both; animation-delay:{{ g.delay }}">
+        <svg width="170" height="170" viewBox="0 0 170 170" style="position:absolute; inset:0">
+          <circle cx="85" cy="85" r="78" fill="rgba(7,5,14,.35)" style="stroke:rgb(var(--acc2) / .2)" stroke-width="1" stroke-dasharray="1 5"></circle>
+          <circle cx="85" cy="85" r="66" fill="none" style="stroke:rgb(var(--acc2) / .1)" stroke-width="2"></circle>
+          <circle cx="85" cy="85" r="66" fill="none" stroke-width="2.5" stroke-linecap="round" transform="rotate(-90 85 85)" stroke-dasharray="{{ g.dash }}" style="stroke:{{ g.color }}; filter:drop-shadow(0 0 5px {{ g.color }}); transition:stroke-dasharray 1000ms cubic-bezier(.16,1,.3,1)"></circle>
+        </svg>
+        <div style="position:relative; display:flex; flex-direction:column; align-items:center; gap:2px">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.24em; color:rgb(var(--acc2) / .7)">{{ g.label }}</span>
+          <span style="font-size:36px; font-weight:300; line-height:1.1; color:#FFF6E9; font-variant-numeric:tabular-nums">{{ g.val }}<span style="font-size:15px; color:rgba(226,218,240,.6)">{{ g.unit }}</span></span>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.06em; color:rgba(226,218,240,.5)">{{ g.detail }}</span>
+        </div>
+      </div>
+    </sc-for>
+    <div style="position:absolute; left:64px; top:190px; width:400px; padding:22px; display:flex; flex-direction:column; gap:14px; background:linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box; border:1px solid transparent; border-radius:14px; backdrop-filter:blur(24px); box-shadow:inset 0 1px 0 rgba(255,255,255,.07); animation:nx-left 700ms cubic-bezier(.16,1,.3,1) 120ms both">
+      <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">PROCESOS QUE MÁS CONSUMEN</span>
+      <sc-for list="{{ procs }}" as="p" hint-placeholder-count="6">
+        <div style="display:grid; grid-template-columns:minmax(0,1fr) 56px 80px; align-items:center; gap:10px; animation:nx-in 500ms cubic-bezier(.16,1,.3,1) both; animation-delay:{{ p.delay }}">
+          <div style="display:flex; flex-direction:column; gap:5px"><span style="font-size:14px; color:rgba(241,234,248,.9)">{{ p.name }}</span><div style="height:2px; background:rgba(196,181,253,.1); border-radius:2px"><div style="height:100%; width:{{ p.pct }}; background:rgb(var(--acc2) / .8); border-radius:2px; transition:width 900ms cubic-bezier(.16,1,.3,1)"></div></div></div>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:12px; text-align:right; color:#FFF6E9">{{ p.cpu }}</span>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:12px; text-align:right; color:rgba(226,218,240,.55)">{{ p.ram }}</span>
+        </div>
+      </sc-for>
+      <div style="margin-top:8px; display:flex; flex-direction:column; gap:8px">
+        <div style="display:flex; justify-content:space-between"><span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">CPU · ÚLTIMOS 60 S</span><span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; color:rgba(226,218,240,.5)">MÁX {{ cpuMax }} %</span></div>
+        <svg width="356" height="70" viewBox="0 0 356 70">
+          <line x1="0" y1="35" x2="356" y2="35" stroke="rgba(196,181,253,.08)" stroke-dasharray="2 4"></line>
+          <polyline points="{{ cpuPoly }}" fill="none" style="stroke:rgb(var(--acc2))" stroke-width="1.2" stroke-linejoin="round"></polyline>
+        </svg>
+      </div>
+    </div>
+    <div style="position:absolute; right:64px; top:190px; width:380px; padding:22px; display:flex; flex-direction:column; gap:4px; background:linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(205deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box; border:1px solid transparent; border-radius:14px; backdrop-filter:blur(24px); box-shadow:inset 0 1px 0 rgba(255,255,255,.07); animation:nx-right 700ms cubic-bezier(.16,1,.3,1) 120ms both">
+      <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62); margin-bottom:10px">HOY · {{ dateShort }}</span>
+      <sc-for list="{{ agenda }}" as="a" hint-placeholder-count="5">
+        <div style="display:grid; grid-template-columns:56px 12px minmax(0,1fr); gap:12px; align-items:stretch; animation:nx-in 500ms cubic-bezier(.16,1,.3,1) both; animation-delay:{{ a.delay }}">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:12.5px; padding-top:2px; color:{{ a.timeColor }}">{{ a.time }}</span>
+          <div style="display:flex; flex-direction:column; align-items:center"><span style="width:8px; height:8px; margin-top:5px; border-radius:50%; background:{{ a.dot }}; box-shadow:0 0 10px {{ a.dot }}"></span><span style="flex:1; width:1px; background:rgba(196,181,253,.12)"></span></div>
+          <div style="display:flex; flex-direction:column; gap:3px; padding-bottom:18px; opacity:{{ a.op }}"><span style="font-size:15px; color:#FFF6E9">{{ a.title }}</span><span style="font-size:12.5px; color:rgba(226,218,240,.55)">{{ a.sub }}</span></div>
+        </div>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- ============ MÚSICA ============ -->
+  <sc-if value="{{ isMusic }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; left:96px; top:150px; width:400px; display:flex; flex-direction:column; gap:22px; animation:nx-left 800ms cubic-bezier(.16,1,.3,1) both">
+      <div style="width:400px; height:400px; border-radius:14px; background:repeating-linear-gradient(135deg, rgba(255,255,255,.07) 0 2px, transparent 2px 12px), linear-gradient(135deg,#FB923C,#9333EA 58%,#1E1B4B); display:flex; align-items:flex-end; padding:18px; box-sizing:border-box; box-shadow:0 30px 90px rgba(251,146,60,.18), 0 0 0 1px rgba(255,255,255,.08)">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgba(255,255,255,.75)">CARÁTULA DEL ÁLBUM · 1:1</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:6px">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:#FDBA74">SPOTIFY · ÁLBUM «LÍNEAS DE CAMPO»</span>
+        <span style="font-size:36px; font-weight:400; color:#FFF6E9; letter-spacing:-.01em">Horizonte de sucesos</span>
+        <span style="font-size:17px; color:rgba(226,218,240,.65)">Aurora Lineal</span>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:8px">
+        <div style="height:3px; border-radius:3px; background:rgba(255,255,255,.1); overflow:hidden"><div style="height:100%; width:{{ musicPct }}; background:linear-gradient(90deg,#FB923C,rgb(var(--acc2))); box-shadow:0 0 12px rgba(251,146,60,.6); transition:width 1000ms linear"></div></div>
+        <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:11.5px; color:rgba(226,218,240,.55)"><span>{{ musicTime }}</span><span>3:48</span></div>
+      </div>
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:0 8px">
+        <button style="width:40px; height:40px; border:none; background:none; color:rgba(226,218,240,.55); display:grid; place-items:center; cursor:pointer" style-hover="color:#FFF6E9"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h3l10 10h3M4 17h3l3-3M14 10l3-3h3M18 4l2 3-2 3M18 14l2 3-2 3"></path></svg></button>
+        <button onClick="{{ prevTrack }}" style="width:44px; height:44px; border:none; background:none; color:rgba(241,234,248,.8); display:grid; place-items:center; cursor:pointer" style-hover="color:#FFF6E9"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M18 6v12L9 12zM6 6v12"></path></svg></button>
+        <button onClick="{{ togglePlay }}" style="width:68px; height:68px; border-radius:50%; border:1px solid rgba(255,255,255,.25); background:linear-gradient(160deg, rgba(251,146,60,.9), rgb(var(--acc) / .8)); color:#fff; display:grid; place-items:center; cursor:pointer; box-shadow:0 0 36px rgba(251,146,60,.35); transition:transform 300ms cubic-bezier(.34,1.3,.64,1)" style-hover="transform:scale(1.05)" style-active="transform:scale(.95)"><svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="{{ playIcon }}"></path></svg></button>
+        <button onClick="{{ nextTrack }}" style="width:44px; height:44px; border:none; background:none; color:rgba(241,234,248,.8); display:grid; place-items:center; cursor:pointer" style-hover="color:#FFF6E9"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"><path d="M6 6v12l9-6zM18 6v12"></path></svg></button>
+        <button style="width:40px; height:40px; border:none; background:none; color:rgba(226,218,240,.55); display:grid; place-items:center; cursor:pointer" style-hover="color:#FFF6E9"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12V9a3 3 0 0 1 3-3h13l-3-3M20 12v3a3 3 0 0 1-3 3H4l3 3"></path></svg></button>
+      </div>
+    </div>
+    <div style="position:absolute; right:96px; top:150px; width:440px; display:flex; flex-direction:column; gap:18px; animation:nx-right 800ms cubic-bezier(.16,1,.3,1) 100ms both">
+      <div style="display:flex; justify-content:space-between; align-items:center">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">LETRA SINCRONIZADA</span>
+        <button onClick="{{ closePanel }}" style="width:36px; height:36px; border-radius:10px; border:1px solid rgba(196,181,253,.14); background:rgba(7,5,14,.4); color:rgba(226,218,240,.7); display:grid; place-items:center; cursor:pointer" style-hover="border-color:rgba(196,181,253,.4); color:#FFF6E9"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <div style="height:392px; overflow:hidden; -webkit-mask:linear-gradient(transparent, #000 22%, #000 70%, transparent); mask:linear-gradient(transparent, #000 22%, #000 70%, transparent)">
+        <div style="display:flex; flex-direction:column; transform:translateY({{ lyricY }}); transition:transform 900ms cubic-bezier(.16,1,.3,1)">
+          <sc-for list="{{ lyrics }}" as="l" hint-placeholder-count="8">
+            <span style="height:56px; display:flex; align-items:center; font-size:{{ l.size }}; font-weight:400; color:{{ l.color }}; filter:{{ l.blur }}; text-shadow:{{ l.shadow }}; transition:color 600ms, font-size 600ms cubic-bezier(.16,1,.3,1), filter 600ms; white-space:nowrap">{{ l.t }}</span>
+          </sc-for>
+        </div>
+      </div>
+      <span style="margin-top:16px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">A CONTINUACIÓN</span>
+      <div style="display:flex; flex-direction:column; gap:4px">
+        <sc-for list="{{ queue }}" as="q" hint-placeholder-count="4">
+          <div style="display:flex; align-items:center; gap:14px; padding:8px; border-radius:10px; transition:background 250ms; animation:nx-in 500ms cubic-bezier(.16,1,.3,1) both; animation-delay:{{ q.delay }}" style-hover="background:rgba(255,255,255,.04)">
+            <span style="width:40px; height:40px; flex:none; border-radius:6px; background:repeating-linear-gradient(135deg, rgba(255,255,255,.08) 0 2px, transparent 2px 7px), {{ q.cover }}"></span>
+            <div style="flex:1; display:flex; flex-direction:column; gap:3px"><span style="font-size:14.5px; color:#FFF6E9">{{ q.t }}</span><span style="font-size:12.5px; color:rgba(226,218,240,.55)">{{ q.a }}</span></div>
+            <span style="font-family:'JetBrains Mono',monospace; font-size:11.5px; color:rgba(226,218,240,.45)">{{ q.d }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ MEMORIA ============ -->
+  <sc-if value="{{ isMemory }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; right:24px; top:24px; bottom:112px; width:1080px; display:flex; flex-direction:column; background:linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / .06) 45%, rgb(var(--acc) / 0)) border-box; border:1px solid transparent; border-radius:14px; backdrop-filter:blur(24px) saturate(1.2); box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 24px 70px rgba(0,0,0,.35); animation:nx-right 600ms cubic-bezier(.16,1,.3,1) both">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; padding:26px 32px 18px">
+        <div style="display:flex; flex-direction:column; gap:8px; animation:nx-in 500ms cubic-bezier(.16,1,.3,1) 80ms both">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">MEMORIA · {{ memCount }} RECUERDOS · CIFRADA EN ESTE EQUIPO</span>
+          <span style="font-size:30px; font-weight:400">Lo que Nexus recuerda</span>
+        </div>
+        <button onClick="{{ closePanel }}" style="width:40px; height:40px; border-radius:10px; border:1px solid rgba(196,181,253,.14); background:rgba(255,255,255,.02); color:rgba(226,218,240,.7); display:grid; place-items:center; cursor:pointer" style-hover="border-color:rgba(196,181,253,.4); color:#FFF6E9"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <div style="display:flex; align-items:center; gap:12px; padding:0 32px 18px">
+        <div style="flex:1; display:flex; align-items:center; gap:10px; height:44px; padding:0 14px; border-radius:10px; background:rgba(0,0,0,.3); border:1px solid rgba(196,181,253,.16)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(196,181,253,.6)" stroke-width="1.5"><path d="M11 5a6 6 0 1 0 0 12a6 6 0 1 0 0-12M20 20l-4.5-4.5"></path></svg>
+          <input value="{{ memQuery }}" onChange="{{ onMemQuery }}" placeholder="Buscar en conversaciones y recuerdos" style="flex:1; background:none; border:none; outline:none; color:#FFF6E9; font-size:14.5px"></input>
+        </div>
+        <sc-for list="{{ memFilters }}" as="f" hint-placeholder-count="5">
+          <button onClick="{{ f.pick }}" style="height:34px; padding:0 14px; border-radius:999px; cursor:pointer; font-size:13px; border:1px solid {{ f.border }}; background:{{ f.bg }}; color:rgba(241,234,248,.9); transition:background 250ms, border-color 250ms">{{ f.label }}</button>
+        </sc-for>
+      </div>
+      <div style="flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:28px; padding:0 32px 28px">
+        <div style="overflow:auto; display:flex; flex-direction:column; gap:4px; padding-right:6px">
+          <sc-for list="{{ memItems }}" as="m" hint-placeholder-count="5">
+            <sc-if value="{{ m.head }}" hint-placeholder-val="{{ false }}"><span style="margin:14px 0 6px 64px; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.2em; color:rgb(var(--acc2) / .6)">{{ m.group }}</span></sc-if>
+            <div data-spot="1" style="position:relative; display:grid; grid-template-columns:52px 12px minmax(0,1fr) 36px; gap:12px; align-items:start; padding:12px 12px 12px 0; border-radius:12px; transition:background 250ms; animation:nx-in 500ms cubic-bezier(.16,1,.3,1) both; animation-delay:{{ m.delay }}" style-hover="background:rgba(255,255,255,.03)">
+              <span style="font-family:'JetBrains Mono',monospace; font-size:12px; text-align:right; padding-top:2px; color:rgba(226,218,240,.5)">{{ m.time }}</span>
+              <span style="width:7px; height:7px; margin-top:6px; border-radius:50%; background:rgb(var(--acc2)); box-shadow:0 0 8px rgb(var(--acc2))"></span>
+              <div style="display:flex; flex-direction:column; gap:5px"><span style="font-size:15.5px; color:#FFF6E9">{{ m.title }}</span><span style="font-size:13.5px; line-height:1.5; color:rgba(226,218,240,.6)">{{ m.sum }}</span></div>
+              <button onClick="{{ m.del }}" title="Borrar" style="width:32px; height:32px; border-radius:8px; border:none; background:transparent; color:rgba(226,218,240,.4); display:grid; place-items:center; cursor:pointer" style-hover="color:#FB7185; background:rgba(251,113,133,.08)"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"></path></svg></button>
+            </div>
+          </sc-for>
+          <sc-if value="{{ memEmpty }}" hint-placeholder-val="{{ false }}"><span style="padding:40px 64px; font-size:15px; color:rgba(226,218,240,.5)">Nada coincide con «{{ memQuery }}».</span></sc-if>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:10px; min-height:0">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">LO QUE SÉ DE USTED</span>
+          <div style="flex:1; overflow:auto; display:flex; flex-direction:column; gap:8px">
+            <sc-for list="{{ factItems }}" as="f" hint-placeholder-count="5">
+              <div style="display:flex; align-items:flex-start; gap:10px; padding:12px 14px; border-radius:12px; background:rgba(255,255,255,.025); border:1px solid rgba(196,181,253,.1); animation:nx-in 500ms cubic-bezier(.16,1,.3,1) both; animation-delay:{{ f.delay }}">
+                <div style="flex:1; display:flex; flex-direction:column; gap:5px"><span style="font-family:'JetBrains Mono',monospace; font-size:9.5px; letter-spacing:.2em; color:rgba(245,185,113,.8)">{{ f.cat }}</span><span style="font-size:14px; line-height:1.45; color:rgba(241,234,248,.9)">{{ f.t }}</span></div>
+                <button onClick="{{ f.del }}" style="width:28px; height:28px; border-radius:8px; border:none; background:transparent; color:rgba(226,218,240,.4); display:grid; place-items:center; cursor:pointer" style-hover="color:#FB7185"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+              </div>
+            </sc-for>
+          </div>
+          <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 2px; border-top:1px solid rgba(196,181,253,.08)">
+            <span style="font-size:14px; color:rgba(241,234,248,.85)">Aprender de las conversaciones</span>
+            <button onClick="{{ toggleLearn }}" style="position:relative; width:38px; height:22px; border-radius:999px; border:1px solid {{ learnT.border }}; background:{{ learnT.bg }}; cursor:pointer; padding:0; transition:background 300ms"><span style="position:absolute; top:2px; left:{{ learnT.left }}; width:16px; height:16px; border-radius:50%; background:#FFF6E9; transition:left 320ms cubic-bezier(.34,1.4,.64,1)"></span></button>
+          </div>
+          <button onClick="{{ forgetAll }}" style="height:42px; border-radius:10px; border:1px solid rgba(251,113,133,.35); background:rgba(251,113,133,.06); color:#FDA4AF; font-size:14px; cursor:pointer; transition:background 250ms" style-hover="background:rgba(251,113,133,.14)">Borrar toda la memoria</button>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ AJUSTES ============ -->
+  <sc-if value="{{ isSettings }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; right:24px; top:24px; bottom:112px; width:1080px; display:flex; flex-direction:column; background:linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / .06) 45%, rgb(var(--acc) / 0)) border-box; border:1px solid transparent; border-radius:14px; backdrop-filter:blur(24px) saturate(1.2); box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 24px 70px rgba(0,0,0,.35); animation:nx-right 600ms cubic-bezier(.16,1,.3,1) both">
+      <div style="display:flex; align-items:flex-start; justify-content:space-between; padding:26px 32px 18px">
+        <div style="display:flex; flex-direction:column; gap:8px; animation:nx-in 500ms cubic-bezier(.16,1,.3,1) 80ms both">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">AJUSTES · NEXUS 2.4.0</span>
+          <span style="font-size:30px; font-weight:400">Configuración</span>
+        </div>
+        <button onClick="{{ closePanel }}" style="width:40px; height:40px; border-radius:10px; border:1px solid rgba(196,181,253,.14); background:rgba(255,255,255,.02); color:rgba(226,218,240,.7); display:grid; place-items:center; cursor:pointer" style-hover="border-color:rgba(196,181,253,.4); color:#FFF6E9"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 6l12 12M18 6L6 18"></path></svg></button>
+      </div>
+      <div style="flex:1; min-height:0; overflow:auto; display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:40px; padding:4px 32px 28px">
+        <div style="display:flex; flex-direction:column; gap:18px; animation:nx-in 600ms cubic-bezier(.16,1,.3,1) 120ms both">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">MODELO DE IA</span>
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <span style="font-size:14.5px; color:rgba(241,234,248,.85)">Proveedor</span>
+            <div style="display:flex; padding:3px; border-radius:10px; background:rgba(0,0,0,.3); border:1px solid rgba(196,181,253,.12)">
+              <sc-for list="{{ providerOpts }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.pick }}" style="flex:1; height:34px; border-radius:8px; border:none; cursor:pointer; font-size:13px; background:{{ o.bg }}; color:{{ o.color }}; transition:background 250ms, color 250ms">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <span style="font-size:14.5px; color:rgba(241,234,248,.85)">Modelo</span>
+            <button onClick="{{ cycleModel }}" style="display:flex; align-items:center; justify-content:space-between; height:44px; padding:0 14px; border-radius:10px; background:rgba(0,0,0,.3); border:1px solid rgba(196,181,253,.16); color:#FFF6E9; font-size:14px; cursor:pointer" style-hover="border-color:rgb(var(--acc2) / .45)"><span>{{ modelName }}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(196,181,253,.7)" stroke-width="1.5"><path d="M6 9l6 6 6-6"></path></svg></button>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <div style="display:flex; justify-content:space-between"><span style="font-size:14.5px; color:rgba(241,234,248,.85)">Clave API</span><span style="display:flex; align-items:center; gap:6px; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.2em; color:#34D399"><span style="width:6px; height:6px; border-radius:50%; background:#34D399; box-shadow:0 0 8px #34D399"></span>VERIFICADA</span></div>
+            <div style="display:flex; align-items:center; gap:8px; height:44px; padding:0 6px 0 14px; border-radius:10px; background:rgba(0,0,0,.3); border:1px solid rgba(196,181,253,.16)">
+              <span style="flex:1; font-family:'JetBrains Mono',monospace; font-size:13px; color:rgba(241,234,248,.8)">{{ apiKey }}</span>
+              <button onClick="{{ toggleKey }}" style="height:32px; padding:0 12px; border-radius:8px; border:1px solid rgba(196,181,253,.2); background:transparent; color:rgba(226,218,240,.75); font-size:12.5px; cursor:pointer">{{ keyBtn }}</button>
+            </div>
+          </div>
+          <span style="margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">SISTEMA</span>
+          <sc-for list="{{ sysToggles }}" as="t" hint-placeholder-count="3">
+            <div style="display:flex; align-items:center; gap:12px; padding:4px 0">
+              <div style="flex:1; display:flex; flex-direction:column; gap:3px"><span style="font-size:14.5px; color:rgba(241,234,248,.88)">{{ t.label }}</span><span style="font-size:12.5px; color:rgba(226,218,240,.45)">{{ t.note }}</span></div>
+              <button onClick="{{ t.toggle }}" style="flex:none; position:relative; width:38px; height:22px; border-radius:999px; border:1px solid {{ t.tBorder }}; background:{{ t.tBg }}; cursor:pointer; padding:0; transition:background 300ms"><span style="position:absolute; top:2px; left:{{ t.tLeft }}; width:16px; height:16px; border-radius:50%; background:#FFF6E9; transition:left 320ms cubic-bezier(.34,1.4,.64,1)"></span></button>
+            </div>
+          </sc-for>
+          <div style="display:flex; align-items:center; gap:12px">
+            <div style="flex:1; display:flex; flex-direction:column; gap:3px"><span style="font-size:14.5px; color:rgba(241,234,248,.88)">Atajo global</span><span style="font-size:12.5px; color:rgba(226,218,240,.45)">Abre el mini overlay sobre cualquier aplicación</span></div>
+            <div style="display:flex; gap:4px"><span style="padding:5px 9px; border-radius:6px; border:1px solid rgba(196,181,253,.25); border-bottom-width:2px; font-family:'JetBrains Mono',monospace; font-size:12px; color:#FFF6E9">Ctrl</span><span style="padding:5px 9px; border-radius:6px; border:1px solid rgba(196,181,253,.25); border-bottom-width:2px; font-family:'JetBrains Mono',monospace; font-size:12px; color:#FFF6E9">Espacio</span></div>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; gap:18px; animation:nx-in 600ms cubic-bezier(.16,1,.3,1) 200ms both">
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">APARIENCIA</span>
+          <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:10px">
+            <sc-for list="{{ themeCards }}" as="t" hint-placeholder-count="5">
+              <button onClick="{{ t.pick }}" style="display:flex; flex-direction:column; align-items:center; gap:10px; padding:14px 6px; border-radius:12px; cursor:pointer; background:{{ t.bg }}; border:1px solid {{ t.border }}; color:#F1EAF8; transition:transform 300ms cubic-bezier(.34,1.2,.64,1), border-color 300ms" style-hover="transform:translateY(-2px)">
+                <span style="width:40px; height:40px; border-radius:50%; background:radial-gradient(circle at 50% 50%, #FFF6E9 0 12%, {{ t.c2 }} 24%, {{ t.c1 }} 48%, #05030A 72%); box-shadow:0 0 0 1.5px {{ t.c2 }}, 0 0 18px {{ t.c1 }}"></span>
+                <span style="font-size:12.5px">{{ t.name }}</span>
+              </button>
+            </sc-for>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <div style="display:flex; justify-content:space-between"><span style="font-size:14.5px; color:rgba(241,234,248,.85)">Calidad gráfica</span><span style="font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(226,218,240,.5)">{{ qualityNote }}</span></div>
+            <div style="display:flex; padding:3px; border-radius:10px; background:rgba(0,0,0,.3); border:1px solid rgba(196,181,253,.12)">
+              <sc-for list="{{ qualityOpts }}" as="o" hint-placeholder-count="3">
+                <button onClick="{{ o.pick }}" style="flex:1; height:34px; border-radius:8px; border:none; cursor:pointer; font-size:13px; background:{{ o.bg }}; color:{{ o.color }}; transition:background 250ms, color 250ms">{{ o.label }}</button>
+              </sc-for>
+            </div>
+          </div>
+          <span style="margin-top:10px; font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:rgb(var(--acc2) / .62)">AUDIO</span>
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <span style="font-size:14.5px; color:rgba(241,234,248,.85)">Micrófono</span>
+            <button onClick="{{ cycleMic }}" style="display:flex; align-items:center; justify-content:space-between; height:44px; padding:0 14px; border-radius:10px; background:rgba(0,0,0,.3); border:1px solid rgba(196,181,253,.16); color:#FFF6E9; font-size:14px; cursor:pointer"><span>{{ micName }}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(196,181,253,.7)" stroke-width="1.5"><path d="M6 9l6 6 6-6"></path></svg></button>
+            <div style="display:flex; align-items:center; gap:10px"><span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.2em; color:rgba(226,218,240,.45)">NIVEL</span><div style="flex:1; height:4px; border-radius:4px; background:rgba(196,181,253,.1); overflow:hidden"><div data-nexus-meter="1" style="height:100%; width:100%; transform-origin:0 50%; transform:scaleX(0); background:linear-gradient(90deg,#34D399,rgb(var(--acc2)))"></div></div></div>
+          </div>
+          <div style="display:flex; flex-direction:column; gap:10px">
+            <span style="font-size:14.5px; color:rgba(241,234,248,.85)">Salida de audio</span>
+            <button onClick="{{ cycleOut }}" style="display:flex; align-items:center; justify-content:space-between; height:44px; padding:0 14px; border-radius:10px; background:rgba(0,0,0,.3); border:1px solid rgba(196,181,253,.16); color:#FFF6E9; font-size:14px; cursor:pointer"><span>{{ outName }}</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(196,181,253,.7)" stroke-width="1.5"><path d="M6 9l6 6 6-6"></path></svg></button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ OVERLAY ============ -->
+  <sc-if value="{{ overlay }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; left:50%; top:120px; width:780px; margin-left:-390px; display:flex; flex-direction:column; background:linear-gradient(rgba(10,7,20,.62),rgba(10,7,20,.62)) padding-box, linear-gradient(155deg, rgb(var(--acc2) / .7), rgb(var(--acc) / .1) 50%, rgb(var(--acc) / .35)) border-box; border:1px solid transparent; border-radius:18px; backdrop-filter:blur(28px) saturate(1.3); box-shadow:inset 0 1px 0 rgba(255,255,255,.1), 0 40px 120px rgba(0,0,0,.6), 0 0 80px rgb(var(--acc) / .18); animation:nx-in 500ms cubic-bezier(.16,1,.3,1) both">
+      <div style="display:flex; align-items:center; gap:14px; padding:14px 18px 14px 10px">
+        <canvas data-nexus-core="1" data-state="{{ ovState }}" data-particles="300" data-r=".22" style="width:72px; height:72px; flex:none"></canvas>
+        <input ref="{{ ovRef }}" value="{{ ovInput }}" onChange="{{ onOvInput }}" onKeyDown="{{ onOvKey }}" placeholder="Pregunte a Nexus…" style="flex:1; background:none; border:none; outline:none; color:#FFF6E9; font-size:22px; font-weight:300"></input>
+        <span style="padding:5px 9px; border-radius:6px; border:1px solid rgba(196,181,253,.25); font-family:'JetBrains Mono',monospace; font-size:11px; color:rgba(226,218,240,.6)">ESC</span>
+      </div>
+      <div style="padding:16px 24px 18px; border-top:1px solid rgba(196,181,253,.1); display:flex; flex-direction:column; gap:8px">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.2em; color:rgb(var(--acc2) / .6)">{{ ovLabel }}</span>
+        <span style="font-size:16px; line-height:1.6; color:rgba(241,234,248,.9); text-wrap:pretty">{{ ovReply }}</span>
+      </div>
+      <div style="display:flex; gap:18px; padding:10px 24px; border-top:1px solid rgba(196,181,253,.08); font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em; color:rgba(226,218,240,.4)">
+        <span>↵ PREGUNTAR</span><span>ALT + ↵ POR VOZ</span><span>TAB ABRIR EN NEXUS</span><span style="margin-left:auto">CTRL + ESPACIO PARA CERRAR</span>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- ============ ONBOARDING ============ -->
+  <sc-if value="{{ onbCard }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute; left:50%; top:690px; width:760px; margin-left:-380px; display:flex; flex-direction:column; gap:22px; align-items:center; text-align:center">
+      <div style="display:flex; align-items:center; gap:14px; animation:nx-in 600ms cubic-bezier(.16,1,.3,1) both">
+        <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.24em; color:rgb(var(--acc2) / .7)">PASO {{ onbStep }} DE 3</span>
+        <div style="display:flex; gap:6px"><sc-for list="{{ onbDots }}" as="d" hint-placeholder-count="3"><span style="height:3px; width:{{ d.w }}; border-radius:3px; background:{{ d.c }}; transition:width 500ms cubic-bezier(.16,1,.3,1), background 500ms"></span></sc-for></div>
+      </div>
+      <sc-if value="{{ onb1 }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:20px; align-items:center; width:100%">
+          <span style="font-size:40px; font-weight:300; letter-spacing:-.01em; animation:nx-in 700ms cubic-bezier(.16,1,.3,1) 60ms both">¿Cómo quiere que le llame?</span>
+          <input value="{{ userName }}" onChange="{{ onNameOnb }}" style="width:420px; height:56px; text-align:center; border-radius:12px; background:rgba(0,0,0,.35); border:1px solid rgb(var(--acc2) / .3); color:#FFF6E9; font-size:22px; outline:none; box-shadow:0 0 30px rgb(var(--acc) / .15); animation:nx-in 700ms cubic-bezier(.16,1,.3,1) 120ms both"></input>
+          <div style="display:flex; gap:8px; animation:nx-in 700ms cubic-bezier(.16,1,.3,1) 180ms both"><sc-for list="{{ nameChips }}" as="c" hint-placeholder-count="4"><button onClick="{{ c.pick }}" style="height:32px; padding:0 14px; border-radius:999px; cursor:pointer; font-size:13px; border:1px solid {{ c.border }}; background:{{ c.bg }}; color:rgba(241,234,248,.9)">{{ c.label }}</button></sc-for></div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ onb2 }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:20px; align-items:center; width:100%">
+          <span style="font-size:40px; font-weight:300; animation:nx-in 700ms cubic-bezier(.16,1,.3,1) 60ms both">Elija mi voz</span>
+          <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:10px; width:100%">
+            <sc-for list="{{ voiceCards }}" as="v" hint-placeholder-count="4">
+              <button onClick="{{ v.selectSay }}" style="display:flex; flex-direction:column; align-items:center; gap:6px; padding:12px 8px 14px; border-radius:12px; cursor:pointer; background:{{ v.bg }}; border:1px solid {{ v.border }}; color:#F1EAF8; transition:transform 300ms cubic-bezier(.34,1.2,.64,1), border-color 300ms; animation:nx-in 600ms cubic-bezier(.16,1,.3,1) both; animation-delay:{{ v.delay }}" style-hover="transform:translateY(-2px)">
+                <canvas data-nexus-core="1" data-state="{{ v.state }}" data-particles="220" data-r=".2" style="width:72px; height:72px"></canvas>
+                <span style="font-size:16px; font-weight:500">{{ v.name }}</span>
+                <span style="font-size:11.5px; color:rgba(226,218,240,.55)">{{ v.desc }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-if>
+      <sc-if value="{{ onb3 }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex; flex-direction:column; gap:14px; align-items:center">
+          <span style="font-size:40px; font-weight:300; animation:nx-in 700ms cubic-bezier(.16,1,.3,1) 60ms both">Necesito oírle</span>
+          <span style="max-width:520px; font-size:16px; line-height:1.55; color:rgba(226,218,240,.65); animation:nx-in 700ms cubic-bezier(.16,1,.3,1) 120ms both">Solo escucho después de «{{ wakeWord }}». El audio se procesa en este equipo y no se guarda.</span>
+          <span style="font-family:'JetBrains Mono',monospace; font-size:11px; letter-spacing:.2em; color:{{ micPermColor }}; animation:nx-in 700ms cubic-bezier(.16,1,.3,1) 180ms both">{{ micPermText }}</span>
+        </div>
+      </sc-if>
+      <div style="display:flex; gap:10px; animation:nx-in 700ms cubic-bezier(.16,1,.3,1) 240ms both">
+        <sc-if value="{{ onbCanBack }}" hint-placeholder-val="{{ false }}"><button onClick="{{ onbBack }}" style="height:46px; padding:0 20px; border-radius:10px; border:1px solid rgba(196,181,253,.2); background:rgba(0,0,0,.3); color:rgba(241,234,248,.85); font-size:14.5px; cursor:pointer" style-hover="border-color:rgb(var(--acc2) / .5)">Atrás</button></sc-if>
+        <sc-if value="{{ onb3 }}" hint-placeholder-val="{{ false }}"><button onClick="{{ askMic }}" style="height:46px; padding:0 20px; border-radius:10px; border:1px solid rgba(52,211,153,.4); background:rgba(52,211,153,.08); color:#6EE7B7; font-size:14.5px; cursor:pointer" style-hover="background:rgba(52,211,153,.16)">Permitir micrófono</button></sc-if>
+        <button onClick="{{ onbNext }}" style="height:46px; padding:0 24px; border-radius:10px; border:1px solid rgba(255,255,255,.18); background:linear-gradient(180deg, rgb(var(--acc) / .95), rgb(var(--acc) / .7)); color:#fff; font-size:14.5px; font-weight:500; cursor:pointer; box-shadow:0 0 24px rgb(var(--acc) / .4), inset 0 1px 0 rgba(255,255,255,.25); transition:transform 250ms cubic-bezier(.34,1.3,.64,1)" style-hover="transform:translateY(-1px)" style-active="transform:scale(.97)">{{ onbNextLabel }}</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- dock -->
+  <sc-if value="{{ showDock }}" hint-placeholder-val="{{ false }}">
+    <sc-if value="{{ hasHover }}" hint-placeholder-val="{{ false }}">
+      <span style="position:absolute; right:24px; bottom:104px; padding:6px 12px; border-radius:8px; background:rgba(7,5,14,.75); border:1px solid rgb(var(--acc) / .3); font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.2em; color:#FFF6E9; animation:nx-in 220ms cubic-bezier(.16,1,.3,1) both">{{ hoverLabel }}</span>
+    </sc-if>
+    <sc-if value="{{ volOpen }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute; right:24px; bottom:104px; width:260px; padding:16px 18px; display:flex; flex-direction:column; gap:12px; background:linear-gradient(rgba(7,5,14,.6),rgba(7,5,14,.6)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / 0) 60%) border-box; border:1px solid transparent; border-radius:14px; backdrop-filter:blur(24px); animation:nx-up 320ms cubic-bezier(.16,1,.3,1) both">
+        <div style="display:flex; justify-content:space-between; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.2em; color:rgb(var(--acc2) / .7)"><span>VOLUMEN</span><span style="color:#FFF6E9">{{ volSlider.val }}</span></div>
+        <div data-key="volume" onPointerDown="{{ onSlider }}" style="position:relative; height:20px; cursor:pointer; touch-action:none">
+          <div style="position:absolute; left:0; right:0; top:9px; height:2px; border-radius:2px; background:rgba(196,181,253,.14)"></div>
+          <div style="position:absolute; left:0; top:9px; height:2px; width:{{ volSlider.pct }}; background:linear-gradient(90deg, rgb(var(--acc) / .6), rgb(var(--acc2))); box-shadow:0 0 10px rgb(var(--acc) / .6)"></div>
+          <div style="position:absolute; top:3px; left:{{ volSlider.pct }}; width:14px; height:14px; margin-left:-7px; border-radius:50%; background:#FFF6E9; box-shadow:0 0 0 4px rgb(var(--acc) / .25), 0 0 14px rgb(var(--acc2) / .8)"></div>
+        </div>
+      </div>
+    </sc-if>
+    <div data-spot="1" style="position:absolute; right:24px; bottom:28px; display:flex; align-items:center; gap:2px; padding:8px; border-radius:18px; background:linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / .05) 60%) border-box; border:1px solid transparent; backdrop-filter:blur(24px); box-shadow:inset 0 1px 0 rgba(255,255,255,.07), 0 20px 60px rgba(0,0,0,.4); animation:nx-up 800ms cubic-bezier(.16,1,.3,1) 350ms both" style-before="content:''; position:absolute; inset:-1px; border-radius:inherit; padding:1px; background:radial-gradient(160px circle at var(--mx,-500px) var(--my,-500px), rgb(var(--acc2) / .9), transparent 70%); -webkit-mask:linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite:xor; mask-composite:exclude; pointer-events:none">
+      <sc-for list="{{ dock }}" as="it" hint-placeholder-count="8">
+        <sc-if value="{{ it.sep }}" hint-placeholder-val="{{ false }}"><span style="width:1px; height:26px; margin:0 6px; background:rgba(196,181,253,.16)"></span></sc-if>
+        <button id="{{ it.domId }}" onClick="{{ it.click }}" onMouseEnter="{{ it.enter }}" onMouseLeave="{{ it.leave }}" style="position:relative; width:46px; height:46px; border-radius:12px; border:none; display:grid; place-items:center; cursor:pointer; background:{{ it.bg }}; color:{{ it.color }}; transition:background 250ms, color 250ms, transform 300ms cubic-bezier(.34,1.3,.64,1), filter 250ms" style-hover="color:#FFF6E9; transform:translateY(-2px); filter:drop-shadow(0 0 7px rgb(var(--acc2) / .9))">
+          <svg width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="{{ it.d }}"></path></svg>
+          <span style="position:absolute; bottom:3px; left:50%; width:4px; height:4px; margin-left:-2px; border-radius:50%; background:#FFF6E9; box-shadow:0 0 6px #FFF6E9; opacity:{{ it.dot }}; transition:opacity 250ms"></span>
+        </button>
+      </sc-for>
+    </div>
+  </sc-if>
+
+  <!-- director -->
+  <sc-if value="{{ showDirector }}" hint-placeholder-val="{{ true }}">
+    <div style="position:absolute; left:24px; bottom:28px; display:flex; flex-direction:column; gap:10px; padding:12px 14px; border-radius:14px; background:rgba(7,5,14,.55); border:1px solid rgba(196,181,253,.14); backdrop-filter:blur(20px); max-width:600px">
+      <div style="display:flex; align-items:center; gap:12px">
+        <button onClick="{{ toggleDir }}" style="display:flex; align-items:center; gap:8px; border:none; background:none; padding:0; cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.24em; color:#F5B971">◇ DIRECTOR DE ESCENA</button>
+        <sc-if value="{{ dirOpen }}" hint-placeholder-val="{{ true }}"><span style="font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.12em; color:rgba(226,218,240,.4)">ALT+N DEMO · CTRL+ESPACIO OVERLAY</span><a href="Sistema de diseño.dc.html" style="margin-left:auto; font-family:'JetBrains Mono',monospace; font-size:10px; letter-spacing:.16em">SISTEMA DE DISEÑO →</a></sc-if>
+      </div>
+      <sc-if value="{{ dirOpen }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex; flex-wrap:wrap; gap:6px">
+          <sc-for list="{{ dirStates }}" as="d" hint-placeholder-count="7">
+            <button onClick="{{ d.click }}" style="height:28px; padding:0 11px; border-radius:999px; cursor:pointer; font-family:'JetBrains Mono',monospace; font-size:10.5px; letter-spacing:.1em; border:1px solid {{ d.border }}; background:{{ d.bg }}; color:{{ d.color }}; transition:all 250ms">{{ d.label }}</button>
+          </sc-for>
+        </div>
+        <div style="display:flex; flex-wrap:wrap; gap:6px">
+          <sc-for list="{{ dirActions }}" as="d" hint-placeholder-count="4">
+            <button onClick="{{ d.click }}" style="height:28px; padding:0 11px; border-radius:8px; cursor:pointer; font-size:12px; white-space:nowrap; border:1px solid rgba(245,185,113,.25); background:rgba(245,185,113,.05); color:#F5D2A6" style-hover="background:rgba(245,185,113,.14)">{{ d.label }}</button>
+          </sc-for>
+        </div>
+      </sc-if>
+    </div>
+  </sc-if>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;theme&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;nexus&quot;,&quot;arc&quot;,&quot;mark3&quot;,&quot;emerald&quot;,&quot;solar&quot;],&quot;default&quot;:&quot;nexus&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;quality&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;ultra&quot;,&quot;equilibrado&quot;,&quot;ahorro&quot;],&quot;default&quot;:&quot;ultra&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;reducedMotion&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;},&quot;showDirector&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+class Component extends DCLogic {
+  SL = {
+    speed: { min: .5, max: 2, step: .05, label: 'Velocidad', fmt: v => v.toFixed(2).replace('.', ',') + '×' },
+    pitch: { min: -12, max: 12, step: 1, label: 'Tono', fmt: v => (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v) + ' st' },
+    warmth: { min: 0, max: 100, step: 1, label: 'Calidez', fmt: v => v + ' %' },
+    formal: { min: 0, max: 100, step: 1, label: 'Formalidad', fmt: v => v + ' %' },
+    volume: { min: 0, max: 100, step: 1, label: 'Volumen', fmt: v => v + ' %' },
+  };
+  TH = {
+    nexus: { name: 'Nexus', acc: '139 92 246', acc2: '196 181 253', c1: '#8B5CF6', c2: '#C4B5FD' },
+    arc: { name: 'Arc', acc: '34 211 238', acc2: '165 243 252', c1: '#22D3EE', c2: '#A5F3FC' },
+    mark3: { name: 'Mark III', acc: '239 68 68', acc2: '253 208 150', c1: '#EF4444', c2: '#FCD34D' },
+    emerald: { name: 'Esmeralda', acc: '16 185 129', acc2: '167 243 208', c1: '#10B981', c2: '#A7F3D0' },
+    solar: { name: 'Solar', acc: '249 115 22', acc2: '254 215 170', c1: '#F97316', c2: '#FED7AA' },
+  };
+  VOICES = [
+    { id: 'orion', name: 'Orión', desc: 'Grave · británica · pausada' },
+    { id: 'lyra', name: 'Lyra', desc: 'Cálida · cercana' },
+    { id: 'vega', name: 'Vega', desc: 'Neutra · precisa · ágil' },
+    { id: 'atlas', name: 'Atlas', desc: 'Profunda · cinematográfica' },
+  ];
+  PERSONAS = [
+    { id: 'butler', name: 'Mayordomo británico', line: '«Por supuesto, señor. Ya está hecho.»' },
+    { id: 'direct', name: 'Copiloto directo', line: '«Hecho. Siguiente.»' },
+    { id: 'sarcastic', name: 'Sarcástico', line: '«Claro. Abrir Spotify usted solo era demasiado.»' },
+  ];
+  ICON = {
+    chat: 'M4 5h16v11H9l-5 4z',
+    voice: 'M4 10v4M8 7v10M12 4v16M16 7v10M20 10v4',
+    routines: 'M6 4a2 2 0 1 0 0 4a2 2 0 1 0 0-4M18 16a2 2 0 1 0 0 4a2 2 0 1 0 0-4M8 6h5a3 3 0 0 1 0 6h-2a3 3 0 0 0 0 6h5',
+    system: 'M7 6h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM10 10h4v4h-4zM9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4',
+    music: 'M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0a3 3 0 1 1 6 0M20 16a3 3 0 1 1-6 0a3 3 0 1 1 6 0',
+    memory: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 7v5l3 2',
+    settings: 'M4 7h10M18 7h2M4 17h4M12 17h8M16 5a2 2 0 1 0 0 4a2 2 0 1 0 0-4M10 15a2 2 0 1 0 0 4a2 2 0 1 0 0-4',
+    volume: 'M4 9h4l5-4v14l-5-4H4zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11',
+    trigger: 'M12 3l9 9-9 9-9-9z',
+    app: 'M4 5h16v14H4zM4 9h16',
+    audio: 'M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0a3 3 0 1 1 6 0',
+    bell: 'M6 16V11a6 6 0 0 1 12 0v5l2 2H4zM10 21h4M4 4l16 16',
+    speak: 'M4 5h16v11H9l-5 4zM8 10h8',
+    light: 'M9 18h6M10 21h4M12 3a6 6 0 0 0-4 10.5V16h8v-2.5A6 6 0 0 0 12 3z',
+    power: 'M12 3v9M6.3 6.3a8 8 0 1 0 11.4 0',
+    save: 'M5 4h11l3 3v13H5zM8 4v5h8V4M8 20v-6h8v6',
+  };
+  ROUT = [
+    { id: 'work', name: 'Modo trabajo', trigger: '«NEXUS, MODO TRABAJO»', steps: [
+      ['trigger', 'DISPARADOR', 'Frase de voz', '«modo trabajo»'], ['app', 'ABRIR APLICACIÓN', 'VS Code', 'nexus-core'], ['audio', 'MÚSICA', 'Spotify', 'Enfoque profundo'], ['bell', 'SISTEMA', 'Silenciar notificaciones', '2 h'], ['speak', 'RESPUESTA', 'Decir «Todo listo»', 'voz Orión']] },
+    { id: 'night', name: 'Buenas noches', trigger: '23:30 · CADA DÍA', steps: [
+      ['trigger', 'DISPARADOR', 'Hora programada', '23:30'], ['save', 'ARCHIVOS', 'Guardar trabajo abierto', '4 apps'], ['light', 'HOGAR', 'Bajar luces', '10 % · Hue'], ['audio', 'MÚSICA', 'Pausar reproducción', 'Spotify'], ['power', 'SISTEMA', 'Apagar el equipo', 'en 10 min']] },
+    { id: 'home', name: 'Llego a casa', trigger: 'AL CONECTAR A «CASA-5G»', steps: [
+      ['trigger', 'DISPARADOR', 'Red Wi-Fi', 'CASA-5G'], ['light', 'HOGAR', 'Encender salón', '60 %'], ['speak', 'RESPUESTA', 'Resumen del día', '3 puntos'], ['audio', 'MÚSICA', 'Lista Relax', 'volumen 30 %']] },
+    { id: 'pres', name: 'Presentación', trigger: 'AL ABRIR POWERPOINT', steps: [
+      ['trigger', 'DISPARADOR', 'Aplicación abierta', 'PowerPoint'], ['bell', 'SISTEMA', 'No molestar', 'hasta cerrar'], ['app', 'ESCRITORIO', 'Ocultar iconos', 'pantalla 2'], ['audio', 'AUDIO', 'Volumen del sistema', '40 %']] },
+  ];
+  PERMS = [
+    ['apps', 'Abrir y cerrar aplicaciones', 'Sin confirmación'], ['music', 'Música y volumen', 'Spotify, YouTube, mezclador'], ['files', 'Leer archivos', 'Solo Documentos y Escritorio'],
+    ['home', 'Luces del hogar', 'Philips Hue · 6 luces'], ['power', 'Apagar y reiniciar', 'Pide confirmación por voz'], ['msg', 'Enviar mensajes y correos', 'Desactivado'], ['cam', 'Cámara', 'Desactivado'],
+  ];
+  LYR = ['Cruzo la noche sin hacer ruido', 'cada luz es una puerta abierta', 'giro en torno a lo que no se ve', 'y la gravedad me llama por mi nombre', '· · ·', 'Si caigo, que sea hacia ti', 'más allá del borde del tiempo', 'donde el silencio también brilla', 'horizonte de sucesos', 'no hay vuelta atrás', 'horizonte de sucesos', 'solo luz', '· · ·', 'Vuelvo a empezar desde el centro', 'como una estrella que no sabe apagarse', 'y en cada órbita te encuentro', 'horizonte de sucesos'];
+  QUEUE = [
+    { t: 'Órbita baja', a: 'Satélite Norte', d: '3:21', cover: 'linear-gradient(135deg,#38BDF8,#312E81)' },
+    { t: 'Polvo de estrellas', a: 'Mira Vale', d: '4:02', cover: 'linear-gradient(135deg,#F472B6,#4C1D95)' },
+    { t: 'Marea lunar', a: 'Kepler & Sons', d: '3:47', cover: 'linear-gradient(135deg,#FDE68A,#7C2D12)' },
+    { t: 'Señal débil', a: 'Aurora Lineal', d: '5:10', cover: 'linear-gradient(135deg,#A78BFA,#0F172A)' },
+  ];
+  CMDS = [
+    { cmd: '/rutina', desc: 'Ejecutar una rutina guardada' }, { cmd: '/abrir', desc: 'Abrir una aplicación' }, { cmd: '/recordar', desc: 'Guardar algo en memoria' },
+    { cmd: '/sistema', desc: 'Estado del equipo' }, { cmd: '/musica', desc: 'Controlar la reproducción' }, { cmd: '/voz', desc: 'Cambiar de voz o personalidad' },
+  ];
+  MODELS = { Anthropic: ['Claude Sonnet', 'Claude Opus', 'Claude Haiku'], OpenAI: ['GPT · modelo por defecto', 'GPT · rápido'], 'Local · Ollama': ['llama · 8B local', 'qwen · 14B local'] };
+  MICS = ['Micrófono (Shure MV7)', 'Micrófono de la cámara (Logitech)', 'Predeterminado del sistema'];
+  OUTS = ['Altavoces (Realtek Audio)', 'Auriculares (Sony WH-1000XM5)', 'Monitor LG (HDMI)'];
+  chatRef = React.createRef();
+  ovRef = React.createRef();
+  T = [];
+  state = {
+    k: .5, theme: (this.props && this.props.theme) || 'nexus', quality: (this.props && this.props.quality) || 'ultra', reduced: !!(this.props && this.props.reducedMotion),
+    now: Date.now(), uiIn: false, core: 'idle', panel: null, overlay: false, onb: false, onbStep: 0, micPerm: null,
+    words: [], wordsKind: null, actionLabel: '', error: false,
+    notifs: [{ id: 1, app: 'CALENDARIO', time: '21:32', title: 'Revisión de diseño mañana', body: '09:30 · con Laura · sala Órbita', dot: '#C4B5FD' }],
+    music: false, musicPos: 72,
+    chat: [
+      { id: 1, role: 'user', text: '¿Qué tengo mañana por la mañana?' },
+      { id: 2, role: 'nexus', text: 'Dos compromisos, señor: revisión de diseño a las 9:30 con Laura y el dentista a las 12:00. ¿Le preparo un recordatorio veinte minutos antes?' },
+      { id: 3, role: 'user', text: 'Sí. Y abre VS Code con nexus-core.' },
+      { id: 4, role: 'action', items: ['Recordatorio creado · mañana 09:10', 'VS Code abierto · nexus-core'] },
+      { id: 5, role: 'nexus', text: 'Hecho. He dejado el terminal en la rama feature/halo.' },
+    ],
+    chatInput: '', voiceSel: 'orion', preview: null, sliders: { speed: 1, pitch: -2, warmth: 70, formal: 85, volume: 64 }, lang: 'es-ES', wakeWord: 'Hey Nexus', persona: 'butler', userName: 'señor',
+    routineSel: 'work', routineOn: { work: true, night: true, home: true, pres: false }, runStep: -1,
+    perms: { apps: true, music: true, files: true, home: true, power: true, msg: false, cam: false },
+    sys: { cpu: 34, gpu: 58, ram: 38, net: 48, disk: 61, temp: 61 }, cpuHist: Array.from({ length: 40 }, (_, i) => 30 + Math.sin(i / 3) * 8 + Math.random() * 6),
+    memQuery: '', memFilter: 'Todo', learn: true,
+    mem: [
+      { id: 1, group: 'HOY', time: '21:12', cat: 'Conversaciones', title: 'Música para concentrarse', sum: 'Puso «Horizonte de sucesos» y silenció las notificaciones durante dos horas.' },
+      { id: 2, group: 'HOY', time: '18:40', cat: 'Conversaciones', title: 'Preparar la revisión de diseño', sum: 'Resumió los comentarios de Laura sobre el halo y creó tres tareas.' },
+      { id: 3, group: 'AYER', time: '22:05', cat: 'Conversaciones', title: 'Rutina «Buenas noches»', sum: 'Cambió la hora de apagado de las 00:00 a las 23:30.' },
+      { id: 4, group: 'AYER', time: '10:15', cat: 'Lugares', title: 'Viaje a Lisboa', sum: 'Buscó vuelos del 14 al 17 de noviembre. Prefiere ventanilla.' },
+      { id: 5, group: 'SEMANA PASADA', time: 'JUE', cat: 'Personas', title: 'Cumpleaños de Marta', sum: 'Recordatorio el 14 de noviembre e ideas de regalo: libros de fotografía.' },
+      { id: 6, group: 'SEMANA PASADA', time: 'LUN', cat: 'Preferencias', title: 'Configuración inicial', sum: 'Eligió la voz Orión y el tratamiento «señor».' },
+    ],
+    facts: [
+      { id: 1, cat: 'PREFERENCIAS', t: 'Toma el café solo y sin azúcar por la mañana.' },
+      { id: 2, cat: 'PERSONAS', t: 'Su hermana Marta cumple años el 14 de noviembre.' },
+      { id: 3, cat: 'TRABAJO', t: 'Trabaja en nexus-core con TypeScript y Three.js.' },
+      { id: 4, cat: 'LUGARES', t: 'Vive en Madrid, en el barrio de Chamberí.' },
+      { id: 5, cat: 'PREFERENCIAS', t: 'No quiere interrupciones entre las 9:00 y las 11:00.' },
+    ],
+    provider: 'Anthropic', modelIdx: 0, showKey: false, autostart: true, alwaysListen: true, micIdx: 0, outIdx: 0,
+    dirOpen: true, hoverDock: null, volOpen: false,
+    ovInput: '', ovState: 'idle', ovLabel: 'ÚLTIMA RESPUESTA · 21:12', ovReply: 'Tiene la revisión de diseño mañana a las 9:30. He dejado un recordatorio a las 9:10.',
+  };
+
+  E() { return window.NexusEngine; }
+  later(fn, ms) { const id = setTimeout(fn, ms); this.T.push(id); return id; }
+  clearFlow() { this.T.forEach(clearTimeout); this.T = []; clearInterval(this.wordIv); clearInterval(this.streamIv); clearInterval(this.runIv); }
+  setCore(s) { this.setState({ core: s, error: s === 'error' }); const E = this.E(); E && E.setState(s); }
+  greet() { const h = new Date().getHours(); return h < 6 ? 'Buenas noches' : h < 13 ? 'Buenos días' : h < 21 ? 'Buenas tardes' : 'Buenas noches'; }
+  name() { return this.state.userName || 'señor'; }
+  cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+  componentDidMount() {
+    this.onResize = () => this.setState({ k: Math.min(innerWidth / 1920, innerHeight / 1080) });
+    this.onResize(); addEventListener('resize', this.onResize);
+    this.iv = setInterval(() => this.tick(), 1000);
+    this.onKey = e => {
+      if (e.ctrlKey && e.code === 'Space') { e.preventDefault(); this.toggleOverlay(); }
+      else if (e.key === 'Escape') { if (this.state.overlay) this.toggleOverlay(); else if (this.state.panel) this.openPanel(null); }
+      else if (e.altKey && (e.key === 'n' || e.key === 'N')) { e.preventDefault(); this.demo(); }
+    };
+    addEventListener('keydown', this.onKey);
+    const go = () => { const E = this.E(); if (!E) return setTimeout(go, 50); E.setTheme(this.state.theme); E.setQuality(this.state.quality); E.setReduced(this.state.reduced); E.snapCore(this.layout()); this.bootDesktop(); };
+    go();
+  }
+  componentWillUnmount() { removeEventListener('resize', this.onResize); removeEventListener('keydown', this.onKey); clearInterval(this.iv); this.clearFlow(); }
+  componentDidUpdate(pp, ps) {
+    const P = this.props || {};
+    if (pp.theme !== P.theme && P.theme) this.setTheme(P.theme);
+    if (pp.quality !== P.quality && P.quality) this.setQuality(P.quality);
+    if (pp.reducedMotion !== P.reducedMotion) this.setReduced(!!P.reducedMotion);
+    const E = this.E(); if (E) E.setCore(this.layout());
+    if (this.chatRef.current && (ps.chat !== this.state.chat || ps.panel !== this.state.panel)) this.chatRef.current.scrollTop = 1e6;
+    if (this.state.overlay && !ps.overlay) setTimeout(() => this.ovRef.current && this.ovRef.current.focus(), 60);
+  }
+  layout() {
+    const { panel, overlay, onb } = this.state;
+    if (overlay) return { x: 960, y: 540, s: .5, v: 0 };
+    if (onb) return { x: 960, y: 390, s: .72, v: 1 };
+    switch (panel) {
+      case 'chat': return { x: 652, y: 480, s: .8, v: 1 };
+      case 'voice': case 'routines': case 'memory': case 'settings': return { x: 410, y: 440, s: .62, v: 1 };
+      case 'system': return { x: 960, y: 520, s: .46, v: 1 };
+      case 'music': return { x: 960, y: 470, s: .92, v: 1 };
+      default: return { x: 960, y: 480, s: 1, v: 1 };
+    }
+  }
+  tick() {
+    this.setState(s => {
+      const w = (v, a, b, d) => Math.max(a, Math.min(b, Math.round(v + (Math.random() - .5) * d)));
+      const sys = { cpu: w(s.sys.cpu, 12, 88, 12), gpu: w(s.sys.gpu, 20, 95, 10), ram: w(s.sys.ram, 30, 60, 3), net: w(s.sys.net, 2, 240, 30), disk: s.sys.disk, temp: w(s.sys.temp, 48, 78, 3) };
+      const out = { now: Date.now(), sys, cpuHist: [...s.cpuHist.slice(1), sys.cpu] };
+      if (s.music) out.musicPos = s.musicPos >= 228 ? 0 : s.musicPos + 1;
+      return out;
+    });
+  }
+
+  // ---------- flows ----------
+  bootDesktop() {
+    this.clearFlow(); const E = this.E(); if (!E) return;
+    this.setState({ uiIn: false, panel: null, overlay: false, onb: false, words: [], actionLabel: '' });
+    E.setState('idle'); E.snapCore({ x: 960, y: 480, s: 1, v: 1 });
+    E.boot({ onUI: () => this.setState({ uiIn: true }), onDone: () => {
+      this.say(`${this.greet()}, ${this.name()}. Todos los sistemas operativos.`);
+      this.later(() => this.announce(), 11000);
+    } });
+  }
+  announce() {
+    const n = { id: Date.now(), app: 'DESCARGAS', time: this.hm(), title: 'Blender 4.3 instalado', body: 'Listo para abrir · 412 MB', dot: '#34D399' };
+    this.setState(s => ({ notifs: [n, ...s.notifs].slice(0, 3) }));
+    if (this.state.core === 'idle' && !this.state.panel) this.say(`${this.cap(this.name())}, ha terminado la instalación de Blender.`);
+  }
+  hm() { const d = new Date(); return String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0'); }
+  say(text, done, opts) {
+    opts = opts || {}; clearInterval(this.wordIv);
+    this.setCore('speaking'); this.setState({ words: [], wordsKind: 'nexus', actionLabel: '' });
+    const ws = text.split(' '); let i = 0;
+    this.later(() => {
+      this.wordIv = setInterval(() => {
+        i++; this.setState({ words: ws.slice(0, i) });
+        if (i >= ws.length) {
+          clearInterval(this.wordIv);
+          this.later(() => {
+            if (opts.keep) { done && done(); return; }
+            if (!done) { this.setCore(this.state.music ? 'music' : 'idle'); this.later(() => this.setState({ words: [], wordsKind: null }), 2200); }
+            else done();
+          }, 1200);
+        }
+      }, 200);
+    }, 140);
+  }
+  listen(text, done) {
+    clearInterval(this.wordIv);
+    this.setCore('listening'); this.setState({ words: [], wordsKind: 'user' });
+    const ws = text.split(' '); let i = 0;
+    this.later(() => {
+      this.wordIv = setInterval(() => {
+        i++; this.setState({ words: ws.slice(0, i) });
+        if (i >= ws.length) { clearInterval(this.wordIv); done && this.later(done, 700); }
+      }, 290);
+    }, 500);
+  }
+  think(ms, done) { this.setCore('thinking'); this.setState({ wordsKind: 'userDim' }); this.later(done, ms); }
+  doAction(label, elId, done) {
+    this.setCore('action'); this.setState({ actionLabel: label });
+    this.later(() => { const E = this.E(); E && E.action(document.getElementById(elId), () => { this.setState({ actionLabel: '' }); done && done(); }); }, 250);
+  }
+  demo() {
+    this.clearFlow(); if (this.state.overlay) this.setState({ overlay: false });
+    this.setState({ actionLabel: '' }); this.setCore('wake');
+    const n = this.name();
+    this.later(() => this.listen('Nexus, pon algo de música para concentrarme.', () =>
+      this.think(1500, () => this.say(`Por supuesto, ${n}. Pongo «Horizonte de sucesos» y silencio las notificaciones durante dos horas.`, () =>
+        this.doAction('ABRIENDO SPOTIFY', 'dock-music', () => { this.startMusic(); this.later(() => this.setState({ words: [], wordsKind: null }), 1500); })
+      )))
+    , 800);
+  }
+  startMusic() { const E = this.E(); E && E.setTint([251, 146, 60]); this.setState({ music: true, words: [], wordsKind: null }); this.setCore('music'); }
+  stopAll() {
+    this.clearFlow(); this.setState({ words: [], wordsKind: null, actionLabel: '' });
+    if (this.state.core === 'music') { this.setState({ music: false }); this.setCore('idle'); return; }
+    this.setCore(this.state.music ? 'music' : 'idle');
+  }
+  togglePlay() { if (this.state.music) { this.setState({ music: false }); if (this.state.core === 'music') this.setCore('idle'); } else this.startMusic(); }
+  openPanel(p) {
+    this.setState(s => ({ panel: s.panel === p ? null : p, volOpen: false }));
+    if (p === 'music' && !this.state.music) this.startMusic();
+  }
+  toggleOverlay() { this.clearFlow(); this.setState(s => ({ overlay: !s.overlay, panel: null, words: [], ovInput: '' })); if (!this.state.overlay) this.setCore(this.state.music ? 'music' : 'idle'); }
+  setTheme(t) { this.setState({ theme: t }); const E = this.E(); E && E.setTheme(t); }
+  setQuality(q) { this.setState({ quality: q }); const E = this.E(); E && E.setQuality(q); }
+  setReduced(b) { this.setState({ reduced: b }); const E = this.E(); E && E.setReduced(b); }
+  startOnboarding() {
+    this.clearFlow(); const E = this.E(); if (!E) return;
+    this.setState({ onb: true, onbStep: 0, uiIn: false, panel: null, overlay: false, words: [], micPerm: null });
+    E.setState('idle'); E.snapCore({ x: 960, y: 390, s: .72, v: 1 });
+    E.boot({ onDone: () => { this.setState({ onbStep: 1 }); this.say('Hola. Soy Nexus. Antes de empezar, ¿cómo quiere que le llame?', null); } });
+  }
+  onbNext() {
+    const s = this.state.onbStep;
+    if (s < 3) {
+      this.setState({ onbStep: s + 1 }); this.clearFlow();
+      if (s + 1 === 2) this.say(`Encantado, ${this.name()}. Ahora elija cómo quiere que suene.`);
+      if (s + 1 === 3) this.say('Último paso. Necesito permiso para oírle.');
+    } else {
+      this.clearFlow(); this.setState({ onb: false, uiIn: true, words: [] });
+      this.later(() => this.say(`${this.greet()}, ${this.name()}. Todos los sistemas operativos.`), 400);
+    }
+  }
+  async askMic() {
+    const E = this.E();
+    try { await E.enableMic(); this.setState({ micPerm: 'ok' }); this.clearFlow(); this.setCore('listening'); this.setState({ words: [], wordsKind: 'user' }); }
+    catch (e) { this.setState({ micPerm: 'no' }); this.setCore('error'); this.later(() => this.setCore('idle'), 1800); }
+  }
+  reply(text) {
+    const t = text.toLowerCase(), n = this.name(), s = this.state.sys;
+    if (/m[uú]sica|spotify/.test(t)) return { actions: ['Spotify abierto', 'Reproduciendo · Horizonte de sucesos'], text: `Listo, ${n}. Volumen al 40 % para que no le distraiga.`, music: true };
+    if (/rutina|trabajo/.test(t)) return { actions: ['VS Code abierto · nexus-core', 'Spotify · Enfoque profundo', 'Notificaciones silenciadas · 2 h'], text: 'Modo trabajo activado. Le aviso solo si algo requiere su atención.' };
+    if (/sistema|cpu|gpu|temperatura/.test(t)) return { text: `CPU al ${s.cpu} %, GPU al ${s.gpu} % y ${s.temp} °C. Blender es el proceso que más consume ahora mismo.` };
+    if (/recuerda|recordar/.test(t)) return { actions: ['Guardado en memoria'], text: 'Anotado. Lo tendré en cuenta a partir de ahora.' };
+    if (/abr[ei]/.test(t)) return { actions: ['Aplicación abierta'], text: `Abierta, ${n}. ¿Algo más?` };
+    if (/voz/.test(t)) return { text: 'Puede cambiar mi voz y mi personalidad en el panel de Voz. Le recomiendo probar a Lyra.' };
+    return { text: `Entendido, ${n}. En esta demostración puedo abrir aplicaciones, lanzar rutinas, poner música o contarle cómo va el equipo.` };
+  }
+  sendChat() {
+    const text = this.state.chatInput.trim(); if (!text) return;
+    this.clearFlow();
+    this.setState(s => ({ chatInput: '', chat: [...s.chat, { id: Date.now(), role: 'user', text, fresh: true }] }));
+    this.setCore('thinking');
+    this.later(() => {
+      const r = this.reply(text), id = Date.now();
+      const add = [];
+      if (r.actions) add.push({ id: id + 1, role: 'action', items: r.actions, fresh: true });
+      add.push({ id: id + 2, role: 'nexus', text: r.text, shown: '', streaming: true, fresh: true });
+      this.setState(s => ({ chat: [...s.chat, ...add] }));
+      if (r.music) this.startMusic();
+      this.setCore('speaking');
+      let i = 0;
+      this.streamIv = setInterval(() => {
+        i += 2;
+        this.setState(s => ({ chat: s.chat.map(m => m.id === id + 2 ? { ...m, shown: r.text.slice(0, i), streaming: i < r.text.length } : m) }));
+        if (i >= r.text.length) { clearInterval(this.streamIv); this.later(() => this.setCore(this.state.music ? 'music' : 'idle'), 500); }
+      }, 22);
+    }, 1100);
+  }
+  runRoutine() {
+    const r = this.ROUT.find(x => x.id === this.state.routineSel); this.clearFlow();
+    this.setCore('action'); this.setState({ runStep: 0, actionLabel: 'EJECUTANDO · ' + r.name.toUpperCase() });
+    let i = 0;
+    this.runIv = setInterval(() => {
+      i++; this.setState({ runStep: i });
+      if (i >= r.steps.length) { clearInterval(this.runIv); this.later(() => { this.setState({ runStep: -1 }); this.say(`Rutina «${r.name}» completada.`); }, 500); }
+    }, 600);
+  }
+  testVoice() {
+    this.clearFlow(); const n = this.name(), N = this.cap(n);
+    const L = { butler: `Buenas noches, ${n}. He preparado su escritorio y fuera hace catorce grados.`, direct: `${N}: catorce grados, dos reuniones mañana. Todo listo.`, sarcastic: `Oh, ${n}, otra vez usted. Catorce grados fuera y cero ganas de trabajar, supongo.` };
+    this.say(L[this.state.persona]);
+  }
+  previewVoice(id) { clearTimeout(this.pvT); this.setState({ preview: id }); this.pvT = setTimeout(() => this.setState({ preview: null }), 2600); }
+  onSlider = e => {
+    const el = e.currentTarget, key = el.dataset.key, c = this.SL[key];
+    const set = x => { const r = el.getBoundingClientRect(); const u = Math.max(0, Math.min(1, (x - r.left) / r.width)); let v = c.min + u * (c.max - c.min); v = Math.round(v / c.step) * c.step; this.setState(s => ({ sliders: { ...s.sliders, [key]: +v.toFixed(2) } })); };
+    set(e.clientX);
+    const mv = ev => set(ev.clientX), up = () => { removeEventListener('pointermove', mv); removeEventListener('pointerup', up); };
+    addEventListener('pointermove', mv); addEventListener('pointerup', up);
+  };
+  ovAsk() {
+    const q = this.state.ovInput.trim(); if (!q) return;
+    this.setState({ ovState: 'thinking', ovLabel: 'PENSANDO…', ovReply: '' });
+    setTimeout(() => {
+      const r = this.reply(q).text; let i = 0; this.setState({ ovState: 'speaking', ovLabel: 'NEXUS · ' + this.hm(), ovInput: '' });
+      clearInterval(this.ovIv);
+      this.ovIv = setInterval(() => { i += 2; this.setState({ ovReply: r.slice(0, i) }); if (i >= r.length) { clearInterval(this.ovIv); setTimeout(() => this.setState({ ovState: 'idle' }), 600); } }, 22);
+    }, 1000);
+  }
+  dirSet(s) {
+    this.clearFlow(); if (this.state.overlay || this.state.onb) this.setState({ overlay: false, onb: false, uiIn: true });
+    this.setState({ actionLabel: '', words: [], wordsKind: null });
+    const n = this.name();
+    if (s === 'idle') this.setCore(this.state.music && false ? 'music' : 'idle');
+    if (s === 'wake') { this.setCore('wake'); this.later(() => this.listen('¿Qué tiempo hará mañana en Madrid?'), 900); }
+    if (s === 'listening') this.listen('¿Qué tiempo hará mañana en Madrid?');
+    if (s === 'thinking') { this.setState({ words: '¿Qué tiempo hará mañana en Madrid?'.split(' '), wordsKind: 'userDim' }); this.setCore('thinking'); }
+    if (s === 'speaking') this.say(`Mañana, catorce grados y cielo despejado. Le recomiendo una chaqueta ligera, ${n}.`, null, { keep: true });
+    if (s === 'action') this.doAction('ABRIENDO SPOTIFY', 'dock-music', () => this.setCore('idle'));
+    if (s === 'error') this.setCore('error');
+    if (s === 'music') this.startMusic();
+  }
+  toggleT(on) { return { tBg: on ? 'rgb(var(--acc) / .85)' : 'rgba(255,255,255,.06)', tBorder: on ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.2)', tLeft: on ? '18px' : '2px' }; }
+  seg(active) { return { bg: active ? 'rgb(var(--acc) / .28)' : 'transparent', color: active ? '#FFF6E9' : 'rgba(226,218,240,.6)' }; }
+
+  renderVals() {
+    const S = this.state, th = this.TH[S.theme] || this.TH.nexus, L = this.layout();
+    const d = new Date(S.now), hh = String(d.getHours()).padStart(2, '0'), mm = String(d.getMinutes()).padStart(2, '0');
+    const dig = c => ({ num: true, sep: false, ty: (-(+c)) + 'em' });
+    const clockDigits = [dig(hh[0]), dig(hh[1]), { sep: true, num: false }, dig(mm[0]), dig(mm[1])];
+    const dateStr = d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase();
+    const core = S.core;
+    const labels = { idle: 'EN REPOSO', wake: 'ACTIVANDO', listening: 'ESCUCHANDO', thinking: 'PENSANDO', speaking: 'HABLANDO', action: 'EJECUTANDO ACCIÓN', error: 'SIN CONEXIÓN', music: 'MODO MÚSICA' };
+    const stateColor = core === 'error' ? '#FB7185' : core === 'thinking' || core === 'action' ? '#F5B971' : core === 'speaking' ? '#FFE4C4' : core === 'music' ? '#FDBA74' : 'rgb(var(--acc2) / .75)';
+    const live = ['wake', 'listening', 'thinking', 'speaking', 'action'].includes(core);
+    const pillText = core === 'error' ? 'SIN CONEXIÓN · TOCA PARA REINTENTAR' : live ? 'EN VIVO · TOCA PARA PARAR' : core === 'music' ? 'MÚSICA · TOCA PARA PAUSAR' : `EN ESPERA · DI «${S.wakeWord.toUpperCase()}»`;
+    const pillDot = core === 'error' ? '#FB7185' : live ? '#FB7185' : core === 'music' ? '#FDBA74' : '#34D399';
+    const capTop = S.panel === 'system' ? 905 : L.y + 150 * L.s * 1.95 + (L.s < .7 ? 18 : 26);
+    const wk = S.wordsKind;
+    const P = S.panel, wide = ['voice', 'routines', 'memory', 'settings'].includes(P);
+    const mem = S.mem.filter(m => (S.memFilter === 'Todo' || m.cat === S.memFilter) && (!S.memQuery || (m.title + ' ' + m.sum).toLowerCase().includes(S.memQuery.toLowerCase())));
+    const facts = S.facts.filter(f => !S.memQuery || f.t.toLowerCase().includes(S.memQuery.toLowerCase()));
+    let lastG = null;
+    const memItems = mem.map((m, i) => { const head = m.group !== lastG; lastG = m.group; return { ...m, head, delay: (i * 40 + 120) + 'ms', del: () => this.setState(s => ({ mem: s.mem.filter(x => x.id !== m.id) })) }; });
+    const r = this.ROUT.find(x => x.id === S.routineSel);
+    const sl = k => { const c = this.SL[k], v = S.sliders[k]; return { key: k, label: c.label, val: c.fmt(v), pct: ((v - c.min) / (c.max - c.min) * 100).toFixed(1) + '%' }; };
+    const g6 = [
+      { label: 'CPU', val: S.sys.cpu, unit: ' %', detail: 'RYZEN 9 · 4,2 GHZ', p: S.sys.cpu / 100 },
+      { label: 'GPU', val: S.sys.gpu, unit: ' %', detail: 'RTX 4070 · 8,1 / 12 GB', p: S.sys.gpu / 100 },
+      { label: 'TEMP', val: S.sys.temp, unit: ' °C', detail: 'CPU · 1 180 RPM', p: S.sys.temp / 100, warn: S.sys.temp > 72 },
+      { label: 'RED', val: S.sys.net, unit: ' Mb/s', detail: '↑ 6,2 MB/S · WI-FI 6', p: Math.min(1, S.sys.net / 250) },
+      { label: 'DISCO C:', val: S.sys.disk, unit: ' %', detail: '612 / 1 000 GB', p: S.sys.disk / 100 },
+      { label: 'RAM', val: (S.sys.ram * .32).toFixed(1).replace('.', ','), unit: ' GB', detail: 'DE 32 GB · DDR5', p: S.sys.ram / 100 },
+    ];
+    const ang = [-90, -30, 30, 90, 150, 210];
+    const gauges = g6.map((g, i) => { const a = ang[i] * Math.PI / 180; return { ...g, left: (960 + Math.cos(a) * 300 - 85) + 'px', top: (520 + Math.sin(a) * 262 - 85) + 'px', dash: (414.7 * g.p).toFixed(1) + ' 999', color: g.warn ? '#FB7185' : i === 2 ? '#F5B971' : 'rgb(var(--acc2))', delay: (200 + i * 60) + 'ms' }; });
+    const hist = S.cpuHist, cpuPoly = hist.map((v, i) => (i * 356 / (hist.length - 1)).toFixed(1) + ',' + (66 - v * .64).toFixed(1)).join(' ');
+    const procs = [['Blender', 18, '3,2 GB'], ['Chrome · 24 pestañas', 9, '2,8 GB'], ['VS Code', 5, '1,1 GB'], ['Nexus · motor', 3, '420 MB'], ['Spotify', 2, '310 MB'], ['Discord', 1, '280 MB']]
+      .map((p, i) => { const c = Math.max(1, Math.round(p[1] * S.sys.cpu / 34)); return { name: p[0], cpu: c + ' %', ram: p[2], pct: Math.min(100, c * 3) + '%', delay: (160 + i * 40) + 'ms' }; });
+    const agendaRaw = [['09:30', 'Revisión de diseño', 'Laura · sala Órbita', 1], ['12:00', 'Dentista', 'Clínica Arganzuela', 1], ['16:00', 'Llamada con Tokio', 'Equipo de motor', 1], ['19:30', 'Entrenamiento', 'Gimnasio', 1], ['23:30', 'Rutina «Buenas noches»', 'Automática', 0]];
+    const nowH = d.getHours() + d.getMinutes() / 60;
+    const agenda = agendaRaw.map((a, i) => { const [h, m] = a[0].split(':').map(Number), past = h + m / 60 < nowH; return { time: a[0], title: a[1], sub: a[2], op: past ? .45 : 1, dot: past ? 'rgba(196,181,253,.3)' : a[3] ? 'rgb(var(--acc2))' : '#F5B971', timeColor: past ? 'rgba(226,218,240,.35)' : '#FFF6E9', delay: (160 + i * 40) + 'ms' }; });
+    const li = Math.floor((S.musicPos - 60) / 4), cur = Math.max(0, li) % this.LYR.length;
+    const lyrics = this.LYR.map((t, i) => { const dd = Math.abs(i - cur); return { t, size: i === cur ? '30px' : '22px', color: i === cur ? '#FFF6E9' : i < cur ? 'rgba(226,218,240,.28)' : 'rgba(226,218,240,.45)', blur: dd > 2 ? 'blur(1px)' : 'none', shadow: i === cur ? '0 0 24px rgba(251,146,60,.45)' : 'none' }; });
+    const models = this.MODELS[S.provider];
+    const qN = { ultra: '2 600 PARTÍCULAS · 60 FPS', equilibrado: '1 500 PARTÍCULAS · 60 FPS', ahorro: '700 PARTÍCULAS · SIN GRANO' };
+    const dockDef = [['chat', 'CHAT', 'chat'], ['voice', 'VOZ Y PERSONALIDAD', 'voice'], ['routines', 'RUTINAS', 'routines'], ['system', 'SISTEMA', 'system'], ['music', 'MÚSICA', 'music'], ['memory', 'MEMORIA', 'memory'], ['settings', 'AJUSTES', 'settings'], ['volume', 'VOLUMEN', 'volume']];
+    const dock = dockDef.map(([id, label, ic]) => { const act = P === id || (id === 'volume' && S.volOpen); return {
+      sep: id === 'volume', domId: 'dock-' + id, d: this.ICON[ic], bg: act ? 'rgb(var(--acc) / .22)' : 'transparent', color: act ? '#FFF6E9' : 'rgba(214,204,236,.72)', dot: act || (id === 'music' && S.music) ? 1 : 0,
+      click: () => id === 'volume' ? this.setState(s => ({ volOpen: !s.volOpen, hoverDock: null })) : this.openPanel(id),
+      enter: () => this.setState({ hoverDock: label }), leave: () => this.setState({ hoverDock: null }) }; });
+    const dirDef = [['idle', 'Reposo'], ['wake', 'Despertar'], ['listening', 'Escuchando'], ['thinking', 'Pensando'], ['speaking', 'Hablando'], ['action', 'Ejecutando'], ['error', 'Error'], ['music', 'Música']];
+    const nameOpts = ['señor', 'señora', 'capitán', 'Alex'];
+    const vs = S.onbStep ? S.onbStep : 0;
+    return {
+      k: S.k, acc: th.acc, acc2: th.acc2, reducedAttr: S.reduced ? '1' : '0',
+      bgFilter: S.overlay ? 'blur(12px) brightness(.3)' : P === 'music' ? 'brightness(.85)' : P === 'system' ? 'blur(3px) brightness(.78)' : P ? 'blur(6px) brightness(.7)' : 'none',
+      overlay: S.overlay,
+      showUI: S.uiIn && !S.overlay && !S.onb,
+      showHud: !P || P === 'chat', showMic: !P || P === 'chat', showNotifs: !P,
+      clockDigits, dateStr, greetText: `${this.greet()}, ${this.name()}.`,
+      indicators: [{ label: 'IA', color: S.error ? '#FB7185' : '#34D399' }, { label: 'LOCAL', color: '#34D399' }, { label: 'VOZ', color: S.alwaysListen ? '#34D399' : 'rgba(226,218,240,.35)' }],
+      pillLeft: L.x + 'px', pillText, pillDot, pillAnim: live || core === 'error' ? 'nx-pulse 1.4s ease-in-out infinite' : 'none',
+      onPill: () => core === 'error' ? this.setCore('idle') : live || core === 'music' ? this.stopAll() : this.demo(),
+      notifs: S.notifs.map(n => ({ ...n, dismiss: () => this.setState(s => ({ notifs: s.notifs.filter(x => x.id !== n.id) })) })),
+      capLeft: L.x + 'px', capTop: capTop + 'px', capWidth: (wide ? 640 : P === 'chat' ? 760 : 1000) + 'px',
+      stateLabel: labels[core] || '', stateColor, showWave: core === 'listening',
+      words: S.words, wordsColor: wk === 'nexus' ? '#FFE9D2' : 'rgba(255,246,233,.95)', wordsOpacity: wk === 'userDim' ? .45 : 1, wordsSize: wide ? '22px' : '30px',
+      hasAction: !!S.actionLabel, actionLabel: S.actionLabel, hasError: core === 'error',
+      onMic: () => live ? this.stopAll() : this.demo(), micRing: core === 'listening' || core === 'wake',
+      micStatus: core === 'listening' ? 'LE ESCUCHO · TOQUE PARA TERMINAR' : live ? 'TOQUE PARA INTERRUMPIR' : `TOQUE O DIGA «${S.wakeWord.toUpperCase()}» · ALT+N`,
+      showMusicMini: S.music && !P, musicPct: (S.musicPos / 228 * 100).toFixed(2) + '%', musicTime: Math.floor(S.musicPos / 60) + ':' + String(S.musicPos % 60).padStart(2, '0'),
+      playIcon: S.music ? 'M8 5v14M16 5v14' : 'M8 5v14l11-7z', togglePlay: () => this.togglePlay(), openMusic: () => this.openPanel('music'),
+      nextTrack: () => this.setState({ musicPos: 0 }), prevTrack: () => this.setState({ musicPos: 0 }),
+      isChat: P === 'chat' && !S.overlay, isVoice: P === 'voice' && !S.overlay, isRoutines: P === 'routines' && !S.overlay, isSystem: P === 'system' && !S.overlay, isMusic: P === 'music' && !S.overlay, isMemory: P === 'memory' && !S.overlay, isSettings: P === 'settings' && !S.overlay,
+      closePanel: () => this.openPanel(null),
+      chatRef: this.chatRef, modelName: models[S.modelIdx % models.length],
+      chatMsgs: S.chat.map((m, i) => ({ ...m, isUser: m.role === 'user', isNexus: m.role === 'nexus', isAction: m.role === 'action', shown: m.shown !== undefined ? m.shown : m.text,
+        anim: 'nx-in 520ms cubic-bezier(.16,1,.3,1) ' + (m.fresh ? 0 : 120 + i * 40) + 'ms both', items: (m.items || []).map((t, j) => ({ t, delay: (m.fresh ? 200 : 400 + i * 40) + j * 180 + 'ms' })) })),
+      chatInput: S.chatInput, onChatInput: e => this.setState({ chatInput: e.target.value }),
+      onChatKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.sendChat(); } }, onChatSend: () => this.sendChat(),
+      showSlash: S.chatInput.startsWith('/'),
+      slashCmds: this.CMDS.filter(c => c.cmd.startsWith(S.chatInput.split(' ')[0]) || S.chatInput === '/').map(c => ({ ...c, pick: () => this.setState({ chatInput: c.cmd + ' ' }) })),
+      voiceCards: this.VOICES.map((v, i) => { const sel = S.voiceSel === v.id; return { ...v, selected: sel, state: S.preview === v.id ? 'speaking' : sel ? 'idle' : 'idle',
+        bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.1)', delay: (140 + i * 40) + 'ms',
+        previewLabel: S.preview === v.id ? '■ SONANDO…' : '▶ ESCUCHAR',
+        select: () => this.setState({ voiceSel: v.id }), preview: e => { e.stopPropagation(); this.previewVoice(v.id); },
+        selectSay: () => { this.setState({ voiceSel: v.id }); this.previewVoice(v.id); this.clearFlow(); this.say(`Hola, ${this.name()}. Así sonaré a partir de ahora.`); } }; }),
+      personaCards: this.PERSONAS.map((p, i) => { const sel = S.persona === p.id; return { ...p, bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.1)', delay: (320 + i * 40) + 'ms', select: () => this.setState({ persona: p.id }) }; }),
+      voiceSliders: ['speed', 'pitch', 'warmth', 'formal'].map((k, i) => ({ ...sl(k), delay: (200 + i * 40) + 'ms' })), volSlider: sl('volume'), onSlider: this.onSlider,
+      langOpts: [['es-ES', 'Español (ES)'], ['es-MX', 'Español (MX)'], ['en', 'English']].map(([id, label]) => ({ label, ...this.seg(S.lang === id), pick: () => this.setState({ lang: id }) })),
+      wakeWord: S.wakeWord, onWake: e => this.setState({ wakeWord: e.target.value }), userName: S.userName, onName: e => this.setState({ userName: e.target.value }),
+      onNameOnb: e => { this.setState({ userName: e.target.value }); const E = this.E(); E && E.poke(); },
+      nameChips: nameOpts.map(n => ({ label: n, bg: S.userName === n ? 'rgb(var(--acc) / .22)' : 'rgba(255,255,255,.03)', border: S.userName === n ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.18)', pick: () => { this.setState({ userName: n }); const E = this.E(); E && E.poke(); } })),
+      testVoice: () => this.testVoice(),
+      routineCards: this.ROUT.map((x, i) => { const sel = S.routineSel === x.id, on = S.routineOn[x.id]; return { name: x.name, trigger: x.trigger, count: x.steps.length, bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.1)', delay: (120 + i * 40) + 'ms', ...this.toggleT(on),
+        select: () => this.setState({ routineSel: x.id, runStep: -1 }), toggle: e => { e.stopPropagation(); this.setState(s => ({ routineOn: { ...s.routineOn, [x.id]: !s.routineOn[x.id] } })); } }; }),
+      selRoutine: { name: r.name },
+      routineSteps: r.steps.map((st, i) => { const act = S.runStep === i, done = S.runStep > i; return { notFirst: i > 0, icon: this.ICON[st[0]], kind: st[1], title: st[2], detail: st[3], delay: (160 + i * 60) + 'ms',
+        bg: act ? 'rgba(245,185,113,.12)' : done ? 'rgba(52,211,153,.06)' : 'rgba(10,7,20,.7)', border: act ? 'rgba(245,185,113,.6)' : done ? 'rgba(52,211,153,.35)' : 'rgba(196,181,253,.14)', glow: act ? '0 0 30px rgba(245,185,113,.25)' : 'none', iconColor: act ? '#F5B971' : done ? '#34D399' : 'rgb(var(--acc2))' }; }),
+      runRoutine: () => this.runRoutine(),
+      permRows: this.PERMS.map(([id, label, note]) => ({ label, note, ...this.toggleT(S.perms[id]), toggle: () => this.setState(s => ({ perms: { ...s.perms, [id]: !s.perms[id] } })) })),
+      gauges, cpuPoly, cpuMax: Math.round(Math.max(...hist)), procs, agenda, dateShort: d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' }).toUpperCase(),
+      lyrics, lyricY: (-(cur * 56) + 2 * 56) + 'px', queue: this.QUEUE.map((q, i) => ({ ...q, delay: (200 + i * 40) + 'ms' })),
+      memQuery: S.memQuery, onMemQuery: e => this.setState({ memQuery: e.target.value }), memCount: 122 + S.mem.length + S.facts.length - 5,
+      memFilters: ['Todo', 'Conversaciones', 'Preferencias', 'Personas', 'Lugares'].map(f => ({ label: f, bg: S.memFilter === f ? 'rgb(var(--acc) / .22)' : 'rgba(255,255,255,.03)', border: S.memFilter === f ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.16)', pick: () => this.setState({ memFilter: f }) })),
+      memItems, memEmpty: memItems.length === 0,
+      factItems: facts.map((f, i) => ({ ...f, delay: (160 + i * 40) + 'ms', del: () => this.setState(s => ({ facts: s.facts.filter(x => x.id !== f.id) })) })),
+      learnT: { bg: this.toggleT(S.learn).tBg, border: this.toggleT(S.learn).tBorder, left: this.toggleT(S.learn).tLeft }, toggleLearn: () => this.setState(s => ({ learn: !s.learn })),
+      forgetAll: () => { this.setState({ mem: [], facts: [] }); this.say(`Hecho, ${this.name()}. He olvidado todo lo que sabía de usted.`); },
+      providerOpts: Object.keys(this.MODELS).map(p => ({ label: p, ...this.seg(S.provider === p), pick: () => this.setState({ provider: p, modelIdx: 0 }) })),
+      cycleModel: () => this.setState(s => ({ modelIdx: s.modelIdx + 1 })),
+      apiKey: S.provider.startsWith('Local') ? 'No necesaria · http://localhost:11434' : S.showKey ? 'sk-demo-7Hq2mV9xLp4Rt8Ws3f9a' : 'sk-••••••••••••••••••••3f9a', keyBtn: S.showKey ? 'Ocultar' : 'Mostrar', toggleKey: () => this.setState(s => ({ showKey: !s.showKey })),
+      sysToggles: [
+        { label: 'Iniciar con Windows', note: 'Arranca en segundo plano al encender', on: S.autostart, toggle: () => this.setState(s => ({ autostart: !s.autostart })) },
+        { label: `Escuchar «${S.wakeWord}» siempre`, note: 'Detección local, sin enviar audio', on: S.alwaysListen, toggle: () => this.setState(s => ({ alwaysListen: !s.alwaysListen })) },
+        { label: 'Reducir movimiento', note: 'Sin parallax, estelas ni partículas extra', on: S.reduced, toggle: () => this.setReduced(!S.reduced) },
+      ].map(t => ({ ...t, ...this.toggleT(t.on) })),
+      themeCards: Object.keys(this.TH).map(id => { const t = this.TH[id], sel = S.theme === id; return { name: t.name, c1: t.c1, c2: t.c2, bg: sel ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.02)', border: sel ? t.c2 : 'rgba(196,181,253,.1)', pick: () => this.setTheme(id) }; }),
+      qualityOpts: [['ultra', 'Ultra'], ['equilibrado', 'Equilibrado'], ['ahorro', 'Ahorro']].map(([id, label]) => ({ label, ...this.seg(S.quality === id), pick: () => this.setQuality(id) })), qualityNote: qN[S.quality],
+      micName: this.MICS[S.micIdx % 3], outName: this.OUTS[S.outIdx % 3], cycleMic: () => this.setState(s => ({ micIdx: s.micIdx + 1 })), cycleOut: () => this.setState(s => ({ outIdx: s.outIdx + 1 })),
+      ovRef: this.ovRef, ovInput: S.ovInput, ovState: S.ovState, ovLabel: S.ovLabel, ovReply: S.ovReply,
+      onOvInput: e => this.setState({ ovInput: e.target.value, ovState: e.target.value ? 'listening' : 'idle' }),
+      onOvKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.ovAsk(); } },
+      onbCard: S.onb && S.onbStep > 0, onbStep: vs, onb1: vs === 1, onb2: vs === 2, onb3: vs === 3, onbCanBack: vs > 1,
+      onbDots: [1, 2, 3].map(i => ({ w: i === vs ? '28px' : '10px', c: i <= vs ? 'rgb(var(--acc2))' : 'rgba(196,181,253,.2)' })),
+      onbBack: () => this.setState(s => ({ onbStep: Math.max(1, s.onbStep - 1) })), onbNext: () => this.onbNext(), onbNextLabel: vs === 3 ? 'Empezar' : 'Continuar', askMic: () => this.askMic(),
+      micPermText: S.micPerm === 'ok' ? '● MICRÓFONO ACTIVO · HABLE Y MIRE EL NÚCLEO' : S.micPerm === 'no' ? 'PERMISO DENEGADO · PUEDE ACTIVARLO LUEGO EN AJUSTES' : 'EL NAVEGADOR LE PEDIRÁ PERMISO',
+      micPermColor: S.micPerm === 'ok' ? '#34D399' : S.micPerm === 'no' ? '#FB7185' : 'rgba(226,218,240,.45)',
+      showDock: (S.uiIn || S.overlay) && !S.onb && !S.overlay, dock, hasHover: !!S.hoverDock && !S.volOpen, hoverLabel: S.hoverDock, volOpen: S.volOpen,
+      showDirector: (this.props && this.props.showDirector) !== false, dirOpen: S.dirOpen, toggleDir: () => this.setState(s => ({ dirOpen: !s.dirOpen })),
+      dirStates: dirDef.map(([id, label]) => { const a = core === id; return { label, click: () => this.dirSet(id), bg: a ? 'rgb(var(--acc) / .25)' : 'rgba(255,255,255,.03)', border: a ? 'rgb(var(--acc2) / .6)' : 'rgba(196,181,253,.16)', color: a ? '#FFF6E9' : 'rgba(226,218,240,.7)' }; }),
+      dirActions: [
+        { label: '▶ Demo por voz', click: () => this.demo() }, { label: 'Arranque', click: () => this.bootDesktop() },
+        { label: 'Onboarding', click: () => this.startOnboarding() }, { label: 'Mini overlay', click: () => this.toggleOverlay() },
+      ],
+    };
+  }
+}
+</script>
+</body>
+</html>

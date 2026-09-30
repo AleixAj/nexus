@@ -1,0 +1,9 @@
+node_modules
+out
+dist
+*.log
+
+# design export leftovers
+design/shots
+design/.thumbnail
+scripts/design-logic.txt
