@@ -92,17 +92,17 @@ quedarse la última imagen en el escritorio hasta que vuelvas a abrir NEXUS o ca
 
 | Voz | Tipo | Carácter |
 | --- | --- | --- |
-| Lyra | Femenina | Natural y cálida (Microsoft Ava, acento neutro) |
+| Lyra | Femenina | Española, natural (Microsoft Ximena) |
 | Vega | Femenina | Natural y alegre (Microsoft Emma, acento neutro) |
-| Nova | Femenina | Española, clara |
+| Nova | Femenina | Española, serena (Microsoft Elvira) |
 | Aura ✦ | Femenina | Premium: voz de Gemini, la más humana |
 | Orión | Masculina | Española, grave, estilo Jarvis |
 | Kairo | Masculina | Natural y cercana (Microsoft Andrew, acento neutro) |
 | Atlas | Masculina | Natural y joven (Microsoft Brian, acento neutro) |
 | Zenit ✦ | Masculina | Premium: voz de Gemini, profunda |
 
-Las voces de Microsoft son gratis y sin clave. Las premium usan la clave de Gemini y, si no la hay o se agota
-su cupo gratuito, suenan con la voz de Microsoft equivalente. *Efecto IA* añade un toque de voz de película
+Las voces de Microsoft son gratis y sin clave. Las premium necesitan la clave de Gemini (sin ella no se pueden elegir); si se agota
+su cupo gratuito, suenan con una voz de Microsoft. *Efecto IA* añade un toque de voz de película
 (presencia, un leve timbre metálico y una sala muy corta); en las voces naturales es casi imperceptible.
 
 ## Cómo está hecho

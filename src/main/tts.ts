@@ -8,9 +8,9 @@ import { getKey } from './settings'
 type Voice = { es: string; mx: string; en: string; rate: number; pitch: number; gemini?: string }
 
 const VOICES: Record<string, Voice> = {
-  lyra: { es: 'en-US-AvaMultilingualNeural', mx: 'en-US-AvaMultilingualNeural', en: 'en-US-AvaMultilingualNeural', rate: 0, pitch: 0 },
+  lyra: { es: 'es-ES-XimenaNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-SoniaNeural', rate: 0, pitch: 0 },
   vega: { es: 'en-US-EmmaMultilingualNeural', mx: 'en-US-EmmaMultilingualNeural', en: 'en-US-EmmaMultilingualNeural', rate: 0, pitch: 0 },
-  nova: { es: 'es-ES-XimenaNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-SoniaNeural', rate: 0, pitch: 0 },
+  nova: { es: 'es-ES-ElviraNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-LibbyNeural', rate: 0, pitch: 0 },
   aura: { es: 'en-US-AvaMultilingualNeural', mx: 'en-US-AvaMultilingualNeural', en: 'en-US-AvaMultilingualNeural', rate: 0, pitch: 0, gemini: 'Sulafat' },
   orion: { es: 'es-ES-AlvaroNeural', mx: 'es-MX-JorgeNeural', en: 'en-GB-RyanNeural', rate: -4, pitch: -6 },
   kairo: { es: 'en-US-AndrewMultilingualNeural', mx: 'en-US-AndrewMultilingualNeural', en: 'en-US-AndrewMultilingualNeural', rate: 0, pitch: 0 },

@@ -30,12 +30,12 @@ export default class NexusApp extends Component {
     // fx: the AI processing preset applied on top of the neural voice (services/voice.ts)
     // Lyra/Vega/Kairo/Atlas: the most natural Microsoft voices (neutral accent).
     // Aura/Zenit: premium Gemini voices, the most human; they need the Gemini key.
-    { id: 'lyra', name: 'Lyra', desc: 'Femenina · natural y cálida', fx: 'clean' },
+    { id: 'lyra', name: 'Lyra', desc: 'Femenina · española · natural', fx: 'clean' },
     { id: 'orion', name: 'Orión', desc: 'Masculina · española · estilo Jarvis', fx: 'jarvis' },
-    { id: 'vega', name: 'Vega', desc: 'Femenina · natural y alegre', fx: 'clean' },
-    { id: 'kairo', name: 'Kairo', desc: 'Masculina · natural y cercana', fx: 'clean' },
-    { id: 'nova', name: 'Nova', desc: 'Femenina · española · clara', fx: 'soft' },
-    { id: 'atlas', name: 'Atlas', desc: 'Masculina · natural y joven', fx: 'clean' },
+    { id: 'vega', name: 'Vega', desc: 'Femenina · alegre · acento neutro', fx: 'clean' },
+    { id: 'kairo', name: 'Kairo', desc: 'Masculina · cercana · acento neutro', fx: 'clean' },
+    { id: 'nova', name: 'Nova', desc: 'Femenina · española · serena', fx: 'soft' },
+    { id: 'atlas', name: 'Atlas', desc: 'Masculina · joven · acento neutro', fx: 'clean' },
     { id: 'aura', name: 'Aura ✦', desc: 'Femenina · premium Gemini · la más humana', fx: 'clean', premium: true },
     { id: 'zenit', name: 'Zenit ✦', desc: 'Masculina · premium Gemini · profunda', fx: 'clean', premium: true },
   ];
@@ -593,7 +593,17 @@ export default class NexusApp extends Component {
     this.say(L[this.state.persona] || L.butler);
   }
   fxOf(id) { return (this.VOICES.find(x => x.id === id) || this.VOICES[0]).fx; }
+  // premium voices need the Gemini key; without it they would just sound like another voice
+  premiumLocked(id) {
+    const v = this.VOICES.find(x => x.id === id);
+    if (!v || !v.premium || (this.state.providers.Gemini || {}).hasKey) return false;
+    this.interrupt();
+    this.notify('VOZ PREMIUM', v.name.replace(' ✦', '') + ' necesita la clave de Gemini', 'Es gratis en Google AI Studio · pégala en Ajustes', '#F5B971');
+    this.say(`${v.name.replace(' ✦', '')} es una voz premium: necesita la clave gratuita de Gemini. Puede ponerla en Ajustes.`);
+    return true;
+  }
   previewVoice(id) {
+    if (this.premiumLocked(id)) return;
     if (this.state.preview === id) { this.stopAll(); return; }
     this.interrupt();
     this.setState({ preview: id });
@@ -601,6 +611,7 @@ export default class NexusApp extends Component {
     this.say(`Hola, ${this.name()}. Soy ${v.name}. Sistemas en línea y a su disposición.`, () => { this.setState({ preview: null }); this.settle(); }, {}, id);
   }
   selectVoice(id) {
+    if (this.premiumLocked(id)) return;
     this.interrupt();
     this.setState({ voiceSel: id, preview: id }); this.save({ voice: id });
     voice.setVoiceFx(this.fxOf(id));
