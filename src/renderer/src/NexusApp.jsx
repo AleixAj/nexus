@@ -28,12 +28,16 @@ export default class NexusApp extends Component {
   };
   VOICES = [
     // fx: the AI processing preset applied on top of the neural voice (services/voice.ts)
-    { id: 'lyra', name: 'Lyra', desc: 'Femenina · cálida · cercana', fx: 'soft' },
-    { id: 'orion', name: 'Orión', desc: 'Masculina · grave · estilo Jarvis', fx: 'jarvis' },
-    { id: 'vega', name: 'Vega', desc: 'Femenina · precisa · holográfica', fx: 'holo' },
-    { id: 'atlas', name: 'Atlas', desc: 'Masculina · profunda · de nave', fx: 'deep' },
-    { id: 'nova', name: 'Nova', desc: 'Femenina · sintética · internacional', fx: 'synth' },
-    { id: 'kairo', name: 'Kairo', desc: 'Masculino · sintético · internacional', fx: 'synth' },
+    // Lyra/Vega/Kairo/Atlas: the most natural Microsoft voices (neutral accent).
+    // Aura/Zenit: premium Gemini voices, the most human; they need the Gemini key.
+    { id: 'lyra', name: 'Lyra', desc: 'Femenina · natural y cálida', fx: 'clean' },
+    { id: 'orion', name: 'Orión', desc: 'Masculina · española · estilo Jarvis', fx: 'jarvis' },
+    { id: 'vega', name: 'Vega', desc: 'Femenina · natural y alegre', fx: 'clean' },
+    { id: 'kairo', name: 'Kairo', desc: 'Masculina · natural y cercana', fx: 'clean' },
+    { id: 'nova', name: 'Nova', desc: 'Femenina · española · clara', fx: 'soft' },
+    { id: 'atlas', name: 'Atlas', desc: 'Masculina · natural y joven', fx: 'clean' },
+    { id: 'aura', name: 'Aura ✦', desc: 'Femenina · premium Gemini · la más humana', fx: 'clean', premium: true },
+    { id: 'zenit', name: 'Zenit ✦', desc: 'Masculina · premium Gemini · profunda', fx: 'clean', premium: true },
   ];
   PERSONAS = [
     { id: 'butler', name: 'Mayordomo británico', line: '«Por supuesto, señor. Ya está hecho.»' },
@@ -95,7 +99,7 @@ export default class NexusApp extends Component {
     notifs: [],
     music: false, musicPos: 72,
     chat: [],
-    chatInput: '', voiceSel: 'lyra', preview: null, sliders: { speed: 1, pitch: 0, warmth: 70, formal: 85, volume: 64, fx: 60 }, lang: 'es-ES', wakeWord: 'Hey Nexus', persona: 'butler', userName: 'señor',
+    chatInput: '', voiceSel: 'lyra', preview: null, sliders: { speed: 1, pitch: 0, warmth: 70, formal: 85, volume: 64, fx: 35 }, lang: 'es-ES', wakeWord: 'Hey Nexus', persona: 'butler', userName: 'señor',
     routineSel: 'work', routineOn: { work: true, night: true, home: true, pres: false }, runStep: -1,
     perms: { apps: true, music: true, files: true, home: true, power: true, msg: false, cam: false },
     sys: { cpu: 34, gpu: 58, ram: 38, net: 48, disk: 61, temp: 61 }, cpuHist: Array.from({ length: 40 }, (_, i) => 30 + Math.sin(i / 3) * 8 + Math.random() * 6),
@@ -193,7 +197,7 @@ export default class NexusApp extends Component {
     this.firstScreen();
   }
   firstScreen() { if (this.onboarded) this.bootDesktop(); else this.startOnboarding(); }
-  fem() { return ['lyra', 'vega', 'nova'].includes(this.state.voiceSel); }
+  fem() { return ['lyra', 'vega', 'nova', 'aura'].includes(this.state.voiceSel); }
   async countMics() {
     try {
       const list = await voice.listMics();
@@ -604,7 +608,7 @@ export default class NexusApp extends Component {
   }
   providerInfo(p) {
     return {
-      Gemini: { name: 'Gemini · recomendado', url: 'https://aistudio.google.com/apikey', note: 'Google Gemini 3.8 Flash: el mejor gratis. Busca en internet y entiende su voz con la misma clave.', help: 'Gratis y sin tarjeta en aistudio.google.com → Get API key. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos.' },
+      Gemini: { name: 'Gemini · recomendado', url: 'https://aistudio.google.com/apikey', note: 'Google Gemini (Flash-Lite): el mejor gratis, 500 preguntas al día. Busca en internet y entiende su voz con la misma clave.', help: 'Gratis y sin tarjeta en aistudio.google.com → Get API key. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos.' },
       Groq: { name: 'Groq · rápido', url: 'https://console.groq.com/keys', note: 'Muy rápido. El plan gratuito tiene menos margen por minuto para tareas largas.', help: 'Gratis y sin tarjeta en console.groq.com → API Keys. Si la pone, también se usa para entender su voz.' },
       Cerebras: { name: 'Cerebras', url: 'https://cloud.cerebras.ai', note: 'Alternativa gratuita con buen margen por minuto.', help: 'Gratis en cloud.cerebras.ai. Para entender su voz hace falta además la clave de Gemini o Groq.' },
       Ollama: { name: 'Local · sin clave', url: 'https://ollama.com/download', note: 'Funciona en su PC sin clave ni internet. Hay que instalar Ollama y descargar un modelo (unos 5 GB).', help: 'Instale Ollama y ejecute «ollama pull qwen2.5:7b». Para entender su voz hace falta la clave de Gemini o Groq.' },
@@ -776,7 +780,7 @@ export default class NexusApp extends Component {
       onChatKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.sendChat(); } }, onChatSend: () => this.sendChat(),
       showSlash: S.chatInput.startsWith('/'),
       slashCmds: this.CMDS.filter(c => c.cmd.startsWith(S.chatInput.split(' ')[0]) || S.chatInput === '/').map(c => ({ ...c, pick: () => this.setState({ chatInput: c.cmd + ' ' }) })),
-      voiceCards: this.VOICES.map((v, i) => { const sel = S.voiceSel === v.id; return { ...v, selected: sel, state: S.preview === v.id ? 'speaking' : sel ? 'idle' : 'idle',
+      voiceCards: this.VOICES.map((v, i) => { const sel = S.voiceSel === v.id; const noKey = v.premium && !(S.providers.Gemini || {}).hasKey; return { ...v, desc: noKey ? v.desc + ' · requiere clave de Gemini' : v.desc, selected: sel, state: S.preview === v.id ? 'speaking' : sel ? 'idle' : 'idle',
         bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.1)', delay: (140 + i * 40) + 'ms',
         previewLabel: S.preview === v.id ? '■ SONANDO…' : '▶ ESCUCHAR',
         select: () => this.selectVoice(v.id), preview: e => { e.stopPropagation(); this.previewVoice(v.id); },

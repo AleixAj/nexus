@@ -83,7 +83,7 @@ export default function Onboarding({ v }: { v: any }) {
       {step === 2 && (
         <div key="s2" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <span style={{ ...title, animation: enter(40) }}>Elija mi voz</span>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
             {(v.voiceCards || []).map((c: any, i: number) => (
               <button key={c.id} onClick={c.selectSay} style={{
                 display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px 10px 8px', borderRadius: 12, cursor: 'pointer', textAlign: 'left',

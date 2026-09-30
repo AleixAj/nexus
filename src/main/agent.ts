@@ -121,7 +121,7 @@ async function geminiSearch(key: string, query: string) {
     signal: AbortSignal.timeout(40000),
     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
     body: JSON.stringify({
-      model: 'gemini-3.8-flash',
+      model: 'gemini-3.5-flash-lite',
       reasoning_effort: 'low',
       messages: [{ role: 'user', content: searchPrompt(query) }],
       tools: [{ google_search: {} }]

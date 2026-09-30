@@ -23,7 +23,7 @@ function systemPrompt() {
     'Eres NEXUS, un agente de IA que vive en el ordenador Windows del usuario y le ayuda con lo que necesite.',
     PERSONAS[s.persona] || PERSONAS.butler,
     `Llama al usuario «${s.userName}».`,
-    ['lyra', 'vega', 'nova'].includes(s.voice) ? 'Tu voz es femenina: habla de ti misma en femenino (encantada, lista…).' : 'Tu voz es masculina: habla de ti mismo en masculino.',
+    ['lyra', 'vega', 'nova', 'aura'].includes(s.voice) ? 'Tu voz es femenina: habla de ti misma en femenino (encantada, lista…).' : 'Tu voz es masculina: habla de ti mismo en masculino.',
     s.lang.startsWith('en') ? 'Answer in British English, whatever language the user writes in.' : s.lang === 'es-MX' ? 'Responde en español de México.' : 'Responde en español de España.',
     s.formal >= 50 ? 'Trata al usuario de usted.' : 'Tutea al usuario, con un registro cercano.',
     s.warmth >= 60 ? 'Tono cálido y amable.' : s.warmth <= 30 ? 'Tono seco y profesional.' : '',
@@ -104,9 +104,10 @@ export function ask(text: string, h: Handlers): Promise<string> {
 async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise<string> {
   if (ctl.signal.aborted) throw aborted()
   const s = loadSettings()
-  const name = Object.hasOwn(PROVIDERS, s.provider) ? s.provider : 'Groq'
-  const p = PROVIDERS[name]
-  const key = getKey(name)
+  let name = Object.hasOwn(PROVIDERS, s.provider) ? s.provider : 'Gemini'
+  let p = PROVIDERS[name]
+  let key = getKey(name)
+  const tried = new Set([name])
   if (p.needsKey && !key) throw new Error('NO_KEY')
 
   // work on a copy; history only changes if the whole turn succeeds
@@ -157,7 +158,16 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
       }
     }
     if (!res) throw new Error('No se pudo conectar con el modelo')
-    if (res.status === 429) throw new Error('Se ha agotado el límite gratuito por ahora; pruebe en un minuto')
+    if (res.status === 429) {
+      // this free tier is used up: continue with another service the user has a key for
+      const alt = ['Gemini', 'Groq', 'Cerebras'].find(n => !tried.has(n) && getKey(n))
+      if (!alt) throw new Error('Se ha agotado el límite gratuito por ahora; pruebe en un rato')
+      tried.add(alt)
+      name = alt; p = PROVIDERS[alt]; key = getKey(alt); model = p.models[0]
+      h.onProgress('Cupo agotado · sigo con ' + alt)
+      round--
+      continue
+    }
     if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`)
 
     const { content, toolCalls } = await readStream(res.body, h.onDelta)

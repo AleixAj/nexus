@@ -30,7 +30,7 @@ export type Settings = {
 
 export const PROVIDERS: Record<string, { url: string; models: string[]; needsKey: boolean }> = {
   // best free tier (Google AI Studio key, no card): smart, generous and it also understands audio
-  Gemini: { url: 'https://generativelanguage.googleapis.com/v1beta/openai', models: ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-pro-preview'], needsKey: true },
+  Gemini: { url: 'https://generativelanguage.googleapis.com/v1beta/openai', models: ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'], needsKey: true },
   Groq: { url: 'https://api.groq.com/openai/v1', models: ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile', 'openai/gpt-oss-20b'], needsKey: true },
   // free tier with a bigger per-minute budget than Groq (5 requests/min, 30K tokens/min)
   Cerebras: { url: 'https://api.cerebras.ai/v1', models: ['gpt-oss-120b'], needsKey: true },
@@ -40,7 +40,8 @@ export const PROVIDERS: Record<string, { url: string; models: string[]; needsKey
 
 const DEFAULTS: Settings = {
   provider: 'Gemini',
-  model: 'gemini-3.8-flash',
+  // Flash-Lite: 500 free requests/day (Flash only ~20)
+  model: 'gemini-3.5-flash-lite',
   voice: 'lyra',
   userName: 'señor',
   persona: 'butler',
@@ -49,7 +50,7 @@ const DEFAULTS: Settings = {
   volume: 64,
   warmth: 70,
   formal: 85,
-  fx: 60,
+  fx: 35,
   lang: 'es-ES',
   mode: 'window',
   trayHinted: false,

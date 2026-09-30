@@ -40,11 +40,13 @@ export function sfxBus() {
 type FxPreset = { comb: number; chorus: number; verb: number; presence: number; air: number; lowcut: number; body: number }
 
 export const FX: Record<string, FxPreset> = {
-  soft: { comb: .12, chorus: .18, verb: .14, presence: 2, air: 2, lowcut: 110, body: 1 },
-  holo: { comb: .26, chorus: .34, verb: .2, presence: 3.5, air: 4, lowcut: 140, body: 0 },
-  synth: { comb: .5, chorus: .26, verb: .16, presence: 3, air: 3, lowcut: 150, body: 0 },
-  jarvis: { comb: .22, chorus: .2, verb: .22, presence: 4, air: 3, lowcut: 130, body: 2 },
-  deep: { comb: .32, chorus: .16, verb: .3, presence: 2, air: 2, lowcut: 90, body: 4 }
+  // natural voices: only a touch of presence and air, no metallic colour
+  clean: { comb: 0, chorus: 0, verb: 0, presence: 1.5, air: 1.5, lowcut: 70, body: .5 },
+  soft: { comb: .08, chorus: .06, verb: .04, presence: 2, air: 2, lowcut: 100, body: 1 },
+  holo: { comb: .16, chorus: .1, verb: .05, presence: 3, air: 3.5, lowcut: 130, body: 0 },
+  synth: { comb: .3, chorus: .08, verb: .04, presence: 3, air: 3, lowcut: 140, body: 0 },
+  jarvis: { comb: .14, chorus: .06, verb: .05, presence: 3.5, air: 2.5, lowcut: 120, body: 2 },
+  deep: { comb: .18, chorus: .05, verb: .06, presence: 2, air: 2, lowcut: 90, body: 3.5 }
 }
 
 let fxNodes: {
@@ -89,19 +91,19 @@ function buildFx(ac: AudioContext, out: AudioNode) {
 
   // metallic comb: very short delay with feedback, slowly modulated
   const comb = ac.createDelay(.05), fb = ac.createGain(), combWet = ac.createGain()
-  comb.delayTime.value = .0055; fb.gain.value = .42
+  comb.delayTime.value = .0055; fb.gain.value = .22
   air.connect(comb); comb.connect(fb).connect(comb); comb.connect(combWet).connect(sum)
   lfo(ac, .23, .0009, comb.delayTime)
 
   // doubler: a second, slightly detuned copy
   const chorus = ac.createDelay(.06), chorusWet = ac.createGain()
-  chorus.delayTime.value = .017
+  chorus.delayTime.value = .009
   air.connect(chorus).connect(chorusWet).connect(sum)
   lfo(ac, .55, .0022, chorus.delayTime)
 
   // short synthetic room
   const verb = ac.createConvolver(), verbWet = ac.createGain()
-  verb.buffer = impulse(ac, 1.3)
+  verb.buffer = impulse(ac, .45) // a small, dry room: presence without echo
   air.connect(verb).connect(verbWet).connect(sum)
 
   const comp = ac.createDynamicsCompressor()
@@ -195,13 +197,28 @@ async function pump() {
     waitTimer = window.setTimeout(next, secs * 1000)
     return
   }
-  handlers.onLine?.(line.text, buf.duration)
+  const clip = trimSilence(buf)
+  handlers.onLine?.(line.text, clip.duration)
   source = audio().createBufferSource()
-  source.buffer = buf
+  source.buffer = clip
   applyFx(line.fx || fxVoice)
   source.connect(fxNodes ? fxNodes.input : outAnalyser!)
   source.onended = next
   source.start()
+}
+
+// Keeps ~40 ms before the voice starts and ~180 ms after it ends
+function trimSilence(buf: AudioBuffer) {
+  const d = buf.getChannelData(0), rate = buf.sampleRate, th = .012
+  let a = 0, b = d.length - 1
+  while (a < d.length && Math.abs(d[a]) < th) a++
+  while (b > a && Math.abs(d[b]) < th) b--
+  a = Math.max(0, a - Math.round(rate * .04))
+  b = Math.min(d.length - 1, b + Math.round(rate * .18))
+  if (b - a < rate * .1 || (a === 0 && b === d.length - 1)) return buf
+  const out = audio().createBuffer(buf.numberOfChannels, b - a + 1, rate)
+  for (let c = 0; c < buf.numberOfChannels; c++) out.copyToChannel(buf.getChannelData(c).subarray(a, b + 1), c)
+  return out
 }
 
 function enqueue(text: string, voice?: string, fx?: string) {
@@ -214,12 +231,16 @@ function enqueue(text: string, voice?: string, fx?: string) {
 const ABBR = /\b(sr|sra|srta|dr|dra|ud|uds|etc|aprox|pág|núm|p\. ej|ej)\.$/i
 
 // Index where the first complete sentence of `text` ends, or -1
+let chunkIndex = 0 // chunks sent in this utterance
+
 function sentenceEnd(text: string) {
   const re = /[.!?…:;\n]+(?=\s)/g
+  // the first chunk is short so speech starts fast; later ones group sentences
+  const min = chunkIndex === 0 ? 14 : 120
   let m
   while ((m = re.exec(text))) {
     const end = m.index + m[0].length
-    if (end < 14) continue // join very short openers ("Hecho.") with what follows
+    if (end < min) continue
     if (ABBR.test(text.slice(0, end))) continue
     return end
   }
@@ -243,6 +264,7 @@ export function feedSpeech(delta: string) {
   pending += delta
   let end
   while ((end = sentenceEnd(pending)) > 0) {
+    chunkIndex++
     enqueue(pending.slice(0, end))
     pending = pending.slice(end).replace(/^\s+/, '')
   }
@@ -267,6 +289,7 @@ export function say(text: string, h: SpeakHandlers, voice?: string, fx?: string)
 
 export function stopSpeech() {
   token++
+  chunkIndex = 0
   queue = []
   pending = ''
   playing = false
