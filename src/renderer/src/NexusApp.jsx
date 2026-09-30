@@ -1,6 +1,7 @@
 import { Component, createRef } from 'react'
 import Stage from './views/Stage'
 import * as voice from './services/voice'
+import * as sfx from './services/sfx'
 
 const api = window.nexus
 const params = new URLSearchParams(location.search)
@@ -16,6 +17,7 @@ export default class NexusApp extends Component {
     warmth: { min: 0, max: 100, step: 1, label: 'Calidez', fmt: v => v + ' %' },
     formal: { min: 0, max: 100, step: 1, label: 'Formalidad', fmt: v => v + ' %' },
     volume: { min: 0, max: 100, step: 1, label: 'Volumen', fmt: v => v + ' %' },
+    fx: { min: 0, max: 100, step: 1, label: 'Efecto IA', fmt: v => v + ' %' },
   };
   TH = {
     nexus: { name: 'Nexus', acc: '139 92 246', acc2: '196 181 253', c1: '#8B5CF6', c2: '#C4B5FD' },
@@ -25,10 +27,13 @@ export default class NexusApp extends Component {
     solar: { name: 'Solar', acc: '249 115 22', acc2: '254 215 170', c1: '#F97316', c2: '#FED7AA' },
   };
   VOICES = [
-    { id: 'lyra', name: 'Lyra', desc: 'Femenina · cálida · cercana' },
-    { id: 'vega', name: 'Vega', desc: 'Femenina · neutra · ágil' },
-    { id: 'orion', name: 'Orión', desc: 'Masculina · grave · pausada' },
-    { id: 'atlas', name: 'Atlas', desc: 'Masculina · profunda' },
+    // fx: the AI processing preset applied on top of the neural voice (services/voice.ts)
+    { id: 'lyra', name: 'Lyra', desc: 'Femenina · cálida · cercana', fx: 'soft' },
+    { id: 'orion', name: 'Orión', desc: 'Masculina · grave · estilo Jarvis', fx: 'jarvis' },
+    { id: 'vega', name: 'Vega', desc: 'Femenina · precisa · holográfica', fx: 'holo' },
+    { id: 'atlas', name: 'Atlas', desc: 'Masculina · profunda · de nave', fx: 'deep' },
+    { id: 'nova', name: 'Nova', desc: 'Femenina · sintética · internacional', fx: 'synth' },
+    { id: 'kairo', name: 'Kairo', desc: 'Masculino · sintético · internacional', fx: 'synth' },
   ];
   PERSONAS = [
     { id: 'butler', name: 'Mayordomo británico', line: '«Por supuesto, señor. Ya está hecho.»' },
@@ -90,7 +95,7 @@ export default class NexusApp extends Component {
     notifs: [],
     music: false, musicPos: 72,
     chat: [],
-    chatInput: '', voiceSel: 'lyra', preview: null, sliders: { speed: 1, pitch: 0, warmth: 70, formal: 85, volume: 64 }, lang: 'es-ES', wakeWord: 'Hey Nexus', persona: 'butler', userName: 'señor',
+    chatInput: '', voiceSel: 'lyra', preview: null, sliders: { speed: 1, pitch: 0, warmth: 70, formal: 85, volume: 64, fx: 60 }, lang: 'es-ES', wakeWord: 'Hey Nexus', persona: 'butler', userName: 'señor',
     routineSel: 'work', routineOn: { work: true, night: true, home: true, pres: false }, runStep: -1,
     perms: { apps: true, music: true, files: true, home: true, power: true, msg: false, cam: false },
     sys: { cpu: 34, gpu: 58, ram: 38, net: 48, disk: 61, temp: 61 }, cpuHist: Array.from({ length: 40 }, (_, i) => 30 + Math.sin(i / 3) * 8 + Math.random() * 6),
@@ -148,10 +153,17 @@ export default class NexusApp extends Component {
     const go = async () => {
       const E = this.E(); if (!E) return setTimeout(go, 50);
       const s = await this.loadSettings();
-      if (s) { E.setTheme(s.theme); E.setQuality(s.quality); E.setReduced(s.reduced); voice.setVolume(s.volume); }
+      if (s) { E.setTheme(s.theme); E.setQuality(s.quality); E.setReduced(s.reduced); voice.setVolume(s.volume); voice.setFxAmount(s.fx); voice.setVoiceFx(this.fxOf(s.voice)); }
       E.snapCore(this.layout());
-      this.bootDesktop();
       this.loadWorld();
+      this.countMics();
+      // cinematic intro on a real start; straight to the core after a mode switch
+      this.onboarded = !s || s.onboarded;
+      if (QUIET || this.state.reduced) this.firstScreen();
+      else {
+        this.setState({ intro: true });
+        this.stopHum = sfx.bootHum([.88, 1.14, 1.4, 1.66, 1.92]);
+      }
     };
     go();
     this.worldIv = setInterval(() => this.loadWorld(), 20 * 60e3);
@@ -163,9 +175,43 @@ export default class NexusApp extends Component {
     this.setState(st => ({
       provider: s.provider, model: s.model, providers: s.providers, voiceSel: s.voice, userName: s.userName, persona: s.persona,
       theme: s.theme, quality: s.quality, reduced: s.reduced, autostart: !!s.autostart, hotkey: s.hotkey || st.hotkey,
-      lang: s.lang, sliders: { ...st.sliders, speed: s.speed, pitch: s.pitch, volume: s.volume, warmth: s.warmth, formal: s.formal },
+      lang: s.lang, sliders: { ...st.sliders, speed: s.speed, pitch: s.pitch, volume: s.volume, warmth: s.warmth, formal: s.formal, fx: s.fx },
     }));
     return s;
+  }
+  onIntroCollapse() {
+    this.stopHum && this.stopHum();
+    sfx.ignition(1);
+    this.firstScreen();
+  }
+  firstScreen() { if (this.onboarded) this.bootDesktop(); else this.startOnboarding(); }
+  fem() { return ['lyra', 'vega', 'nova'].includes(this.state.voiceSel); }
+  async countMics() {
+    try {
+      const d = await navigator.mediaDevices.enumerateDevices();
+      this.setState({ mics: d.filter(x => x.kind === 'audioinput').length });
+    } catch { this.setState({ mics: 0 }); }
+  }
+  // real system checks shown in the start-up log
+  introVals() {
+    const S = this.state, ok = '#34D399', warn = '#F5B971';
+    const prov = S.providers[S.provider] || {};
+    const hasKey = !prov.needsKey || prov.hasKey;
+    const v = this.VOICES.find(x => x.id === S.voiceSel) || this.VOICES[0];
+    const parts = { ultra: '2 600', equilibrado: '1 500', ahorro: '700' }[S.quality] || '2 600';
+    const city = S.world && S.world.city;
+    return {
+      introLines: [
+        { label: 'NÚCLEO GRÁFICO', detail: 'CANVAS 2D · ' + parts + ' PARTÍCULAS', status: 'OK', color: ok },
+        { label: 'SÍNTESIS DE VOZ', detail: v.name.toUpperCase() + ' · NEURAL · FX ' + S.sliders.fx + ' %', status: 'OK', color: ok },
+        { label: 'ENLACE NEURONAL', detail: (S.provider + ' · ' + (S.model || '')).toUpperCase(), status: hasKey ? 'OK' : 'SIN CLAVE', color: hasKey ? ok : warn },
+        { label: 'SENSOR ACÚSTICO', detail: S.mics == null ? 'MICRÓFONO' : S.mics ? 'MICRÓFONO · ' + S.mics + (S.mics > 1 ? ' DISPOSITIVOS' : ' DISPOSITIVO') : 'SIN MICRÓFONO', status: S.mics === 0 ? 'NO' : 'LISTO', color: S.mics === 0 ? warn : ok },
+        { label: 'POSICIONAMIENTO', detail: city ? city.toUpperCase() : 'LOCALIZANDO…', status: city ? 'OK' : '···', color: city ? ok : warn },
+      ],
+      introStamp: new Date().toLocaleString('es-ES', { dateStyle: 'short', timeStyle: 'medium' }).toUpperCase(),
+      onIntroCollapse: () => this.onIntroCollapse(),
+      onIntroDone: () => this.setState({ intro: false }),
+    };
   }
   async loadWorld() {
     if (!api) return;
@@ -187,7 +233,7 @@ export default class NexusApp extends Component {
   layout() {
     const { panel, overlay, onb } = this.state;
     if (overlay) return { x: 960, y: 540, s: .5, v: 0 };
-    if (onb) return { x: 960, y: 390, s: .72, v: 1 };
+    if (onb) return { x: 960, y: 290, s: .58, v: 1 };
     switch (panel) {
       case 'chat': return { x: 652, y: 480, s: .8, v: 1 };
       case 'voice': case 'routines': case 'memory': case 'settings': return { x: 410, y: 440, s: .62, v: 1 };
@@ -239,7 +285,7 @@ export default class NexusApp extends Component {
     this.clearFlow();
     this.setState({ words: [], wordsKind: 'nexus', actionLabel: '' });
     this.setCore('speaking');
-    voice.say(text, this.speechHandlers(done, opts), voiceId);
+    voice.say(text, this.speechHandlers(done, opts), voiceId, voiceId ? this.fxOf(voiceId) : undefined);
   }
   speechHandlers(done, opts = {}) {
     return {
@@ -421,26 +467,46 @@ export default class NexusApp extends Component {
   setReduced(b) { this.setState({ reduced: b }); const E = this.E(); E && E.setReduced(b); this.save({ reduced: b }); }
   startOnboarding() {
     this.interrupt(); const E = this.E(); if (!E) return;
-    this.setState({ onb: true, onbStep: 0, uiIn: false, panel: null, overlay: false, words: [], micPerm: null });
-    E.setState('idle'); E.snapCore({ x: 960, y: 390, s: .72, v: 1 });
-    E.boot({ onDone: () => { this.setState({ onbStep: 1 }); this.say('Hola. Soy Nexus. Antes de empezar, ¿cómo quiere que le llame?', null); } });
+    this.setState({ onb: true, onbStep: 0, uiIn: false, panel: null, overlay: false, words: [], micPerm: null, onbWallpaper: false });
+    E.setState('idle'); E.snapCore(this.layout());
+    E.boot({ onDone: () => { this.setState({ onbStep: 1 }); this.say(`Hola. Soy Nexus, su asistente personal. Antes de empezar, ¿cómo quiere que le llame?`); } });
   }
   onbNext() {
-    const s = this.state.onbStep;
-    if (s < 3) {
-      this.setState({ onbStep: s + 1 }); this.clearFlow();
-      if (s + 1 === 2) this.say(`Encantada, ${this.name()}. Ahora elija cómo quiere que suene.`);
-      if (s + 1 === 3) this.say('Último paso. Necesito permiso para oírle.');
-    } else {
-      const E = this.E(); E && E.disableMic();
-      this.clearFlow(); this.setState({ onb: false, uiIn: true, words: [] });
-      this.later(() => this.say(`${this.greet()}, ${this.name()}. Todos los sistemas operativos.`), 400);
+    const s = this.state.onbStep, n = this.name();
+    if (s < 5) {
+      this.setState({ onbStep: s + 1 });
+      const L = {
+        2: `${this.fem() ? 'Encantada' : 'Encantado'}, ${n}. Ahora elija cómo quiere que suene.`,
+        3: 'Perfecto. Elija también mi color.',
+        4: 'Para pensar y para oírle necesito dos cosas.',
+        5: `Último paso, ${n}. ¿Cómo quiere tenerme?`,
+      };
+      this.say(L[s + 1]);
+      return;
     }
+    // done
+    this.onboarded = true;
+    this.save({ onboarded: true, userName: this.state.userName.trim() || 'señor' });
+    const E = this.E(); E && E.disableMic();
+    this.clearFlow();
+    if (this.state.onbWallpaper && api) {
+      this.say(`Perfecto, ${n}. Me coloco en su escritorio. Llámeme con ${this.hotkeyLabel().toLowerCase()}.`, () => api.setMode('wallpaper'));
+      return;
+    }
+    this.setState({ onb: false, uiIn: true, words: [] });
+    this.later(() => this.say(`${this.greet()}, ${n}. Todos los sistemas operativos.`), 400);
   }
   async askMic() {
-    const E = this.E();
-    try { await E.enableMic(); this.setState({ micPerm: 'ok' }); this.clearFlow(); this.setCore('listening'); this.setState({ words: [], wordsKind: 'user' }); }
-    catch (e) { this.setState({ micPerm: 'no', errorTitle: 'Sin acceso al micrófono', errorDetail: '' }); this.setCore('error'); this.later(() => this.setCore('idle'), 1800); }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(t => t.stop());
+      this.setState({ micPerm: 'ok' });
+      const E = this.E(); E && E.poke();
+      this.say(`Le oigo perfectamente, ${this.name()}.`);
+      this.countMics();
+    } catch {
+      this.setState({ micPerm: 'no' });
+    }
   }
   sendChat() {
     const text = this.state.chatInput.trim(); if (!text) return;
@@ -461,16 +527,18 @@ export default class NexusApp extends Component {
     const L = { butler: `${this.greet()}, ${n}. Su escritorio está listo cuando usted lo esté.`, direct: `${N}: todo listo. Usted dirá.`, sarcastic: `Oh, ${n}, otra vez usted. Supongo que hoy tampoco hay ganas de trabajar.` };
     this.say(L[this.state.persona] || L.butler);
   }
+  fxOf(id) { return (this.VOICES.find(x => x.id === id) || this.VOICES[0]).fx; }
   previewVoice(id) {
     if (this.state.preview === id) { this.stopAll(); return; }
     this.interrupt();
     this.setState({ preview: id });
     const v = this.VOICES.find(x => x.id === id);
-    this.say(`Hola, ${this.name()}. Soy ${v.name}.`, () => { this.setState({ preview: null }); this.settle(); }, {}, id);
+    this.say(`Hola, ${this.name()}. Soy ${v.name}. Sistemas en línea y a su disposición.`, () => { this.setState({ preview: null }); this.settle(); }, {}, id);
   }
   selectVoice(id) {
     this.interrupt();
     this.setState({ voiceSel: id, preview: id }); this.save({ voice: id });
+    voice.setVoiceFx(this.fxOf(id));
     this.say(`Hola, ${this.name()}. Así sonaré a partir de ahora.`, () => { this.setState({ preview: null }); this.settle(); }, {}, id);
   }
   hotkeyLabel() { return this.state.hotkey.replace('Control', 'Ctrl').replace('Space', 'Espacio').split('+').join(' + ').toUpperCase(); }
@@ -503,7 +571,7 @@ export default class NexusApp extends Component {
   }
   onSlider = e => {
     const el = e.currentTarget, key = el.dataset.key, c = this.SL[key];
-    const set = x => { const r = el.getBoundingClientRect(); const u = Math.max(0, Math.min(1, (x - r.left) / r.width)); let v = c.min + u * (c.max - c.min); v = Math.round(v / c.step) * c.step; this.setState(s => ({ sliders: { ...s.sliders, [key]: +v.toFixed(2) } })); };
+    const set = x => { const r = el.getBoundingClientRect(); const u = Math.max(0, Math.min(1, (x - r.left) / r.width)); let v = c.min + u * (c.max - c.min); v = Math.round(v / c.step) * c.step; this.setState(s => ({ sliders: { ...s.sliders, [key]: +v.toFixed(2) } })); if (key === 'fx') voice.setFxAmount(v); };
     set(e.clientX);
     // capture so releasing outside the window still ends the drag
     try { el.setPointerCapture(e.pointerId); } catch { /* not a pointer event */ }
@@ -596,10 +664,10 @@ export default class NexusApp extends Component {
       click: () => id === 'volume' ? this.setState(s => ({ volOpen: !s.volOpen, hoverDock: null })) : this.openPanel(id),
       enter: () => this.setState({ hoverDock: label }), leave: () => this.setState({ hoverDock: null }) }; });
     const dirDef = [['idle', 'Reposo'], ['wake', 'Despertar'], ['listening', 'Escuchando'], ['thinking', 'Pensando'], ['speaking', 'Hablando'], ['action', 'Ejecutando'], ['error', 'Error'], ['music', 'Música']];
-    const nameOpts = ['señor', 'señora', 'capitán', 'Alex'];
+    const nameOpts = ['señor', 'señora', 'jefe', 'jefa', 'capitán', 'comandante'];
     const vs = S.onbStep ? S.onbStep : 0;
     return {
-      k: S.k, qualityAttr: S.quality, ...this.worldVals(d), acc: th.acc, acc2: th.acc2, reducedAttr: S.reduced ? '1' : '0',
+      k: S.k, qualityAttr: S.quality, intro: !!S.intro, ...(S.intro ? this.introVals() : null), ...this.worldVals(d), acc: th.acc, acc2: th.acc2, reducedAttr: S.reduced ? '1' : '0',
       bgFilter: S.overlay ? 'blur(12px) brightness(.3)' : P === 'music' ? 'brightness(.85)' : P === 'system' ? 'blur(3px) brightness(.78)' : P ? 'blur(6px) brightness(.7)' : 'none',
       overlay: S.overlay,
       showUI: S.uiIn && !S.overlay && !S.onb,
@@ -636,12 +704,12 @@ export default class NexusApp extends Component {
         previewLabel: S.preview === v.id ? '■ SONANDO…' : '▶ ESCUCHAR',
         select: () => this.selectVoice(v.id), preview: e => { e.stopPropagation(); this.previewVoice(v.id); },
         selectSay: () => this.selectVoice(v.id) }; }),
-      personaCards: this.PERSONAS.map((p, i) => { const sel = S.persona === p.id; return { ...p, bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.1)', delay: (320 + i * 40) + 'ms', select: () => { this.setState({ persona: p.id }); this.save({ persona: p.id }); } }; }),
-      voiceSliders: ['speed', 'pitch', 'warmth', 'formal'].map((k, i) => ({ ...sl(k), delay: (200 + i * 40) + 'ms' })), volSlider: sl('volume'), onSlider: this.onSlider,
+      personaCards: this.PERSONAS.map((p, i) => { const sel = S.persona === p.id; return { ...p, sel, bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.1)', delay: (320 + i * 40) + 'ms', select: () => { this.setState({ persona: p.id }); this.save({ persona: p.id }); } }; }),
+      voiceSliders: ['speed', 'pitch', 'fx', 'warmth', 'formal'].map((k, i) => ({ ...sl(k), delay: (200 + i * 40) + 'ms' })), volSlider: sl('volume'), onSlider: this.onSlider,
       langOpts: [['es-ES', 'Español (ES)'], ['es-MX', 'Español (MX)'], ['en', 'English']].map(([id, label]) => ({ label, ...this.seg(S.lang === id), pick: () => { this.setState({ lang: id }); this.save({ lang: id }); } })),
       wakeWord: S.wakeWord, onWake: e => this.setState({ wakeWord: e.target.value }), userName: S.userName, onName: e => this.setName(e.target.value),
       onNameOnb: e => { this.setName(e.target.value); const E = this.E(); E && E.poke(); },
-      nameChips: nameOpts.map(n => ({ label: n, bg: S.userName === n ? 'rgb(var(--acc) / .22)' : 'rgba(255,255,255,.03)', border: S.userName === n ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.18)', pick: () => { this.setName(n); const E = this.E(); E && E.poke(); } })),
+      nameChips: nameOpts.map(n => ({ label: n, on: S.userName === n, bg: S.userName === n ? 'rgb(var(--acc) / .22)' : 'rgba(255,255,255,.03)', border: S.userName === n ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.18)', pick: () => { this.setName(n); const E = this.E(); E && E.poke(); } })),
       testVoice: () => this.testVoice(),
       routineCards: this.ROUT.map((x, i) => { const sel = S.routineSel === x.id, on = S.routineOn[x.id]; return { name: x.name, trigger: x.trigger, count: x.steps.length, bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.1)', delay: (120 + i * 40) + 'ms', ...this.toggleT(on),
         select: () => this.setState({ routineSel: x.id, runStep: -1 }), toggle: e => { e.stopPropagation(); this.setState(s => ({ routineOn: { ...s.routineOn, [x.id]: !s.routineOn[x.id] } })); } }; }),
@@ -682,10 +750,18 @@ export default class NexusApp extends Component {
         else if (e.key === 'Enter') { e.preventDefault(); this.ovAsk(); }
         else if (e.key === 'Tab') { e.preventDefault(); this.setState({ overlay: false }); this.openPanel('chat', true); }
       },
-      onbCard: S.onb && S.onbStep > 0, onbStep: vs, onb1: vs === 1, onb2: vs === 2, onb3: vs === 3, onbCanBack: vs > 1,
-      onbDots: [1, 2, 3].map(i => ({ w: i === vs ? '28px' : '10px', c: i <= vs ? 'rgb(var(--acc2))' : 'rgba(196,181,253,.2)' })),
-      onbBack: () => this.setState(s => ({ onbStep: Math.max(1, s.onbStep - 1) })), onbNext: () => this.onbNext(), onbNextLabel: vs === 3 ? 'Empezar' : 'Continuar', askMic: () => this.askMic(),
-      micPermText: S.micPerm === 'ok' ? '● MICRÓFONO ACTIVO · HABLE Y MIRE EL NÚCLEO' : S.micPerm === 'no' ? 'PERMISO DENEGADO · PUEDE ACTIVARLO LUEGO EN AJUSTES' : 'EL NAVEGADOR LE PEDIRÁ PERMISO',
+      onbCard: S.onb && S.onbStep > 0, onbStep: vs, onbTotal: 5,
+      formalOpts: [['usted', 85], ['tú', 20]].map(([label, val]) => ({ label, on: label === 'usted' ? S.sliders.formal >= 50 : S.sliders.formal < 50, pick: () => { this.setState(s => ({ sliders: { ...s.sliders, formal: val } })); this.save({ formal: val }); } })),
+      qualityChips: [['ultra', 'Ultra'], ['equilibrado', 'Equilibrado'], ['ahorro', 'Ahorro']].map(([id, label]) => ({ label, on: S.quality === id, pick: () => this.setQuality(id) })),
+      openGroq: () => window.open('https://console.groq.com/keys'),
+      hotkeyText: this.hotkeyLabel(),
+      onbToggles: [
+        { name: 'Iniciar con Windows', note: 'Me abro sola al encender el PC', on: S.autostart, onClick: () => this.setAutostart(!S.autostart) },
+        { name: 'Fondo de escritorio', note: 'Me coloco detrás de sus iconos y me quedo en segundo plano', on: !!S.onbWallpaper, onClick: () => this.setState(s => ({ onbWallpaper: !s.onbWallpaper })) },
+      ],
+      onbDots: [1, 2, 3, 4, 5].map(i => ({ w: i === vs ? '28px' : '10px', c: i <= vs ? 'rgb(var(--acc2))' : 'rgba(196,181,253,.2)' })),
+      onbBack: () => this.setState(s => ({ onbStep: Math.max(1, s.onbStep - 1) })), onbNext: () => this.onbNext(), onbNextLabel: vs === 5 ? 'Empezar' : 'Continuar', askMic: () => this.askMic(),
+      micPermText: S.micPerm === 'ok' ? '● FUNCIONA · LE OIGO BIEN' : S.micPerm === 'no' ? 'SIN ACCESO · REVISE LA PRIVACIDAD DE WINDOWS' : S.mics === 0 ? 'NO HAY NINGÚN MICRÓFONO CONECTADO' : 'PULSE PARA COMPROBARLO',
       micPermColor: S.micPerm === 'ok' ? '#34D399' : S.micPerm === 'no' ? '#FB7185' : 'rgba(226,218,240,.45)',
       showDock: !WALLPAPER && (S.uiIn || S.overlay) && !S.onb && !S.overlay, dock, hasHover: !!S.hoverDock && !S.volOpen, hoverLabel: S.hoverDock, volOpen: S.volOpen,
       showDirector: !WALLPAPER && S.showDirector, dirOpen: S.dirOpen, toggleDir: () => this.setState(s => ({ dirOpen: !s.dirOpen })),

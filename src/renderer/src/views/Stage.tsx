@@ -11,6 +11,7 @@ import Overlay from './Overlay'
 import Onboarding from './Onboarding'
 import Dock from './Dock'
 import Director from './Director'
+import BootIntro from './BootIntro'
 
 export default function Stage({ v }: { v: any }) {
   return (
@@ -31,6 +32,7 @@ export default function Stage({ v }: { v: any }) {
         <Dock v={v} />
         <Director v={v} />
       </div>
+      {v.intro && <BootIntro v={v} />}
       {/* film grain and scanlines over the whole window, not just the 16:9 stage */}
       <div data-nexus-grain="1" style={{ position: "absolute", inset: "0", pointerEvents: "none", opacity: ".55", mixBlendMode: "overlay" }}></div>
       <div style={{ position: "absolute", inset: "0", pointerEvents: "none", background: "repeating-linear-gradient(0deg, rgba(255,255,255,.018) 0 1px, transparent 1px 3px)" }}></div>

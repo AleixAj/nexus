@@ -4,8 +4,11 @@ Asistente virtual de escritorio para Windows, al estilo J.A.R.V.I.S.: un núcleo
 que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 
 - **Voz y texto.** Háblale con el micro (o un atajo global) o escríbele en el chat.
-- **Voz neuronal.** Cuatro voces (dos femeninas y dos masculinas) en español de España, de México o
-  inglés británico. Por defecto, Lyra.
+- **Voces de IA.** Seis voces neuronales (tres femeninas y tres masculinas) con un procesado de audio que
+  les da timbre de IA de película, al estilo J.A.R.V.I.S. La intensidad se regula con *Efecto IA*. Por defecto, Lyra.
+- **Arranque cinematográfico.** Intro con comprobación real de sistemas y sonido lo-fi sintetizado; se salta con un clic.
+- **Configuración inicial.** La primera vez te pregunta cómo llamarte, si te habla de usted o de tú, la voz,
+  la personalidad, el color, la calidad gráfica, la clave de la IA, el micrófono y cómo quieres tenerla.
 - **Acciones reales.** Abre aplicaciones y webs, controla la música y el volumen y consulta el estado del equipo.
 - **Halo reactivo.** El núcleo y su halo se mueven con el sonido real: tu voz mientras escucha y la suya mientras habla.
 - **Personalidad.** Mayordomo británico, copiloto directo o sarcástico, con calidez y formalidad ajustables.
@@ -27,8 +30,8 @@ npm install
 npm run dev
 ```
 
-La primera vez, abre **Ajustes** (penúltimo icono del dock), pega tu clave de Groq y pulsa **Guardar**.
-La clave se guarda cifrada con el sistema de Windows y nunca sale de tu PC, salvo hacia Groq.
+La primera vez aparece la **configuración inicial**; ahí mismo puedes pegar tu clave de Groq (o hacerlo luego en
+**Ajustes**). La clave se guarda cifrada con el sistema de Windows y solo se envía a Groq.
 
 Para generar la versión compilada:
 
@@ -72,6 +75,20 @@ llamadas a Win32 hechas desde un pequeño script de PowerShell, sin módulos nat
 Si la app se cierra de golpe (por ejemplo, desde el Administrador de tareas) mientras es el fondo, puede
 quedarse la última imagen en el escritorio hasta que vuelvas a abrir NEXUS o cambies el fondo de Windows.
 
+## Voces
+
+| Voz | Tipo | Carácter |
+| --- | --- | --- |
+| Lyra | Femenina | Cálida y cercana |
+| Orión | Masculina | Grave, estilo Jarvis |
+| Vega | Femenina | Precisa, holográfica |
+| Atlas | Masculina | Profunda, de nave |
+| Nova | Femenina | Sintética, acento internacional |
+| Kairo | Masculina | Sintética, acento internacional |
+
+Las voces son de Microsoft Edge (gratis, sin clave). El toque "IA" lo pone NEXUS en tu PC: filtro de
+presencia, un peine metálico muy corto, un doblado de la voz, una sala sintética y compresión de radio.
+
 ## Cómo está hecho
 
 ```
@@ -87,7 +104,10 @@ src/
   preload/index.ts      puente seguro entre la interfaz y el proceso principal
   renderer/src/
     NexusApp.jsx        estado de la app y del núcleo (reposo, escucha, piensa, habla…)
-    services/voice.ts   micrófono con detección de silencio, cola de voz y audio para el halo
+    services/voice.ts   micrófono con detección de silencio, cola de voz, efecto de IA y audio para el halo
+    services/sfx.ts     sonidos de arranque sintetizados
+    views/BootIntro.tsx intro de arranque
+    views/Onboarding.tsx configuración inicial
     engine/             motor gráfico en Canvas 2D: galaxia, núcleo, halo y partículas
     views/              pantallas generadas a partir del diseño
 resources/              iconos de la app y de la bandeja (scripts/make-icon.mjs)

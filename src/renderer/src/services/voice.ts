@@ -16,6 +16,7 @@ function audio() {
     outGain = ctx.createGain()
     outAnalyser.connect(outGain).connect(ctx.destination)
     engine()?.attachSource('speaking', outAnalyser)
+    buildFx(ctx, outAnalyser)
   }
   if (ctx.state === 'suspended') ctx.resume()
   return ctx
@@ -26,8 +27,119 @@ export function setVolume(pct: number) {
   outGain!.gain.value = Math.max(0, Math.min(1, pct / 100))
 }
 
+/** Where interface sounds go: after the volume, but not through the voice effects or the halo. */
+export function sfxBus() {
+  const ac = audio()
+  return { ac, out: outGain! }
+}
+
+// ---------- AI voice processing ----------
+// The neural voices are clean human recordings. This chain gives them the
+// "computer" timbre of a film AI: tight low end, presence, a metallic comb,
+// a light doubler, a short synthetic room and broadcast compression.
+type FxPreset = { comb: number; chorus: number; verb: number; presence: number; air: number; lowcut: number; body: number }
+
+export const FX: Record<string, FxPreset> = {
+  soft: { comb: .12, chorus: .18, verb: .14, presence: 2, air: 2, lowcut: 110, body: 1 },
+  holo: { comb: .26, chorus: .34, verb: .2, presence: 3.5, air: 4, lowcut: 140, body: 0 },
+  synth: { comb: .5, chorus: .26, verb: .16, presence: 3, air: 3, lowcut: 150, body: 0 },
+  jarvis: { comb: .22, chorus: .2, verb: .22, presence: 4, air: 3, lowcut: 130, body: 2 },
+  deep: { comb: .32, chorus: .16, verb: .3, presence: 2, air: 2, lowcut: 90, body: 4 }
+}
+
+let fxNodes: {
+  input: GainNode; hp: BiquadFilterNode; body: BiquadFilterNode; presence: BiquadFilterNode; air: BiquadFilterNode
+  combWet: GainNode; chorusWet: GainNode; verbWet: GainNode
+} | null = null
+let fxVoice = 'soft'
+let fxAmount = .6
+
+function impulse(ac: AudioContext, secs: number) {
+  const len = Math.floor(ac.sampleRate * secs), buf = ac.createBuffer(2, len, ac.sampleRate)
+  for (let ch = 0; ch < 2; ch++) {
+    const d = buf.getChannelData(ch)
+    for (let i = 0; i < len; i++) {
+      const t = i / len
+      // a few early reflections, then a smooth dark tail
+      const early = i < ac.sampleRate * .03 && Math.random() < .004 ? 1 : 0
+      d[i] = ((Math.random() * 2 - 1) * Math.pow(1 - t, 3.2) + early * .6) * (i < ac.sampleRate * .012 ? 0 : 1)
+    }
+  }
+  return buf
+}
+
+function lfo(ac: AudioContext, rate: number, depth: number, target: AudioParam) {
+  const o = ac.createOscillator(), g = ac.createGain()
+  o.frequency.value = rate
+  g.gain.value = depth
+  o.connect(g).connect(target)
+  o.start()
+}
+
+function buildFx(ac: AudioContext, out: AudioNode) {
+  const input = ac.createGain()
+  const hp = ac.createBiquadFilter(); hp.type = 'highpass'; hp.Q.value = .7
+  const body = ac.createBiquadFilter(); body.type = 'lowshelf'; body.frequency.value = 180
+  const presence = ac.createBiquadFilter(); presence.type = 'peaking'; presence.frequency.value = 3200; presence.Q.value = .9
+  const air = ac.createBiquadFilter(); air.type = 'highshelf'; air.frequency.value = 8500
+  input.connect(hp).connect(body).connect(presence).connect(air)
+
+  const sum = ac.createGain()
+  air.connect(sum) // dry
+
+  // metallic comb: very short delay with feedback, slowly modulated
+  const comb = ac.createDelay(.05), fb = ac.createGain(), combWet = ac.createGain()
+  comb.delayTime.value = .0055; fb.gain.value = .42
+  air.connect(comb); comb.connect(fb).connect(comb); comb.connect(combWet).connect(sum)
+  lfo(ac, .23, .0009, comb.delayTime)
+
+  // doubler: a second, slightly detuned copy
+  const chorus = ac.createDelay(.06), chorusWet = ac.createGain()
+  chorus.delayTime.value = .017
+  air.connect(chorus).connect(chorusWet).connect(sum)
+  lfo(ac, .55, .0022, chorus.delayTime)
+
+  // short synthetic room
+  const verb = ac.createConvolver(), verbWet = ac.createGain()
+  verb.buffer = impulse(ac, 1.3)
+  air.connect(verb).connect(verbWet).connect(sum)
+
+  const comp = ac.createDynamicsCompressor()
+  comp.threshold.value = -22; comp.ratio.value = 3.5; comp.attack.value = .004; comp.release.value = .18
+  const makeup = ac.createGain(); makeup.gain.value = 1.15
+  sum.connect(comp).connect(makeup).connect(out)
+
+  fxNodes = { input, hp, body, presence, air, combWet, chorusWet, verbWet }
+  applyFx(fxVoice)
+}
+
+function applyFx(preset: string) {
+  if (!fxNodes || !ctx) return
+  const p = FX[preset] || FX.soft, a = fxAmount, t = ctx.currentTime, k = .05
+  const n = fxNodes
+  n.hp.frequency.setTargetAtTime(40 + (p.lowcut - 40) * a, t, k)
+  n.body.gain.setTargetAtTime(p.body * a, t, k)
+  n.presence.gain.setTargetAtTime(p.presence * a, t, k)
+  n.air.gain.setTargetAtTime(p.air * a, t, k)
+  n.combWet.gain.setTargetAtTime(p.comb * a, t, k)
+  n.chorusWet.gain.setTargetAtTime(p.chorus * a, t, k)
+  n.verbWet.gain.setTargetAtTime(p.verb * a, t, k)
+}
+
+/** Effect preset of the selected voice. */
+export function setVoiceFx(preset: string) {
+  fxVoice = preset
+  applyFx(preset)
+}
+
+/** 0-100: how "synthetic" the voice sounds. */
+export function setFxAmount(pct: number) {
+  fxAmount = Math.max(0, Math.min(1, pct / 100))
+  applyFx(fxVoice)
+}
+
 // ---------- speaking ----------
-type Line = { text: string; buf: Promise<AudioBuffer | null> }
+type Line = { text: string; buf: Promise<AudioBuffer | null>; fx?: string }
 type SpeakHandlers = { onLine?: (text: string, duration: number) => void; onDone?: () => void; onVoiceError?: () => void }
 
 let queue: Line[] = []
@@ -86,15 +198,16 @@ async function pump() {
   handlers.onLine?.(line.text, buf.duration)
   source = audio().createBufferSource()
   source.buffer = buf
-  source.connect(outAnalyser!)
+  applyFx(line.fx || fxVoice)
+  source.connect(fxNodes ? fxNodes.input : outAnalyser!)
   source.onended = next
   source.start()
 }
 
-function enqueue(text: string, voice?: string) {
+function enqueue(text: string, voice?: string, fx?: string) {
   const t = text.trim()
   if (!t) return
-  queue.push({ text: t, buf: synth(t, voice) })
+  queue.push({ text: t, buf: synth(t, voice), fx })
   pump()
 }
 
@@ -144,10 +257,11 @@ export function endSpeech() {
   else maybeDone()
 }
 
-export function say(text: string, h: SpeakHandlers, voice?: string) {
+/** Speaks a fixed text; `voice`/`fx` override the selected voice (previews). */
+export function say(text: string, h: SpeakHandlers, voice?: string, fx?: string) {
   beginSpeech(h)
   ended = true
-  enqueue(text, voice)
+  enqueue(text, voice, fx)
   maybeDone()
 }
 

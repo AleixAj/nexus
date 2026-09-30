@@ -3,9 +3,12 @@ import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts'
 // Design voices mapped to Microsoft neural voices (free, no key)
 const VOICES: Record<string, { es: string; mx: string; en: string; rate: number; pitch: number }> = {
   lyra: { es: 'es-ES-ElviraNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-SoniaNeural', rate: 0, pitch: 0 },
+  // multilingual voices read Spanish with a subtle international accent
+  nova: { es: 'en-US-AvaMultilingualNeural', mx: 'en-US-AvaMultilingualNeural', en: 'en-US-AvaMultilingualNeural', rate: 2, pitch: 0 },
   vega: { es: 'es-ES-XimenaNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-LibbyNeural', rate: 6, pitch: 2 },
   orion: { es: 'es-ES-AlvaroNeural', mx: 'es-MX-JorgeNeural', en: 'en-GB-RyanNeural', rate: -4, pitch: -6 },
-  atlas: { es: 'es-MX-JorgeNeural', mx: 'es-MX-JorgeNeural', en: 'en-GB-ThomasNeural', rate: -8, pitch: -12 }
+  atlas: { es: 'es-MX-JorgeNeural', mx: 'es-MX-JorgeNeural', en: 'en-GB-ThomasNeural', rate: -8, pitch: -12 },
+  kairo: { es: 'en-US-AndrewMultilingualNeural', mx: 'en-US-AndrewMultilingualNeural', en: 'en-US-AndrewMultilingualNeural', rate: -2, pitch: -4 }
 }
 
 export type SpeakOptions = { voice: string; lang: string; speed: number; pitch: number }

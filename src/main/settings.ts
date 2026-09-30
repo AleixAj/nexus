@@ -13,9 +13,11 @@ export type Settings = {
   volume: number
   warmth: number
   formal: number
+  fx: number
   lang: string
   mode: string
   trayHinted: boolean
+  onboarded: boolean
   theme: string
   quality: string
   reduced: boolean
@@ -37,9 +39,11 @@ const DEFAULTS: Settings = {
   volume: 64,
   warmth: 70,
   formal: 85,
+  fx: 60,
   lang: 'es-ES',
   mode: 'window',
   trayHinted: false,
+  onboarded: false,
   theme: 'nexus',
   quality: 'ultra',
   reduced: false
