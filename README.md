@@ -9,7 +9,10 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 - **Arranque cinematográfico.** Intro con comprobación real de sistemas y sonido lo-fi sintetizado; se salta con un clic.
 - **Configuración inicial.** La primera vez te pregunta cómo llamarte, si te habla de usted o de tú, la voz,
   la personalidad, el color, la calidad gráfica, la clave de la IA, el micrófono y cómo quieres tenerla.
-- **Acciones reales.** Abre aplicaciones y webs, controla la música y el volumen y consulta el estado del equipo.
+- **Agente.** Responde cualquier pregunta buscando en internet si hace falta, analiza y busca archivos y
+  carpetas, mira estadísticas del equipo y procesos, crea o modifica archivos y ejecuta comandos de PowerShell.
+  Todo lo que cambia el equipo pide permiso antes, y lo que borra va a la papelera.
+- **Acciones rápidas.** Abre aplicaciones y webs y controla la música y el volumen.
 - **Halo reactivo.** El núcleo y su halo se mueven con el sonido real: tu voz mientras escucha y la suya mientras habla.
 - **Personalidad.** Mayordomo británico, copiloto directo o sarcástico, con calidez y formalidad ajustables.
 - **Datos reales en el escritorio.** Hora, tiempo de tu ciudad y efeméride del día.
@@ -20,8 +23,15 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 
 - Windows 10 u 11.
 - [Node.js](https://nodejs.org) 20 o superior.
-- Una clave gratuita de [Groq](https://console.groq.com/keys) para la IA y para entender la voz.
-  Si prefieres una IA local, puedes usar [Ollama](https://ollama.com), pero la voz sigue necesitando Groq.
+- Una IA, a elegir en la configuración inicial (todas gratis):
+
+| Opción | Clave | Notas |
+| --- | --- | --- |
+| **Gemini 3.8 Flash** (recomendada) | Gratis y sin tarjeta en [Google AI Studio](https://aistudio.google.com/apikey) | La más capaz del plan gratuito, busca con Google y también entiende la voz. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos. |
+| **Groq** | Gratis y sin tarjeta en [console.groq.com](https://console.groq.com/keys) | Muy rápida; menos margen por minuto para tareas largas. |
+| **Local con [Ollama](https://ollama.com)** | Sin clave | Funciona en tu PC y sin internet (modelo de unos 5 GB). Para entender la voz hace falta la clave de Gemini o Groq. |
+
+Sin ninguna clave, las búsquedas en internet siguen funcionando (DuckDuckGo).
 
 ## Arrancar
 
@@ -33,11 +43,10 @@ npm run dev
 La primera vez aparece la **configuración inicial**; ahí mismo puedes pegar tu clave de Groq (o hacerlo luego en
 **Ajustes**). La clave se guarda cifrada con el sistema de Windows y solo se envía a Groq.
 
-Para generar la versión compilada:
+Para generar el programa de Windows (`dist/win-unpacked/NEXUS.exe`):
 
 ```bash
-npm run build
-npm run preview
+npm run dist
 ```
 
 ## Uso
@@ -52,8 +61,12 @@ npm run preview
 | Poner o quitar el fondo de escritorio | Ajustes → *Fondo de escritorio*, o el icono de NEXUS en la bandeja |
 | Panel de demostración del diseño | **Ctrl + Shift + D** |
 
-Ejemplos: *«abre Spotify»*, *«pon la siguiente canción»*, *«sube el volumen»*,
-*«busca recetas de lentejas en YouTube»*, *«¿cómo va el equipo?»*.
+Ejemplos: *«¿cómo quedó el Madrid ayer?»*, *«¿qué me ocupa más espacio en Descargas?»*,
+*«busca mis facturas en PDF»*, *«resume el archivo notas.txt del escritorio»*, *«¿qué proceso consume más RAM?»*,
+*«crea una carpeta Viaje en Documentos con una lista de equipaje»*, *«abre Spotify»*, *«sube el volumen»*.
+
+Los permisos del agente (internet, ver archivos, modificarlos y ejecutar comandos) se activan o desactivan en **Ajustes → Agente**.
+El micrófono se elige en la configuración inicial o en **Ajustes → Micrófono**.
 
 ## Fondo de escritorio y segundo plano
 
@@ -96,7 +109,8 @@ src/
   main/                 proceso de Electron (Node)
     index.ts            ventana, atajo global, IPC y seguridad
     brain.ts            IA: chat en streaming con herramientas y transcripción (Whisper)
-    tools.ts            acciones en el PC: apps, webs, teclas multimedia y estado del sistema
+    agent.ts            herramientas del agente: búsqueda web, archivos, sistema y PowerShell
+    tools.ts            acciones rápidas: apps, webs y teclas multimedia
     tts.ts              voz neuronal de Microsoft Edge (gratis, sin clave)
     world.ts            ubicación aproximada, tiempo (Open-Meteo) y efemérides (Wikipedia)
     wallpaper.ts        modo fondo de escritorio y detección de apps a pantalla completa
@@ -116,7 +130,7 @@ scripts/                conversor del diseño a componentes React
 ```
 
 **Tecnologías:** Electron, React, TypeScript, Vite (electron-vite) y Canvas 2D.
-**Servicios externos, todos gratuitos:** Groq (IA y voz a texto), Microsoft Edge TTS (voz),
+**Servicios externos, todos gratuitos:** Gemini o Groq (IA y voz a texto), DuckDuckGo (búsqueda sin clave), Microsoft Edge TTS (voz),
 Open-Meteo (tiempo), Wikipedia (efemérides) e ipapi.co (ciudad aproximada).
 
 ### Rendimiento

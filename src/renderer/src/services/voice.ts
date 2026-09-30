@@ -288,6 +288,43 @@ type ListenHandlers = {
 }
 
 let rec: { finish: () => void; cancel: () => void } | null = null
+let micId = ""
+
+/** Which input device to record from ("" = Windows default). */
+export function setMicDevice(id: string) {
+  micId = id || ""
+}
+
+async function openMic() {
+  const base = { echoCancellation: true, noiseSuppression: true, autoGainControl: true }
+  if (micId) {
+    try { return await navigator.mediaDevices.getUserMedia({ audio: { ...base, deviceId: { exact: micId } } }) }
+    catch { /* unplugged: fall back to the default one */ }
+  }
+  return navigator.mediaDevices.getUserMedia({ audio: base })
+}
+
+/** Lists the microphones; names only appear once permission was granted. */
+export async function listMics() {
+  const d = await navigator.mediaDevices.enumerateDevices()
+  return d.filter(x => x.kind === "audioinput" && x.deviceId !== "communications")
+    .map((x, i) => ({ id: x.deviceId === "default" ? "" : x.deviceId, label: (x.label || "Micrófono " + (i + 1)).replace(/^(Predeterminado|Default) - /, "") }))
+    .filter((x, i, a) => a.findIndex(y => y.label === x.label) === i)
+}
+
+/** Opens the microphone for a few seconds so the core reacts to it (setup test). */
+export async function testMic(ms = 4000) {
+  const ac = audio()
+  const stream = await openMic()
+  const src = ac.createMediaStreamSource(stream), an = ac.createAnalyser()
+  an.fftSize = 512; an.smoothingTimeConstant = .6
+  src.connect(an)
+  engine()?.attachSource("listening", an)
+  await new Promise(r => setTimeout(r, ms))
+  engine()?.attachSource("listening", null)
+  src.disconnect()
+  stream.getTracks().forEach(t => t.stop())
+}
 let listenGen = 0
 
 export async function listen(h: ListenHandlers) {
@@ -301,7 +338,7 @@ export async function listen(h: ListenHandlers) {
   const ac = audio()
   let stream: MediaStream
   try {
-    stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } })
+    stream = await openMic()
   } catch {
     if (alive()) { rec = null; h.onError('No tengo acceso al micrófono.') }
     return
@@ -373,9 +410,9 @@ export async function listen(h: ListenHandlers) {
     let text = ''
     try {
       const blob = new Blob(chunks, { type: 'audio/webm' })
-      text = await api.transcribe(await blob.arrayBuffer())
+      text = await api.transcribe(await toWav(blob))
     } catch (e: any) {
-      if (alive()) h.onError(String(e?.message || e).includes('NO_KEY') ? 'Falta la clave de Groq en Ajustes' : 'No he podido entenderle')
+      if (alive()) h.onError(String(e?.message || e).includes('NO_KEY') ? 'Falta la clave de Gemini o Groq en Ajustes' : 'No he podido entenderle')
       return
     }
     if (alive()) h.onResult(text)
@@ -384,6 +421,25 @@ export async function listen(h: ListenHandlers) {
   recorder.start()
   if (rec === pendingRec) rec = mine
   else { cancel(); return } // cancelled while starting
+}
+
+/** Recording → 16 kHz mono 16-bit WAV (small, and every speech service accepts it). */
+async function toWav(blob: Blob) {
+  const decoded = await audio().decodeAudioData(await blob.arrayBuffer())
+  const rate = 16000, frames = Math.ceil(decoded.duration * rate)
+  const off = new OfflineAudioContext(1, frames, rate)
+  const src = off.createBufferSource()
+  src.buffer = decoded
+  src.connect(off.destination)
+  src.start()
+  const pcm = (await off.startRendering()).getChannelData(0)
+  const buf = new ArrayBuffer(44 + pcm.length * 2), v = new DataView(buf)
+  const str = (o: number, t: string) => { for (let i = 0; i < t.length; i++) v.setUint8(o + i, t.charCodeAt(i)) }
+  str(0, "RIFF"); v.setUint32(4, 36 + pcm.length * 2, true); str(8, "WAVE"); str(12, "fmt ")
+  v.setUint32(16, 16, true); v.setUint16(20, 1, true); v.setUint16(22, 1, true); v.setUint32(24, rate, true)
+  v.setUint32(28, rate * 2, true); v.setUint16(32, 2, true); v.setUint16(34, 16, true); str(36, "data"); v.setUint32(40, pcm.length * 2, true)
+  for (let i = 0; i < pcm.length; i++) v.setInt16(44 + i * 2, Math.max(-1, Math.min(1, pcm[i])) * 0x7fff, true)
+  return buf
 }
 
 /** Stop recording and send what was said. */

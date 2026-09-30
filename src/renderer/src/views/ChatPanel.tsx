@@ -1,5 +1,6 @@
 // Generated from design/NEXUS.dc.html by scripts/convert-design.mjs
 import { Fragment } from 'react'
+import Markdown from './Markdown'
 
 export default function ChatPanel({ v }: { v: any }) {
   return (
@@ -31,12 +32,12 @@ export default function ChatPanel({ v }: { v: any }) {
             {m.isNexus && (<>
               <div style={{ display: "flex", gap: "12px", maxWidth: "92%", animation: m.anim }}>
                 <span style={{ flex: "none", width: "22px", height: "22px", marginTop: "2px", borderRadius: "50%", background: "radial-gradient(circle, #FFF6E9 0 18%, rgb(var(--acc2) / .7) 30%, transparent 62%)", boxShadow: "0 0 0 1px rgb(var(--acc2) / .5), 0 0 14px rgb(var(--acc) / .6)" }}></span>
-                <span style={{ fontSize: "15.5px", lineHeight: "1.6", color: "rgba(241,234,248,.9)", textWrap: "pretty" }}>
-                  {m.shown}
+                <div style={{ minWidth: 0, fontSize: "15.5px", lineHeight: "1.6", color: "rgba(241,234,248,.9)", textWrap: "pretty", userSelect: "text" }}>
+                  <Markdown text={m.shown} />
                   {m.streaming && (<>
                     <span style={{ display: "inline-block", width: "7px", height: "1em", marginLeft: "3px", verticalAlign: "-2px", background: "rgb(var(--acc2))", animation: "nx-caret 900ms steps(1) infinite" }}></span>
                   </>)}
-                </span>
+                </div>
               </div>
             </>)}
             {m.isAction && (<>

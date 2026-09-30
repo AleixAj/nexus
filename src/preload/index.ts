@@ -22,5 +22,8 @@ contextBridge.exposeInMainWorld('nexus', {
   onCovered: (fn: (covered: boolean) => void) => on('app:covered', fn),
   onDelta: (fn: (id: number, t: string) => void) => on('brain:delta', fn),
   onAction: (fn: (id: number, label: string) => void) => on('brain:action', fn),
+  onProgress: (fn: (id: number, label: string) => void) => on('brain:progress', fn),
+  onConfirm: (fn: (id: number, cid: number, req: { title: string; detail: string }) => void) => on('brain:confirm', fn),
+  confirmReply: (cid: number, ok: boolean) => ipcRenderer.invoke('brain:confirm-reply', cid, ok),
   onHotkey: (fn: () => void) => on('hotkey:talk', fn)
 })

@@ -18,19 +18,29 @@ export type Settings = {
   mode: string
   trayHinted: boolean
   onboarded: boolean
+  agentWeb: boolean
+  agentFiles: boolean
+  agentWrite: boolean
+  agentShell: boolean
+  micId: string
   theme: string
   quality: string
   reduced: boolean
 }
 
 export const PROVIDERS: Record<string, { url: string; models: string[]; needsKey: boolean }> = {
+  // best free tier (Google AI Studio key, no card): smart, generous and it also understands audio
+  Gemini: { url: 'https://generativelanguage.googleapis.com/v1beta/openai', models: ['gemini-3.8-flash', 'gemini-3.5-flash-lite', 'gemini-3.1-pro-preview'], needsKey: true },
   Groq: { url: 'https://api.groq.com/openai/v1', models: ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile', 'openai/gpt-oss-20b'], needsKey: true },
-  Ollama: { url: 'http://localhost:11434/v1', models: ['llama3.1:8b', 'qwen2.5:14b'], needsKey: false }
+  // free tier with a bigger per-minute budget than Groq (5 requests/min, 30K tokens/min)
+  Cerebras: { url: 'https://api.cerebras.ai/v1', models: ['gpt-oss-120b'], needsKey: true },
+  // local, no key: runs on the PC with Ollama installed
+  Ollama: { url: 'http://localhost:11434/v1', models: ['qwen2.5:7b', 'llama3.1:8b', 'qwen2.5:14b'], needsKey: false }
 }
 
 const DEFAULTS: Settings = {
-  provider: 'Groq',
-  model: 'openai/gpt-oss-120b',
+  provider: 'Gemini',
+  model: 'gemini-3.8-flash',
   voice: 'lyra',
   userName: 'señor',
   persona: 'butler',
@@ -44,6 +54,11 @@ const DEFAULTS: Settings = {
   mode: 'window',
   trayHinted: false,
   onboarded: false,
+  agentWeb: true,
+  agentFiles: true,
+  agentWrite: true,
+  agentShell: true,
+  micId: '',
   theme: 'nexus',
   quality: 'ultra',
   reduced: false

@@ -98,12 +98,15 @@ export default function SettingsPanel({ v }: { v: any }) {
                   Atajo global
                 </span>
                 <span style={{ fontSize: "12.5px", color: "rgba(226,218,240,.45)" }}>
-                  Abre el mini overlay sobre cualquier aplicación
+                  Hable con Nexus desde cualquier aplicación
                 </span>
               </div>
               <div style={{ display: "flex", gap: "4px" }}>
                 <span style={{ padding: "5px 9px", borderRadius: "6px", border: "1px solid rgba(196,181,253,.25)", borderBottomWidth: "2px", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", color: "#FFF6E9" }}>
                   Ctrl
+                </span>
+                <span style={{ padding: "5px 9px", borderRadius: "6px", border: "1px solid rgba(196,181,253,.25)", borderBottomWidth: "2px", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", color: "rgba(241,234,248,.85)" }}>
+                  Alt
                 </span>
                 <span style={{ padding: "5px 9px", borderRadius: "6px", border: "1px solid rgba(196,181,253,.25)", borderBottomWidth: "2px", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", color: "#FFF6E9" }}>
                   Espacio
@@ -166,19 +169,24 @@ export default function SettingsPanel({ v }: { v: any }) {
                 </div>
               </div>
             </div>
-            <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
-              <span style={{ fontSize: "14.5px", color: "rgba(241,234,248,.85)" }}>
-                Salida de audio
-              </span>
-              <button onClick={v.cycleOut} style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "44px", padding: "0 14px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.16)", color: "#FFF6E9", fontSize: "14px", cursor: "pointer" }}>
-                <span>
-                  {v.outName}
-                </span>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(196,181,253,.7)" strokeWidth="1.5">
-                  <path d="M6 9l6 6 6-6" />
-                </svg>
-              </button>
-            </div>
+            <span data-scramble="1" style={{ marginTop: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
+              AGENTE
+            </span>
+            {(v.agentToggles || []).map((t, tIndex) => (<Fragment key={t?.label ?? tIndex}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "2px 0" }}>
+                <div style={{ flex: "1", display: "flex", flexDirection: "column", gap: "3px" }}>
+                  <span style={{ fontSize: "14.5px", color: "rgba(241,234,248,.88)" }}>
+                    {t.label}
+                  </span>
+                  <span style={{ fontSize: "12.5px", color: "rgba(226,218,240,.45)" }}>
+                    {t.note}
+                  </span>
+                </div>
+                <button onClick={t.toggle} style={{ flex: "none", position: "relative", width: "38px", height: "22px", borderRadius: "999px", border: `1px solid ${t.tBorder}`, background: t.tBg, cursor: "pointer", padding: "0", transition: "background 250ms, border-color 250ms" }}>
+                  <span style={{ position: "absolute", top: "2px", left: t.tLeft, width: "16px", height: "16px", borderRadius: "50%", background: "#FFF6E9", transition: "left 320ms cubic-bezier(.34,1.3,.64,1)" }}></span>
+                </button>
+              </div>
+            </Fragment>))}
           </div>
         </div>
       </div>

@@ -8,7 +8,8 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
-    "typecheck": "tsc --noEmit -p tsconfig.json"
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "dist": "electron-vite build && electron-builder --win dir"
   },
   "dependencies": {
     "msedge-tts": "^2.0.8",
@@ -21,9 +22,28 @@
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^5.2.0",
     "electron": "^44.5.1",
+    "electron-builder": "^26.15.3",
     "electron-vite": "^5.0.0",
     "node-html-parser": "^9.0.4",
     "typescript": "^7.0.2",
     "vite": "^7.3.6"
+  },
+  "author": "AleixAj",
+  "build": {
+    "appId": "com.aleixaj.nexus",
+    "productName": "NEXUS",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "out/**",
+      "resources/**",
+      "package.json"
+    ],
+    "win": {
+      "icon": "resources/icon.png",
+      "target": "dir"
+    },
+    "asar": true
   }
 }

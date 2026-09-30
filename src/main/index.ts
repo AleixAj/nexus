@@ -131,6 +131,16 @@ function createTray() {
   updateTray()
 }
 
+// approvals the agent is waiting for (write files, run commands…)
+const pendingConfirms = new Map<number, (ok: boolean) => void>()
+let confirmSeq = 0
+function answerConfirm(cid: number, ok: boolean) {
+  const r = pendingConfirms.get(cid)
+  if (!r) return
+  pendingConfirms.delete(cid)
+  r(ok)
+}
+
 const str = (v: unknown, max = 4000) => (typeof v === 'string' ? v.slice(0, max) : '')
 
 function handle(channel: string, fn: (e: IpcMainInvokeEvent, ...args: any[]) => unknown) {
@@ -164,13 +174,21 @@ function registerIpc() {
     return transcribe(audio, loadSettings().lang)
   })
 
-  // streamed answer: deltas and executed actions are pushed as events
+  // streamed answer: deltas, progress, executed actions and approval requests are pushed as events
   handle('brain:ask', async (e, id, text) => {
     const send = (ch: string, ...a: unknown[]) => { if (!e.sender.isDestroyed()) e.sender.send(ch, ...a) }
     try {
       const full = await ask(str(text), {
         onDelta: t => send('brain:delta', id, t),
-        onAction: label => send('brain:action', id, label)
+        onAction: label => send('brain:action', id, label),
+        onProgress: label => send('brain:progress', id, label),
+        confirm: req => new Promise<boolean>(resolve => {
+          const cid = ++confirmSeq
+          pendingConfirms.set(cid, resolve)
+          send('brain:confirm', id, cid, req)
+          // no answer in two minutes counts as "no"
+          setTimeout(() => answerConfirm(cid, false), 120000)
+        })
       })
       return { ok: true, text: full }
     } catch (err: any) {
@@ -179,7 +197,8 @@ function registerIpc() {
       return { ok: false, error: err.message || String(err) }
     }
   })
-  handle('brain:abort', () => abort())
+  handle('brain:abort', () => { abort(); pendingConfirms.forEach((_, cid) => answerConfirm(cid, false)) })
+  handle('brain:confirm-reply', (_e, cid, ok) => answerConfirm(Number(cid), ok === true))
 
   handle('system:status', () => systemStatus())
   handle('world:get', () => getWorld())

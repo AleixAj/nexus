@@ -129,28 +129,45 @@ export default function Onboarding({ v }: { v: any }) {
 
       {/* 4 · brain and ears */}
       {step === 4 && (
-        <div key="s4" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <span style={{ ...title, animation: enter(40) }}>Para pensar y oírle</span>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, animation: enter(100) }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-              <span style={{ fontSize: 16 }}>Clave de Groq <span style={{ ...text, fontSize: 13 }}>· gratuita, para la IA y para entender su voz</span></span>
-              <span style={{ ...label, color: v.keyColor }}>● {v.keyStatus}</span>
+        <div key="s4" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <span style={{ ...title, animation: enter(40) }}>Mi cerebro y mis oídos</span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', animation: enter(90) }}>
+            <span style={{ ...text, marginRight: 4 }}>Inteligencia</span>
+            {(v.providerChips || []).map((p: any) => <Chip key={p.label} on={p.on} onClick={p.pick}>{p.label}</Chip>)}
+          </div>
+          <span style={{ ...text, fontSize: 13, marginTop: -4, animation: enter(120) }}>{v.providerNote}</span>
+          {v.keyNeeded ? (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, animation: enter(150) }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+                <span style={{ fontSize: 15 }}>{v.keyTitle} <span style={{ ...text, fontSize: 12.5 }}>· gratuita, sin tarjeta</span></span>
+                <span style={{ ...label, color: v.keyColor }}>● {v.keyStatus}</span>
+              </div>
+              <div style={{ display: 'flex', gap: 8 }}>
+                <input type={v.keyType} value={v.keyInput} onChange={v.onKeyInput} onKeyDown={v.onKeyEnter} placeholder={v.keyPlaceholder} spellCheck={false}
+                  style={{ flex: 1, minWidth: 0, height: 44, padding: '0 16px', borderRadius: 10, background: 'rgba(0,0,0,.35)', border: '1px solid rgba(196,181,253,.2)', color: '#FFF6E9', fontFamily: mono, fontSize: 13, outline: 'none' }} />
+                <button onClick={v.saveKey} style={{ height: 44, padding: '0 18px', borderRadius: 10, border: '1px solid rgb(var(--acc2) / .4)', background: 'rgb(var(--acc) / .35)', color: '#FFF6E9', fontSize: 14, cursor: 'pointer' }}>Guardar</button>
+                <button onClick={v.openGroq} style={{ height: 44, padding: '0 16px', borderRadius: 10, border: '1px solid rgba(196,181,253,.2)', background: 'transparent', color: 'rgba(226,218,240,.8)', fontSize: 14, cursor: 'pointer' }}>Conseguir una ↗</button>
+              </div>
             </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <input type={v.keyType} value={v.keyInput} onChange={v.onKeyInput} onKeyDown={v.onKeyEnter} placeholder={v.keyPlaceholder} spellCheck={false}
-                style={{ flex: 1, minWidth: 0, height: 46, padding: '0 16px', borderRadius: 10, background: 'rgba(0,0,0,.35)', border: '1px solid rgba(196,181,253,.2)', color: '#FFF6E9', fontFamily: mono, fontSize: 13, outline: 'none' }} />
-              <button onClick={v.saveKey} style={{ height: 46, padding: '0 18px', borderRadius: 10, border: '1px solid rgb(var(--acc2) / .4)', background: 'rgb(var(--acc) / .35)', color: '#FFF6E9', fontSize: 14, cursor: 'pointer' }}>Guardar</button>
-              <button onClick={v.openGroq} style={{ height: 46, padding: '0 16px', borderRadius: 10, border: '1px solid rgba(196,181,253,.2)', background: 'transparent', color: 'rgba(226,218,240,.8)', fontSize: 14, cursor: 'pointer' }}>Conseguir una ↗</button>
+          ) : (
+            <div style={{ display: 'flex', gap: 8, alignItems: 'center', animation: enter(150) }}>
+              <span style={{ ...text, fontSize: 13, flex: 1 }}>{v.keyHelp}</span>
+              <button onClick={v.openGroq} style={{ height: 40, padding: '0 16px', borderRadius: 10, border: '1px solid rgba(196,181,253,.2)', background: 'transparent', color: 'rgba(226,218,240,.8)', fontSize: 14, cursor: 'pointer' }}>Descargar Ollama ↗</button>
+            </div>
+          )}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '14px 16px', borderRadius: 12, background: 'rgba(255,255,255,.025)', border: '1px solid rgba(196,181,253,.12)', animation: enter(210) }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
+                <span style={{ fontSize: 15 }}>Micrófono</span>
+                <span data-scramble="1" style={{ ...label, color: v.micPermColor }}>{v.micPermText}</span>
+              </span>
+              <button onClick={v.askMic} disabled={v.micTesting} style={{ height: 38, padding: '0 16px', borderRadius: 10, border: '1px solid rgba(52,211,153,.4)', background: 'rgba(52,211,153,.08)', color: '#6EE7B7', fontSize: 14, cursor: 'pointer', opacity: v.micTesting ? .5 : 1 }}>{v.micTesting ? 'Escuchando…' : 'Probar'}</button>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              <Chip on={!v.micOpts.some((m: any) => m.on)} onClick={v.micDefault}>Predeterminado de Windows</Chip>
+              {(v.micOpts || []).filter((m: any) => m.id).map((m: any) => <Chip key={m.id} on={m.on} onClick={m.pick}>{m.label}</Chip>)}
             </div>
           </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', borderRadius: 12, background: 'rgba(255,255,255,.025)', border: '1px solid rgba(196,181,253,.12)', animation: enter(180) }}>
-            <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
-              <span style={{ fontSize: 16 }}>Micrófono</span>
-              <span data-scramble="1" style={{ ...label, color: v.micPermColor }}>{v.micPermText}</span>
-            </span>
-            <button onClick={v.askMic} style={{ height: 40, padding: '0 18px', borderRadius: 10, border: '1px solid rgba(52,211,153,.4)', background: 'rgba(52,211,153,.08)', color: '#6EE7B7', fontSize: 14, cursor: 'pointer' }}>Probar micrófono</button>
-          </div>
-          <span style={{ ...text, fontSize: 13, animation: enter(240) }}>Puede dejarlo para más tarde: todo esto está también en Ajustes.</span>
         </div>
       )}
 

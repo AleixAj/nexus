@@ -12,6 +12,7 @@ import Onboarding from './Onboarding'
 import Dock from './Dock'
 import Director from './Director'
 import BootIntro from './BootIntro'
+import ConfirmCard from './ConfirmCard'
 
 export default function Stage({ v }: { v: any }) {
   return (
@@ -31,6 +32,7 @@ export default function Stage({ v }: { v: any }) {
         <Onboarding v={v} />
         <Dock v={v} />
         <Director v={v} />
+        <ConfirmCard v={v} />
       </div>
       {v.intro && <BootIntro v={v} />}
       {/* film grain and scanlines over the whole window, not just the 16:9 stage */}

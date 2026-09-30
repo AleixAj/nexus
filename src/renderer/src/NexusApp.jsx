@@ -134,6 +134,11 @@ export default class NexusApp extends Component {
     this.iv = setInterval(() => this.tick(), 1000);
     this.onKey = e => {
       if (e.repeat) return;
+      if (this.state.confirm) {
+        if (e.key === 'Enter') { e.preventDefault(); this.answerConfirm(true); }
+        else if (e.key === 'Escape') { e.preventDefault(); this.answerConfirm(false); }
+        return;
+      }
       const typing = e.target && e.target.closest && e.target.closest('input, textarea');
       if (e.key === 'Escape') {
         if (typing) { e.target.blur(); return; }
@@ -148,12 +153,14 @@ export default class NexusApp extends Component {
       this.offs.push(api.onHotkey(() => this.talk()));
       this.offs.push(api.onDelta((id, t) => this.onDelta(id, t)));
       this.offs.push(api.onAction((id, label) => this.onAction(id, label)));
+      this.offs.push(api.onProgress((id, label) => { if (id === this.reqId) this.setState({ actionLabel: label.toUpperCase() }); }));
+      this.offs.push(api.onConfirm((id, cid, req) => this.onConfirm(id, cid, req)));
       this.offs.push(api.onCovered(covered => { const E = this.E(); E && E.setPaused(covered); }));
     }
     const go = async () => {
       const E = this.E(); if (!E) return setTimeout(go, 50);
       const s = await this.loadSettings();
-      if (s) { E.setTheme(s.theme); E.setQuality(s.quality); E.setReduced(s.reduced); voice.setVolume(s.volume); voice.setFxAmount(s.fx); voice.setVoiceFx(this.fxOf(s.voice)); }
+      if (s) { E.setTheme(s.theme); E.setQuality(s.quality); E.setReduced(s.reduced); voice.setVolume(s.volume); voice.setFxAmount(s.fx); voice.setVoiceFx(this.fxOf(s.voice)); voice.setMicDevice(s.micId || ''); }
       E.snapCore(this.layout());
       this.loadWorld();
       this.countMics();
@@ -175,6 +182,7 @@ export default class NexusApp extends Component {
     this.setState(st => ({
       provider: s.provider, model: s.model, providers: s.providers, voiceSel: s.voice, userName: s.userName, persona: s.persona,
       theme: s.theme, quality: s.quality, reduced: s.reduced, autostart: !!s.autostart, hotkey: s.hotkey || st.hotkey,
+      agent: { web: s.agentWeb, files: s.agentFiles, write: s.agentWrite, shell: s.agentShell }, micId: s.micId || '',
       lang: s.lang, sliders: { ...st.sliders, speed: s.speed, pitch: s.pitch, volume: s.volume, warmth: s.warmth, formal: s.formal, fx: s.fx },
     }));
     return s;
@@ -188,9 +196,22 @@ export default class NexusApp extends Component {
   fem() { return ['lyra', 'vega', 'nova'].includes(this.state.voiceSel); }
   async countMics() {
     try {
-      const d = await navigator.mediaDevices.enumerateDevices();
-      this.setState({ mics: d.filter(x => x.kind === 'audioinput').length });
-    } catch { this.setState({ mics: 0 }); }
+      const list = await voice.listMics();
+      this.setState({ mics: list.length, micList: list });
+    } catch { this.setState({ mics: 0, micList: [] }); }
+  }
+  pickMic(id) {
+    this.setState({ micId: id }); voice.setMicDevice(id); this.save({ micId: id });
+  }
+  cycleMic() {
+    const list = this.state.micList || [];
+    if (!list.length) return;
+    const i = list.findIndex(m => m.id === this.state.micId);
+    this.pickMic(list[(i + 1) % list.length].id);
+  }
+  micLabel() {
+    const m = (this.state.micList || []).find(x => x.id === this.state.micId);
+    return m ? m.label : 'Predeterminado de Windows';
   }
   // real system checks shown in the start-up log
   introVals() {
@@ -270,7 +291,7 @@ export default class NexusApp extends Component {
       if (!QUIET) this.say(`${this.greet()}, ${this.name()}. Todos los sistemas operativos.`);
       if (params.get('notice') === 'wallpaper-failed') this.notify('FONDO DE ESCRITORIO', 'No he podido ponerme de fondo', 'Windows no lo ha permitido · sigo en modo ventana', '#FB7185');
       const p = this.state.providers[this.state.provider];
-      if (p && p.needsKey && !p.hasKey) this.later(() => this.notify('CONFIGURACIÓN', 'Falta la clave de la IA', 'Ábrala en Ajustes · gratis en console.groq.com', '#F5B971'), 4000);
+      if (p && p.needsKey && !p.hasKey) this.later(() => this.notify('CONFIGURACIÓN', 'Falta la clave de la IA', 'Gratis en Google AI Studio · pégala en Ajustes', '#F5B971'), 4000);
     } });
   }
   notify(app, title, body, dot = '#C4B5FD') {
@@ -319,7 +340,9 @@ export default class NexusApp extends Component {
   }
   // cut whatever is going on: speech, pending answer, recording
   interrupt() {
+    if (this.state.confirm) this.answerConfirm(false);
     cancelAnimationFrame(this.deltaRaf); this.deltaRaf = 0; this.deltaBuf = '';
+    this.spoken = ''; this.spokenDone = false;
     this.clearFlow(); voice.stopSpeech(); voice.cancelListening();
     this.reqId = null; api && api.abort();
     this.setState({ preview: null });
@@ -365,15 +388,48 @@ export default class NexusApp extends Component {
     if (res.error === 'ABORTED') return;
     if (res.error === 'NO_KEY') {
       this.openPanel('settings', true);
-      this.say(`${this.cap(this.name())}, necesito una clave de API para pensar. Póngala en Ajustes; la de Groq es gratuita.`);
+      this.say(`${this.cap(this.name())}, necesito una clave para pensar. Póngala en Ajustes; la de Gemini es gratuita.`);
       return;
     }
     this.fail('No puedo conectar con el modelo', res.error);
   }
   // tokens arrive dozens of times per second: render them once per frame
+  // long answers: only the summary before the first blank line is spoken
+  speakPart(t) {
+    if (this.spokenDone) return;
+    this.spoken = (this.spoken || '') + t;
+    const cut = this.spoken.indexOf('\n\n');
+    let part = t;
+    if (cut > 0) { part = t.slice(0, Math.max(0, t.length - (this.spoken.length - cut))); this.spokenDone = true; }
+    part = part.replace(/[*_`#>|]/g, '').replace(/https?:\/\/\S+/g, '');
+    if (part) voice.feedSpeech(part);
+  }
+  onConfirm(id, cid, req) {
+    if (id !== this.reqId) { api.confirmReply(cid, false); return; }
+    this.setState({ confirm: { cid, ...req }, actionLabel: 'ESPERANDO SU PERMISO' });
+    if (WALLPAPER) this.confirmByVoice(cid, req);
+  }
+  answerConfirm(ok) {
+    const c = this.state.confirm; if (!c) return;
+    api.confirmReply(c.cid, ok);
+    this.setState({ confirm: null, actionLabel: ok ? 'PERMITIDO' : 'DENEGADO' });
+  }
+  // on the wallpaper nothing can be clicked: ask out loud and listen for yes/no
+  confirmByVoice(cid, req) {
+    voice.say(`Necesito su permiso para esto: ${req.title}. ¿Lo hago?`, {
+      onLine: (l, d) => this.revealLine(l, d),
+      onDone: () => {
+        this.setCore('listening');
+        voice.listen({
+          onResult: text => this.answerConfirm(/^\s*(s[ií]|vale|adelante|hazlo|claro|ok|de acuerdo|por supuesto)/i.test(text || '')),
+          onError: () => this.answerConfirm(false),
+        });
+      },
+    });
+  }
   onDelta(id, t) {
     if (id !== this.reqId) return;
-    voice.feedSpeech(t);
+    this.speakPart(t);
     this.deltaBuf = (this.deltaBuf || '') + t;
     if (this.deltaRaf) return;
     this.deltaRaf = requestAnimationFrame(() => {
@@ -497,16 +553,21 @@ export default class NexusApp extends Component {
     this.later(() => this.say(`${this.greet()}, ${n}. Todos los sistemas operativos.`), 400);
   }
   async askMic() {
+    if (this.state.micTesting) return;
+    this.interrupt();
+    this.setState({ micTesting: true });
+    this.setCore('listening');
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach(t => t.stop());
+      await voice.testMic(4000);
       this.setState({ micPerm: 'ok' });
-      const E = this.E(); E && E.poke();
+      this.countMics(); // names are visible now that permission was granted
+      this.setCore('idle');
       this.say(`Le oigo perfectamente, ${this.name()}.`);
-      this.countMics();
     } catch {
       this.setState({ micPerm: 'no' });
+      this.setCore('idle');
     }
+    this.setState({ micTesting: false });
   }
   sendChat() {
     const text = this.state.chatInput.trim(); if (!text) return;
@@ -540,6 +601,14 @@ export default class NexusApp extends Component {
     this.setState({ voiceSel: id, preview: id }); this.save({ voice: id });
     voice.setVoiceFx(this.fxOf(id));
     this.say(`Hola, ${this.name()}. Así sonaré a partir de ahora.`, () => { this.setState({ preview: null }); this.settle(); }, {}, id);
+  }
+  providerInfo(p) {
+    return {
+      Gemini: { name: 'Gemini · recomendado', url: 'https://aistudio.google.com/apikey', note: 'Google Gemini 3.8 Flash: el mejor gratis. Busca en internet y entiende su voz con la misma clave.', help: 'Gratis y sin tarjeta en aistudio.google.com → Get API key. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos.' },
+      Groq: { name: 'Groq · rápido', url: 'https://console.groq.com/keys', note: 'Muy rápido. El plan gratuito tiene menos margen por minuto para tareas largas.', help: 'Gratis y sin tarjeta en console.groq.com → API Keys. Si la pone, también se usa para entender su voz.' },
+      Cerebras: { name: 'Cerebras', url: 'https://cloud.cerebras.ai', note: 'Alternativa gratuita con buen margen por minuto.', help: 'Gratis en cloud.cerebras.ai. Para entender su voz hace falta además la clave de Gemini o Groq.' },
+      Ollama: { name: 'Local · sin clave', url: 'https://ollama.com/download', note: 'Funciona en su PC sin clave ni internet. Hay que instalar Ollama y descargar un modelo (unos 5 GB).', help: 'Instale Ollama y ejecute «ollama pull qwen2.5:7b». Para entender su voz hace falta la clave de Gemini o Groq.' },
+    }[p] || { name: p, url: '', note: '', help: '' };
   }
   hotkeyLabel() { return this.state.hotkey.replace('Control', 'Ctrl').replace('Space', 'Espacio').split('+').join(' + ').toUpperCase(); }
   async setAutostart(on) {
@@ -667,7 +736,15 @@ export default class NexusApp extends Component {
     const nameOpts = ['señor', 'señora', 'jefe', 'jefa', 'capitán', 'comandante'];
     const vs = S.onbStep ? S.onbStep : 0;
     return {
-      k: S.k, qualityAttr: S.quality, intro: !!S.intro, ...(S.intro ? this.introVals() : null), ...this.worldVals(d), acc: th.acc, acc2: th.acc2, reducedAttr: S.reduced ? '1' : '0',
+      k: S.k, qualityAttr: S.quality, intro: !!S.intro,
+      confirm: S.confirm, confirmYes: () => this.answerConfirm(true), confirmNo: () => this.answerConfirm(false),
+      micOpts: (S.micList || []).map(m => ({ id: m.id, label: m.label, on: !!m.id && m.id === S.micId, pick: () => this.pickMic(m.id) })), micDefault: () => this.pickMic(''), micTesting: !!S.micTesting,
+      agentToggles: [
+        ['web', 'agentWeb', 'Buscar en internet', 'Actualidad, precios, noticias y cualquier dato reciente'],
+        ['files', 'agentFiles', 'Ver mis archivos', 'Buscar, leer y analizar archivos y carpetas'],
+        ['write', 'agentWrite', 'Modificar archivos', 'Crear, editar, mover o enviar a la papelera · pide permiso'],
+        ['shell', 'agentShell', 'Ejecutar comandos', 'PowerShell para tareas avanzadas · pide permiso'],
+      ].map(([k, key, label, note]) => ({ label, note, ...this.toggleT(!!(S.agent || {})[k]), toggle: () => { this.setState(s => ({ agent: { ...s.agent, [k]: !(s.agent || {})[k] } })); this.save({ [key]: !(S.agent || {})[k] }); } })), ...(S.intro ? this.introVals() : null), ...this.worldVals(d), acc: th.acc, acc2: th.acc2, reducedAttr: S.reduced ? '1' : '0',
       bgFilter: S.overlay ? 'blur(12px) brightness(.3)' : P === 'music' ? 'brightness(.85)' : P === 'system' ? 'blur(3px) brightness(.78)' : P ? 'blur(6px) brightness(.7)' : 'none',
       overlay: S.overlay,
       showUI: S.uiIn && !S.overlay && !S.onb,
@@ -731,7 +808,7 @@ export default class NexusApp extends Component {
       keyInput: S.keyInput, keyType: S.showKey ? 'text' : 'password', keyDisabled: !(S.providers[S.provider] || {}).needsKey,
       keyPlaceholder: !(S.providers[S.provider] || {}).needsKey ? 'No necesaria · Ollama en http://localhost:11434' : (S.providers[S.provider] || {}).hasKey ? '•••••••••••• guardada · pegue otra para cambiarla' : 'Pegue aquí su clave de ' + S.provider,
       keyStatus: !(S.providers[S.provider] || {}).needsKey ? 'LOCAL' : (S.providers[S.provider] || {}).hasKey ? 'GUARDADA' : 'FALTA', keyColor: !(S.providers[S.provider] || {}).needsKey || (S.providers[S.provider] || {}).hasKey ? '#34D399' : '#F5B971',
-      keyHelp: S.provider === 'Groq' ? 'Gratis en console.groq.com → API Keys. También se usa para entender su voz.' : 'Instale Ollama y descargue el modelo. Para la voz sigue haciendo falta la clave de Groq.',
+      keyHelp: this.providerInfo(S.provider).help,
       onKeyInput: e => this.setState({ keyInput: e.target.value }), onKeyEnter: e => { if (e.key === 'Enter') this.saveKey(); }, saveKey: () => this.saveKey(),
       keyBtn: S.showKey ? 'Ocultar' : 'Mostrar', toggleKey: () => this.setState(s => ({ showKey: !s.showKey })),
       sysToggles: [
@@ -742,7 +819,7 @@ export default class NexusApp extends Component {
       ].map(t => ({ ...t, ...this.toggleT(t.on) })),
       themeCards: Object.keys(this.TH).map(id => { const t = this.TH[id], sel = S.theme === id; return { name: t.name, c1: t.c1, c2: t.c2, bg: sel ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.02)', border: sel ? t.c2 : 'rgba(196,181,253,.1)', pick: () => this.setTheme(id) }; }),
       qualityOpts: [['ultra', 'Ultra'], ['equilibrado', 'Equilibrado'], ['ahorro', 'Ahorro']].map(([id, label]) => ({ label, ...this.seg(S.quality === id), pick: () => this.setQuality(id) })), qualityNote: qN[S.quality],
-      micName: "Predeterminado del sistema", outName: "Predeterminada del sistema", cycleMic: () => {}, cycleOut: () => {},
+      micName: this.micLabel(), outName: "Predeterminada del sistema", cycleMic: () => this.cycleMic(), cycleOut: () => {},
       ovRef: this.ovRef, ovInput: S.ovInput, ovState: S.ovState, ovLabel: S.ovLabel, ovReply: S.ovReply,
       onOvInput: e => this.setState({ ovInput: e.target.value, ovState: e.target.value ? 'listening' : 'idle' }),
       onOvKey: e => {
@@ -753,7 +830,9 @@ export default class NexusApp extends Component {
       onbCard: S.onb && S.onbStep > 0, onbStep: vs, onbTotal: 5,
       formalOpts: [['usted', 85], ['tú', 20]].map(([label, val]) => ({ label, on: label === 'usted' ? S.sliders.formal >= 50 : S.sliders.formal < 50, pick: () => { this.setState(s => ({ sliders: { ...s.sliders, formal: val } })); this.save({ formal: val }); } })),
       qualityChips: [['ultra', 'Ultra'], ['equilibrado', 'Equilibrado'], ['ahorro', 'Ahorro']].map(([id, label]) => ({ label, on: S.quality === id, pick: () => this.setQuality(id) })),
-      openGroq: () => window.open('https://console.groq.com/keys'),
+      openGroq: () => window.open(this.providerInfo(S.provider).url),
+      providerChips: ['Gemini', 'Groq', 'Ollama'].filter(p => S.providers[p]).map(p => ({ label: this.providerInfo(p).name, on: S.provider === p, pick: () => this.pickProvider(p) })),
+      providerNote: this.providerInfo(S.provider).note, keyNeeded: !!(S.providers[S.provider] || {}).needsKey, keyTitle: 'Clave de ' + S.provider,
       hotkeyText: this.hotkeyLabel(),
       onbToggles: [
         { name: 'Iniciar con Windows', note: 'Me abro sola al encender el PC', on: S.autostart, onClick: () => this.setAutostart(!S.autostart) },
@@ -761,7 +840,7 @@ export default class NexusApp extends Component {
       ],
       onbDots: [1, 2, 3, 4, 5].map(i => ({ w: i === vs ? '28px' : '10px', c: i <= vs ? 'rgb(var(--acc2))' : 'rgba(196,181,253,.2)' })),
       onbBack: () => this.setState(s => ({ onbStep: Math.max(1, s.onbStep - 1) })), onbNext: () => this.onbNext(), onbNextLabel: vs === 5 ? 'Empezar' : 'Continuar', askMic: () => this.askMic(),
-      micPermText: S.micPerm === 'ok' ? '● FUNCIONA · LE OIGO BIEN' : S.micPerm === 'no' ? 'SIN ACCESO · REVISE LA PRIVACIDAD DE WINDOWS' : S.mics === 0 ? 'NO HAY NINGÚN MICRÓFONO CONECTADO' : 'PULSE PARA COMPROBARLO',
+      micPermText: S.micTesting ? '● HABLE AHORA · EL NÚCLEO REACCIONA A SU VOZ' : S.micPerm === 'ok' ? '● FUNCIONA · LE OIGO BIEN' : S.micPerm === 'no' ? 'SIN ACCESO · REVISE LA PRIVACIDAD DE WINDOWS' : S.mics === 0 ? 'NO HAY NINGÚN MICRÓFONO CONECTADO' : 'ELÍJALO Y PULSE PROBAR',
       micPermColor: S.micPerm === 'ok' ? '#34D399' : S.micPerm === 'no' ? '#FB7185' : 'rgba(226,218,240,.45)',
       showDock: !WALLPAPER && (S.uiIn || S.overlay) && !S.onb && !S.overlay, dock, hasHover: !!S.hoverDock && !S.volOpen, hoverLabel: S.hoverDock, volOpen: S.volOpen,
       showDirector: !WALLPAPER && S.showDirector, dirOpen: S.dirOpen, toggleDir: () => this.setState(s => ({ dirOpen: !s.dirOpen })),
