@@ -30,16 +30,17 @@ export default class NexusApp extends Component {
     // fx: the AI processing preset applied on top of the neural voice (services/voice.ts)
     // Lyra/Vega/Kairo/Atlas: the most natural Microsoft voices (neutral accent).
     // Aura/Zenit: premium Gemini voices, the most human; they need the Gemini key.
+    // Spanish (Spain) voices first, then the neutral-accent ones
     { id: 'lyra', name: 'Lyra', desc: 'Femenina · española · natural', fx: 'clean' },
     { id: 'orion', name: 'Orión', desc: 'Masculina · española · estilo Jarvis', fx: 'jarvis' },
-    { id: 'vega', name: 'Vega', desc: 'Femenina · alegre · acento neutro', fx: 'clean' },
-    { id: 'kairo', name: 'Kairo', desc: 'Masculina · cercana · acento neutro', fx: 'clean' },
     { id: 'nova', name: 'Nova', desc: 'Femenina · española · serena', fx: 'soft' },
-    { id: 'atlas', name: 'Atlas', desc: 'Masculina · joven · acento neutro', fx: 'clean' },
-    { id: 'aura', name: 'Aura ✦', desc: 'Femenina · premium · española y cálida', fx: 'clean', premium: true },
     { id: 'zenit', name: 'Zenit ✦', desc: 'Masculina · premium · española y profunda', fx: 'clean', premium: true },
-    { id: 'selene', name: 'Selene ✦', desc: 'Femenina · premium · española y suave', fx: 'clean', premium: true },
+    { id: 'aura', name: 'Aura ✦', desc: 'Femenina · premium · española y cálida', fx: 'clean', premium: true },
     { id: 'draco', name: 'Draco ✦', desc: 'Masculina · premium · española y serena', fx: 'clean', premium: true },
+    { id: 'selene', name: 'Selene ✦', desc: 'Femenina · premium · española y suave', fx: 'clean', premium: true },
+    { id: 'kairo', name: 'Kairo', desc: 'Masculina · cercana · acento neutro', fx: 'clean' },
+    { id: 'vega', name: 'Vega', desc: 'Femenina · alegre · acento neutro', fx: 'clean' },
+    { id: 'atlas', name: 'Atlas', desc: 'Masculina · joven · acento neutro', fx: 'clean' },
   ];
   PERSONAS = [
     { id: 'butler', name: 'Mayordomo británico', line: '«Por supuesto, señor. Ya está hecho.»' },
@@ -140,6 +141,7 @@ export default class NexusApp extends Component {
     this.iv = setInterval(() => this.tick(), 1000);
     this.onKey = e => {
       if (e.repeat) return;
+      if (this.state.keyAsk && e.key === 'Escape') { e.preventDefault(); this.setState({ keyAsk: null }); return; }
       if (this.state.confirm) {
         if (e.key === 'Enter') { e.preventDefault(); this.answerConfirm(true); }
         else if (e.key === 'Escape') { e.preventDefault(); this.answerConfirm(false); }
@@ -600,9 +602,20 @@ export default class NexusApp extends Component {
     const v = this.VOICES.find(x => x.id === id);
     if (!v || !v.premium || (this.state.providers.Gemini || {}).hasKey) return false;
     this.interrupt();
-    this.notify('VOZ PREMIUM', v.name.replace(' ✦', '') + ' necesita la clave de Gemini', 'Es gratis en Google AI Studio · pégala en Ajustes', '#F5B971');
-    this.say(`${v.name.replace(' ✦', '')} es una voz premium: necesita la clave gratuita de Gemini. Puede ponerla en Ajustes.`);
+    this.setState({ keyAsk: { voice: id, voiceName: v.name.replace(' ✦', '') }, keyAskInput: '' });
     return true;
+  }
+  async keyAskSave() {
+    const k = this.state.keyAsk, key = this.state.keyAskInput.trim();
+    if (!k || !api) return;
+    if (!key) { this.setState({ keyAsk: { ...k, error: 'PEGUE PRIMERO LA CLAVE' } }); return; }
+    this.setState({ keyAsk: { ...k, saving: true, error: '' } });
+    const ok = await api.testKey('Gemini', key);
+    if (!ok) { this.setState({ keyAsk: { ...k, saving: false, error: 'GOOGLE NO ACEPTA ESA CLAVE · REVÍSELA' } }); return; }
+    try { await api.setKey('Gemini', key); } catch { this.setState({ keyAsk: { ...k, saving: false, error: 'NO SE HA PODIDO GUARDAR' } }); return; }
+    this.setState({ keyAsk: null, keyAskInput: '' });
+    await this.loadSettings();
+    this.selectVoice(k.voice);
   }
   previewVoice(id) {
     if (this.premiumLocked(id)) return;
@@ -754,6 +767,11 @@ export default class NexusApp extends Component {
     const vs = S.onbStep ? S.onbStep : 0;
     return {
       k: S.k, qualityAttr: S.quality, intro: !!S.intro,
+      keyAsk: S.keyAsk, keyAskInput: S.keyAskInput || '',
+      keyAskChange: e => this.setState({ keyAskInput: e.target.value }),
+      keyAskKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.keyAskSave(); } },
+      keyAskSave: () => this.keyAskSave(), keyAskCancel: () => this.setState({ keyAsk: null }),
+      keyAskOpen: () => window.open('https://aistudio.google.com/apikey'),
       confirm: S.confirm, confirmYes: () => this.answerConfirm(true), confirmNo: () => this.answerConfirm(false),
       micOpts: (S.micList || []).map(m => ({ id: m.id, label: m.label, on: !!m.id && m.id === S.micId, pick: () => this.pickMic(m.id) })), micDefault: () => this.pickMic(''), micTesting: !!S.micTesting,
       agentToggles: [
@@ -793,7 +811,7 @@ export default class NexusApp extends Component {
       onChatKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.sendChat(); } }, onChatSend: () => this.sendChat(),
       showSlash: S.chatInput.startsWith('/'),
       slashCmds: this.CMDS.filter(c => c.cmd.startsWith(S.chatInput.split(' ')[0]) || S.chatInput === '/').map(c => ({ ...c, pick: () => this.setState({ chatInput: c.cmd + ' ' }) })),
-      voiceCards: this.VOICES.map((v, i) => { const sel = S.voiceSel === v.id; const noKey = v.premium && !(S.providers.Gemini || {}).hasKey; return { ...v, desc: noKey ? v.desc + ' · requiere clave de Gemini' : v.desc, selected: sel, state: S.preview === v.id ? 'speaking' : sel ? 'idle' : 'idle',
+      voiceCards: this.VOICES.map((v, i) => { const sel = S.voiceSel === v.id; const noKey = v.premium && !(S.providers.Gemini || {}).hasKey; return { ...v, desc: noKey ? v.desc.replace('premium', 'premium · con clave gratis') : v.desc, selected: sel, state: S.preview === v.id ? 'speaking' : sel ? 'idle' : 'idle',
         bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.1)', delay: (140 + i * 40) + 'ms',
         previewLabel: S.preview === v.id ? '■ SONANDO…' : '▶ ESCUCHAR',
         select: () => this.selectVoice(v.id), preview: e => { e.stopPropagation(); this.previewVoice(v.id); },

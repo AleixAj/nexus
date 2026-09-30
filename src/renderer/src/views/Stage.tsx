@@ -13,6 +13,7 @@ import Dock from './Dock'
 import Director from './Director'
 import BootIntro from './BootIntro'
 import ConfirmCard from './ConfirmCard'
+import KeyCard from './KeyCard'
 
 export default function Stage({ v }: { v: any }) {
   return (
@@ -33,6 +34,7 @@ export default function Stage({ v }: { v: any }) {
         <Dock v={v} />
         <Director v={v} />
         <ConfirmCard v={v} />
+        <KeyCard v={v} />
       </div>
       {v.intro && <BootIntro v={v} />}
       {/* film grain and scanlines over the whole window, not just the 16:9 stage */}

@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('nexus', {
   getSettings: () => ipcRenderer.invoke('settings:get'),
   setSettings: (patch: object) => ipcRenderer.invoke('settings:set', patch),
   setKey: (provider: string, key: string) => ipcRenderer.invoke('key:set', provider, key),
+  testKey: (provider: string, key: string) => ipcRenderer.invoke('key:test', provider, key),
   speak: (text: string) => ipcRenderer.invoke('tts:speak', text),
   previewVoice: (text: string, voice: string) => ipcRenderer.invoke('tts:preview', text, voice),
   transcribe: (audio: ArrayBuffer) => ipcRenderer.invoke('stt:transcribe', audio),

@@ -141,6 +141,24 @@ function answerConfirm(cid: number, ok: boolean) {
   r(ok)
 }
 
+// true if the service accepts the key (lists its models)
+async function testKey(provider: string, key: string) {
+  if (!key) return false
+  const url = provider === 'Gemini' ? 'https://generativelanguage.googleapis.com/v1beta/models?pageSize=1'
+    : provider === 'Groq' ? 'https://api.groq.com/openai/v1/models'
+    : provider === 'Cerebras' ? 'https://api.cerebras.ai/v1/models' : ''
+  if (!url) return true
+  try {
+    const res = await fetch(url, {
+      signal: AbortSignal.timeout(10000),
+      headers: provider === 'Gemini' ? { 'x-goog-api-key': key } : { Authorization: `Bearer ${key}` }
+    })
+    return res.ok
+  } catch {
+    return true // offline: do not block saving
+  }
+}
+
 const str = (v: unknown, max = 4000) => (typeof v === 'string' ? v.slice(0, max) : '')
 
 function handle(channel: string, fn: (e: IpcMainInvokeEvent, ...args: any[]) => unknown) {
@@ -159,6 +177,7 @@ function registerIpc() {
   }))
   handle('settings:set', (_e, patch) => saveSettings(patch && typeof patch === 'object' ? patch : {}))
   handle('key:set', (_e, provider, key) => setKey(str(provider, 40), str(key, 400)))
+  handle('key:test', (_e, provider, key) => testKey(str(provider, 40), str(key, 400).trim()))
 
   handle('tts:speak', (_e, text) => {
     const s = loadSettings()
