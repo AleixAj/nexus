@@ -263,7 +263,7 @@ export default class NexusApp extends Component {
   layout() {
     const { panel, overlay, onb } = this.state;
     if (overlay) return { x: 960, y: 540, s: .5, v: 0 };
-    if (onb) return { x: 960, y: 290, s: .58, v: 1 };
+    if (onb) return { x: 960, y: 230, s: .5, v: 1 };
     switch (panel) {
       case 'chat': return { x: 652, y: 480, s: .8, v: 1 };
       case 'voice': case 'routines': case 'memory': case 'settings': return { x: 410, y: 440, s: .62, v: 1 };

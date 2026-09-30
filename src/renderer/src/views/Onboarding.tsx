@@ -43,8 +43,10 @@ export default function Onboarding({ v }: { v: any }) {
   const step = v.onbStep
 
   return (
+    // centred in the free space under the core; scrolls inside if a step is taller than that
+    <div style={{ position: 'absolute', left: 0, right: 0, top: 400, bottom: 28, display: 'flex', alignItems: 'center', justifyContent: 'center', pointerEvents: 'none' }}>
     <div style={{
-      position: 'absolute', left: '50%', top: 560, width: 880, marginLeft: -440, padding: '26px 32px 28px', boxSizing: 'border-box',
+      position: 'relative', width: 880, maxHeight: '100%', overflowY: 'auto', pointerEvents: 'auto', padding: '26px 32px 28px', boxSizing: 'border-box',
       display: 'flex', flexDirection: 'column', gap: 22,
       background: 'linear-gradient(rgba(7,5,14,.62),rgba(7,5,14,.62)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .6), rgb(var(--acc) / .06) 45%, rgb(var(--acc) / .25)) border-box',
       border: '1px solid transparent', borderRadius: 16, backdropFilter: 'blur(26px) saturate(1.2)',
@@ -185,6 +187,7 @@ export default function Onboarding({ v }: { v: any }) {
         {step > 1 && <button onClick={v.onbBack} style={{ height: 46, padding: '0 20px', borderRadius: 10, border: '1px solid rgba(196,181,253,.2)', background: 'rgba(0,0,0,.3)', color: 'rgba(241,234,248,.85)', fontSize: 14.5, cursor: 'pointer' }}>Atrás</button>}
         <button onClick={v.onbNext} style={{ height: 46, padding: '0 26px', borderRadius: 10, border: '1px solid rgba(255,255,255,.18)', background: 'linear-gradient(180deg, rgb(var(--acc) / .95), rgb(var(--acc) / .7))', color: '#fff', fontSize: 14.5, fontWeight: 500, cursor: 'pointer', boxShadow: '0 0 24px rgb(var(--acc) / .45)' }}>{v.onbNextLabel}</button>
       </div>
+    </div>
     </div>
   )
 }
