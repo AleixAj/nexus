@@ -4,8 +4,8 @@ Asistente virtual de escritorio para Windows, al estilo J.A.R.V.I.S.: un núcleo
 que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 
 - **Voz y texto.** Háblale con el micro (o un atajo global) o escríbele en el chat.
-- **Voces de IA.** Seis voces neuronales (tres femeninas y tres masculinas) con un procesado de audio que
-  les da timbre de IA de película, al estilo J.A.R.V.I.S. La intensidad se regula con *Efecto IA*. Por defecto, Lyra.
+- **Voces.** Ocho voces (cuatro femeninas y cuatro masculinas): naturales tipo asistente moderno, españolas
+  y dos premium con Gemini. Un *Efecto IA* opcional les da un toque de J.A.R.V.I.S.
 - **Arranque cinematográfico.** Intro con comprobación real de sistemas y sonido lo-fi sintetizado; se salta con un clic.
 - **Configuración inicial.** La primera vez te pregunta cómo llamarte, si te habla de usted o de tú, la voz,
   la personalidad, el color, la calidad gráfica, la clave de la IA, el micrófono y cómo quieres tenerla.
@@ -27,7 +27,7 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 
 | Opción | Clave | Notas |
 | --- | --- | --- |
-| **Gemini 3.8 Flash** (recomendada) | Gratis y sin tarjeta en [Google AI Studio](https://aistudio.google.com/apikey) | La más capaz del plan gratuito, busca con Google y también entiende la voz. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos. |
+| **Gemini Flash-Lite** (recomendada, 500 preguntas/día) | Gratis y sin tarjeta en [Google AI Studio](https://aistudio.google.com/apikey) | La más capaz del plan gratuito, busca con Google y también entiende la voz. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos. |
 | **Groq** | Gratis y sin tarjeta en [console.groq.com](https://console.groq.com/keys) | Muy rápida; menos margen por minuto para tareas largas. |
 | **Local con [Ollama](https://ollama.com)** | Sin clave | Funciona en tu PC y sin internet (modelo de unos 5 GB). Para entender la voz hace falta la clave de Gemini o Groq. |
 
@@ -92,15 +92,18 @@ quedarse la última imagen en el escritorio hasta que vuelvas a abrir NEXUS o ca
 
 | Voz | Tipo | Carácter |
 | --- | --- | --- |
-| Lyra | Femenina | Cálida y cercana |
-| Orión | Masculina | Grave, estilo Jarvis |
-| Vega | Femenina | Precisa, holográfica |
-| Atlas | Masculina | Profunda, de nave |
-| Nova | Femenina | Sintética, acento internacional |
-| Kairo | Masculina | Sintética, acento internacional |
+| Lyra | Femenina | Natural y cálida (Microsoft Ava, acento neutro) |
+| Vega | Femenina | Natural y alegre (Microsoft Emma, acento neutro) |
+| Nova | Femenina | Española, clara |
+| Aura ✦ | Femenina | Premium: voz de Gemini, la más humana |
+| Orión | Masculina | Española, grave, estilo Jarvis |
+| Kairo | Masculina | Natural y cercana (Microsoft Andrew, acento neutro) |
+| Atlas | Masculina | Natural y joven (Microsoft Brian, acento neutro) |
+| Zenit ✦ | Masculina | Premium: voz de Gemini, profunda |
 
-Las voces son de Microsoft Edge (gratis, sin clave). El toque "IA" lo pone NEXUS en tu PC: filtro de
-presencia, un peine metálico muy corto, un doblado de la voz, una sala sintética y compresión de radio.
+Las voces de Microsoft son gratis y sin clave. Las premium usan la clave de Gemini y, si no la hay o se agota
+su cupo gratuito, suenan con la voz de Microsoft equivalente. *Efecto IA* añade un toque de voz de película
+(presencia, un leve timbre metálico y una sala muy corta); en las voces naturales es casi imperceptible.
 
 ## Cómo está hecho
 
