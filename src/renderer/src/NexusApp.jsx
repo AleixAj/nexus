@@ -36,8 +36,10 @@ export default class NexusApp extends Component {
     { id: 'kairo', name: 'Kairo', desc: 'Masculina · cercana · acento neutro', fx: 'clean' },
     { id: 'nova', name: 'Nova', desc: 'Femenina · española · serena', fx: 'soft' },
     { id: 'atlas', name: 'Atlas', desc: 'Masculina · joven · acento neutro', fx: 'clean' },
-    { id: 'aura', name: 'Aura ✦', desc: 'Femenina · premium Gemini · la más humana', fx: 'clean', premium: true },
-    { id: 'zenit', name: 'Zenit ✦', desc: 'Masculina · premium Gemini · profunda', fx: 'clean', premium: true },
+    { id: 'aura', name: 'Aura ✦', desc: 'Femenina · premium · española y cálida', fx: 'clean', premium: true },
+    { id: 'zenit', name: 'Zenit ✦', desc: 'Masculina · premium · española y profunda', fx: 'clean', premium: true },
+    { id: 'selene', name: 'Selene ✦', desc: 'Femenina · premium · española y suave', fx: 'clean', premium: true },
+    { id: 'draco', name: 'Draco ✦', desc: 'Masculina · premium · española y serena', fx: 'clean', premium: true },
   ];
   PERSONAS = [
     { id: 'butler', name: 'Mayordomo británico', line: '«Por supuesto, señor. Ya está hecho.»' },
@@ -197,7 +199,7 @@ export default class NexusApp extends Component {
     this.firstScreen();
   }
   firstScreen() { if (this.onboarded) this.bootDesktop(); else this.startOnboarding(); }
-  fem() { return ['lyra', 'vega', 'nova', 'aura'].includes(this.state.voiceSel); }
+  fem() { return ['lyra', 'vega', 'nova', 'aura', 'selene'].includes(this.state.voiceSel); }
   async countMics() {
     try {
       const list = await voice.listMics();

@@ -83,17 +83,15 @@ export default function Onboarding({ v }: { v: any }) {
       {step === 2 && (
         <div key="s2" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
           <span style={{ ...title, animation: enter(40) }}>Elija mi voz</span>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
             {(v.voiceCards || []).map((c: any, i: number) => (
               <button key={c.id} onClick={c.selectSay} style={{
-                display: 'flex', alignItems: 'center', gap: 12, padding: '10px 14px 10px 8px', borderRadius: 12, cursor: 'pointer', textAlign: 'left',
-                background: c.bg, border: `1px solid ${c.border}`, color: '#F1EAF8', animation: enter(80 + i * 40)
+                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, padding: '8px 6px 10px', borderRadius: 12, cursor: 'pointer', textAlign: 'center',
+                background: c.bg, border: `1px solid ${c.border}`, color: '#F1EAF8', animation: enter(80 + i * 30)
               }}>
-                <canvas data-nexus-core="1" data-state={c.state} data-particles="200" data-r=".22" style={{ width: 60, height: 60, flex: 'none' }} />
-                <span style={{ display: 'flex', flexDirection: 'column', gap: 3, minWidth: 0 }}>
-                  <span style={{ fontSize: 16, fontWeight: 500 }}>{c.name}{c.selected && <span style={{ marginLeft: 8, fontFamily: mono, fontSize: 9, letterSpacing: '.2em', color: '#34D399' }}>● ACTIVA</span>}</span>
-                  <span style={{ fontSize: 12, color: 'rgba(226,218,240,.55)' }}>{c.desc}</span>
-                </span>
+                <canvas data-nexus-core="1" data-state={c.state} data-particles="160" data-r=".24" style={{ width: 46, height: 46 }} />
+                <span style={{ fontSize: 14.5, fontWeight: 500 }}>{c.selected && <span style={{ color: '#34D399', marginRight: 5 }}>●</span>}{c.name}</span>
+                <span style={{ fontSize: 10.5, lineHeight: 1.35, color: 'rgba(226,218,240,.55)' }}>{c.desc}</span>
               </button>
             ))}
           </div>

@@ -15,7 +15,9 @@ const VOICES: Record<string, Voice> = {
   orion: { es: 'es-ES-AlvaroNeural', mx: 'es-MX-JorgeNeural', en: 'en-GB-RyanNeural', rate: -4, pitch: -6 },
   kairo: { es: 'en-US-AndrewMultilingualNeural', mx: 'en-US-AndrewMultilingualNeural', en: 'en-US-AndrewMultilingualNeural', rate: 0, pitch: 0 },
   atlas: { es: 'en-US-BrianMultilingualNeural', mx: 'en-US-BrianMultilingualNeural', en: 'en-US-BrianMultilingualNeural', rate: 0, pitch: 0 },
-  zenit: { es: 'en-US-AndrewMultilingualNeural', mx: 'en-US-AndrewMultilingualNeural', en: 'en-US-AndrewMultilingualNeural', rate: 0, pitch: 0, gemini: 'Charon' }
+  zenit: { es: 'en-US-AndrewMultilingualNeural', mx: 'en-US-AndrewMultilingualNeural', en: 'en-US-AndrewMultilingualNeural', rate: 0, pitch: 0, gemini: 'Charon' },
+  selene: { es: 'es-ES-XimenaNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-SoniaNeural', rate: 0, pitch: 0, gemini: 'Despina' },
+  draco: { es: 'es-ES-AlvaroNeural', mx: 'es-MX-JorgeNeural', en: 'en-GB-RyanNeural', rate: 0, pitch: 0, gemini: 'Algieba' }
 }
 
 export type SpeakOptions = { voice: string; lang: string; speed: number; pitch: number }
@@ -89,13 +91,21 @@ function wav(pcm: Buffer, rate = 24000) {
   return Buffer.concat([h, pcm])
 }
 
-async function gemini(key: string, voiceName: string, text: string): Promise<Buffer> {
+// Gemini TTS follows a spoken-style direction placed before the text (it is not read aloud)
+const ACCENT: Record<string, string> = {
+  'es-ES': 'Say in Spanish from Spain, with a natural Castilian accent and a warm, conversational tone:',
+  'es-MX': 'Say in Mexican Spanish, with a natural, warm and conversational tone:',
+  en: 'Say in British English, with a natural, warm and conversational tone:'
+}
+
+async function gemini(key: string, voiceName: string, text: string, lang: string): Promise<Buffer> {
+  const direction = ACCENT[lang] || ACCENT[lang.slice(0, 2)] || ACCENT['es-ES']
   const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-tts:generateContent', {
     method: 'POST',
     signal: AbortSignal.timeout(20000),
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({
-      contents: [{ parts: [{ text }] }],
+      contents: [{ parts: [{ text: `${direction}\n${text}` }] }],
       generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName } } } }
     })
   })
@@ -116,7 +126,7 @@ export async function speak(text: string, o: SpeakOptions): Promise<Buffer> {
   const v = Object.hasOwn(VOICES, o.voice) ? VOICES[o.voice] : VOICES.lyra
   const key = v.gemini ? getKey('Gemini') : ''
   if (v.gemini && key && Date.now() > geminiPausedUntil) {
-    try { return await gemini(key, v.gemini, text) } catch { /* fall back to the Microsoft voice */ }
+    try { return await gemini(key, v.gemini, text, o.lang) } catch { /* fall back to the Microsoft voice */ }
   }
   const name = o.lang.startsWith('en') ? v.en : o.lang === 'es-MX' ? v.mx : v.es
   return edge(name, text, v.rate + (num(o.speed, 1) - 1) * 100, v.pitch + num(o.pitch, 0) * 2)

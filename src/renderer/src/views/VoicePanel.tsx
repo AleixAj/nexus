@@ -34,10 +34,10 @@ export default function VoicePanel({ v }: { v: any }) {
             <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)", animation: "nx-in 500ms cubic-bezier(.16,1,.3,1) 120ms both" }}>
               VOCES
             </span>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", maxHeight: "580px", overflowY: "auto", paddingRight: "6px" }}>
               {(v.voiceCards || []).map((v, vIndex) => (<Fragment key={v?.id ?? vIndex}>
-                <div data-spot="1" onClick={v.select} style={{ position: "relative", padding: "16px", display: "flex", gap: "14px", alignItems: "center", cursor: "pointer", borderRadius: "12px", background: v.bg, border: `1px solid ${v.border}`, transition: "transform 300ms cubic-bezier(.34,1.2,.64,1), border-color 300ms, background 300ms", animation: "nx-in 600ms cubic-bezier(.16,1,.3,1) both", animationDelay: v.delay }} className="dc20 dc21">
-                  <canvas data-nexus-core="1" data-state={v.state} data-particles="260" data-r=".2" style={{ width: "96px", height: "96px", flex: "none" }} />
+                <div data-spot="1" onClick={v.select} style={{ position: "relative", padding: "12px 14px", display: "flex", gap: "12px", alignItems: "center", cursor: "pointer", borderRadius: "12px", background: v.bg, border: `1px solid ${v.border}`, transition: "transform 300ms cubic-bezier(.34,1.2,.64,1), border-color 300ms, background 300ms", animation: "nx-in 600ms cubic-bezier(.16,1,.3,1) both", animationDelay: v.delay }} className="dc20 dc21">
+                  <canvas data-nexus-core="1" data-state={v.state} data-particles="220" data-r=".22" style={{ width: "72px", height: "72px", flex: "none" }} />
                   <div style={{ flex: "1", minWidth: "0", display: "flex", flexDirection: "column", gap: "6px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
                       <span style={{ fontSize: "19px", fontWeight: "500", color: "#FFF6E9" }}>

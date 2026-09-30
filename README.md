@@ -4,7 +4,7 @@ Asistente virtual de escritorio para Windows, al estilo J.A.R.V.I.S.: un núcleo
 que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 
 - **Voz y texto.** Háblale con el micro (o un atajo global) o escríbele en el chat.
-- **Voces.** Ocho voces (cuatro femeninas y cuatro masculinas): naturales tipo asistente moderno, españolas
+- **Voces.** Diez voces (cinco femeninas y cinco masculinas): naturales tipo asistente moderno, españolas
   y dos premium con Gemini. Un *Efecto IA* opcional les da un toque de J.A.R.V.I.S.
 - **Arranque cinematográfico.** Intro con comprobación real de sistemas y sonido lo-fi sintetizado; se salta con un clic.
 - **Configuración inicial.** La primera vez te pregunta cómo llamarte, si te habla de usted o de tú, la voz,
@@ -95,13 +95,15 @@ quedarse la última imagen en el escritorio hasta que vuelvas a abrir NEXUS o ca
 | Lyra | Femenina | Española, natural (Microsoft Ximena) |
 | Vega | Femenina | Natural y alegre (Microsoft Emma, acento neutro) |
 | Nova | Femenina | Española, serena (Microsoft Elvira) |
-| Aura ✦ | Femenina | Premium: voz de Gemini, la más humana |
+| Aura ✦ | Femenina | Premium: voz de Gemini, española y cálida |
 | Orión | Masculina | Española, grave, estilo Jarvis |
 | Kairo | Masculina | Natural y cercana (Microsoft Andrew, acento neutro) |
 | Atlas | Masculina | Natural y joven (Microsoft Brian, acento neutro) |
-| Zenit ✦ | Masculina | Premium: voz de Gemini, profunda |
+| Zenit ✦ | Masculina | Premium: voz de Gemini, española y profunda |
+| Selene ✦ | Femenina | Premium: voz de Gemini, española y suave |
+| Draco ✦ | Masculina | Premium: voz de Gemini, española y serena |
 
-Las voces de Microsoft son gratis y sin clave. Las premium necesitan la clave de Gemini (sin ella no se pueden elegir); si se agota
+Las voces de Microsoft son gratis y sin clave; en español de España solo hay tres (Ximena, Elvira y Álvaro). Las premium de Gemini hablan con acento de España. Las premium necesitan la clave de Gemini (sin ella no se pueden elegir); si se agota
 su cupo gratuito, suenan con una voz de Microsoft. *Efecto IA* añade un toque de voz de película
 (presencia, un leve timbre metálico y una sala muy corta); en las voces naturales es casi imperceptible.
 

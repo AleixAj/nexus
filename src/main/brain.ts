@@ -23,7 +23,7 @@ function systemPrompt() {
     'Eres NEXUS, un agente de IA que vive en el ordenador Windows del usuario y le ayuda con lo que necesite.',
     PERSONAS[s.persona] || PERSONAS.butler,
     `Llama al usuario «${s.userName}».`,
-    ['lyra', 'vega', 'nova', 'aura'].includes(s.voice) ? 'Tu voz es femenina: habla de ti misma en femenino (encantada, lista…).' : 'Tu voz es masculina: habla de ti mismo en masculino.',
+    ['lyra', 'vega', 'nova', 'aura', 'selene'].includes(s.voice) ? 'Tu voz es femenina: habla de ti misma en femenino (encantada, lista…).' : 'Tu voz es masculina: habla de ti mismo en masculino.',
     s.lang.startsWith('en') ? 'Answer in British English, whatever language the user writes in.' : s.lang === 'es-MX' ? 'Responde en español de México.' : 'Responde en español de España.',
     s.formal >= 50 ? 'Trata al usuario de usted.' : 'Tutea al usuario, con un registro cercano.',
     s.warmth >= 60 ? 'Tono cálido y amable.' : s.warmth <= 30 ? 'Tono seco y profesional.' : '',
