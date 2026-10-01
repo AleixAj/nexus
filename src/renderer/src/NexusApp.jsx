@@ -41,7 +41,7 @@ export default class NexusApp extends Component {
     // memory and reminders
     // news
     news: null, newsTopics: 'tech,science,curious', newsAvoid: 'política',
-    memQuery: '', memFilter: 'Todo', learn: true, memChats: [], facts: [], factInput: '', forgetArmed: false, reminders: [],
+    memQuery: '', memFilter: 'Todo', learn: true, memChats: [], facts: [], factInput: '', forgetArmed: false, reminders: [], calendar: null,
     // settings
     provider: 'Auto', model: '', providers: {}, keyInput: '', showKey: false, autostart: false, hotkey: 'Control+Alt+Space',
     hoverDock: null, volOpen: false,
@@ -99,6 +99,8 @@ export default class NexusApp extends Component {
     on(api.onRoutineRun, r => this.onRoutineDue(r));
     on(api.onRoutinesChanged, () => this.loadRoutines());
     this.loadRoutines();
+    this.loadCalendar();
+    this.calIv = setInterval(() => this.loadCalendar(), 10 * 60e3);
     api.listReminders().then(l => this.setState({ reminders: l })).catch(() => {});
     api.getMedia().then(r => { if (r.state) this.onMedia(r.state); if (r.extra && r.extra.key) this.onMediaExtra(r.extra); }).catch(() => {});
   }
@@ -131,7 +133,7 @@ export default class NexusApp extends Component {
 
   componentWillUnmount() {
     removeEventListener('resize', this.onResize); removeEventListener('keydown', this.onKey);
-    clearInterval(this.iv); clearInterval(this.worldIv); this.clearFlow();
+    clearInterval(this.iv); clearInterval(this.worldIv); clearInterval(this.calIv); this.clearFlow();
     (this.offs || []).forEach(off => off());
     voice.cancelListening(); voice.stopSpeech(); voice.stopLoopback();
     const E = this.E(); E && E.disableMic();

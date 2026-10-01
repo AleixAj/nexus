@@ -152,12 +152,12 @@ export default function Desktop({ v }: { v: any }) {
           </div>
           {v.upcoming?.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "inherit", animation: "nx-left 800ms cubic-bezier(.16,1,.3,1) 280ms both" }}>
-              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .6)" }}>PRÓXIMOS AVISOS</span>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .6)" }}>PRÓXIMAMENTE</span>
               {v.upcoming.map(r => (
                 <div key={r.id} className="nx-rem" style={{ display: "flex", alignItems: "center", gap: "10px", maxWidth: "380px" }}>
-                  <button onClick={r.cancel} title="Cancelar" className="nx-rem-x" style={{ width: "22px", height: "22px", borderRadius: "6px", border: "none", background: "transparent", color: "rgba(226,218,240,.45)", cursor: "pointer", display: "grid", placeItems: "center", padding: 0 }}>
+                  {r.event ? <span title="Calendario" style={{ width: "22px", textAlign: "center", color: "rgb(var(--acc2) / .7)", fontSize: "12px" }}>◷</span> : <button onClick={r.cancel} title="Cancelar" className="nx-rem-x" style={{ width: "22px", height: "22px", borderRadius: "6px", border: "none", background: "transparent", color: "rgba(226,218,240,.45)", cursor: "pointer", display: "grid", placeItems: "center", padding: 0 }}>
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 6l12 12M18 6L6 18" /></svg>
-                  </button>
+                  </button>}
                   <span style={{ fontSize: "14.5px", color: "rgba(241,234,248,.85)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.text}</span>
                   <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11.5px", letterSpacing: ".1em", color: r.alarm ? "#FDBA74" : "rgb(var(--acc2) / .85)", whiteSpace: "nowrap" }}>{r.alarm ? "⏰ " : ""}{r.time}</span>
                 </div>

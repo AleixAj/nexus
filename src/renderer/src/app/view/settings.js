@@ -52,6 +52,11 @@ export function settingsView(app, c) {
     ].map(t => ({ ...t, ...toggleT(t.on) })),
     micName: app.micLabel(), cycleMic: () => app.cycleMic(),
 
+    // calendar (secret iCal address)
+    calConnected: !!S.calConnected, calInput: S.calInput || '', onCalInput: e => app.setState({ calInput: e.target.value }),
+    calSave: () => app.saveCalendar(false), calRemove: () => app.saveCalendar(true), calBusy: !!S.calBusy, calError: S.calError || '',
+    calStatus: S.calendar ? `Conectado · ${S.calendar.length} evento${S.calendar.length === 1 ? '' : 's'} hoy y mañana` : '',
+
     // Spotify account
     spotifyConnected: !!(S.spotify && S.spotify.connected), spotifyUser: (S.spotify && S.spotify.user) || '',
     spotifyRedirect: (S.spotify && S.spotify.redirect) || 'http://127.0.0.1:8737/callback',

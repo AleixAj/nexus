@@ -198,6 +198,26 @@ export default function SettingsPanel({ v }: { v: any }) {
               </div>
             </Fragment>))}
             <span data-scramble="1" style={{ marginTop: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
+              CALENDARIO · GOOGLE, OUTLOOK O ICLOUD
+            </span>
+            {v.calConnected ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <span style={{ flex: "1", fontSize: "14px", color: "rgba(241,234,248,.88)" }}>● {v.calStatus}</span>
+                <button onClick={v.calRemove} style={{ height: "32px", padding: "0 12px", borderRadius: "8px", border: "1px solid rgba(196,181,253,.2)", background: "transparent", color: "rgba(226,218,240,.7)", fontSize: "12.5px", cursor: "pointer" }}>Quitar</button>
+              </div>
+            ) : (
+              <>
+                <span style={{ fontSize: "12.5px", lineHeight: "1.55", color: "rgba(226,218,240,.5)" }}>
+                  Google Calendar (web) → Configuración → tu calendario → «Dirección secreta en formato iCal». Cópiala y pégala aquí. Solo lectura; se guarda cifrada.
+                </span>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <input type="password" value={v.calInput} onChange={v.onCalInput} placeholder="https://calendar.google.com/calendar/ical/…/basic.ics" style={{ flex: "1", minWidth: "0", height: "36px", padding: "0 12px", borderRadius: "9px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.16)", outline: "none", color: "#FFF6E9", fontSize: "12px" }} />
+                  <button onClick={v.calSave} disabled={v.calBusy} style={{ height: "36px", padding: "0 14px", borderRadius: "9px", border: "1px solid rgba(255,255,255,.18)", background: "linear-gradient(180deg, rgb(var(--acc) / .95), rgb(var(--acc) / .7))", color: "#fff", fontSize: "13px", cursor: "pointer", opacity: v.calBusy ? .6 : 1 }}>{v.calBusy ? 'Probando…' : 'Conectar'}</button>
+                </div>
+                {v.calError && <span style={{ fontSize: "12.5px", color: "#FB7185" }}>{v.calError}</span>}
+              </>
+            )}
+            <span data-scramble="1" style={{ marginTop: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
               SPOTIFY · TUS LISTAS POR NOMBRE
             </span>
             {v.spotifyConnected ? (

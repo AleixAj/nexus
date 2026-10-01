@@ -94,6 +94,23 @@ export const settings = {
     return m ? m.label : 'Predeterminado de Windows';
   },
 
+  // ---------- calendar ----------
+  async loadCalendar() {
+    if (!api) return;
+    try { const ev = await api.calendarEvents(2); this.setState({ calendar: ev, calConnected: ev !== null }); } catch { /* keep */ }
+  },
+  async saveCalendar(remove) {
+    const url = remove ? '' : (this.state.calInput || '').trim();
+    if (!remove && !url) return;
+    this.setState({ calBusy: true, calError: '' });
+    try {
+      await api.setCalendar(url);
+      this.setState({ calInput: '' });
+      await this.loadCalendar();
+      if (!remove) this.say(`Calendario conectado, ${this.name()}.`);
+    } catch (e) { this.setState({ calError: String((e && e.message) || e).replace(/^Error invoking remote method '[^']+': (Error: )?/, '') }); }
+    this.setState({ calBusy: false });
+  },
   // ---------- data for the panels ----------
   async loadWorld() {
     if (!api) return;

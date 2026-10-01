@@ -27,10 +27,14 @@ export function desktopView(app, c) {
     // info on the right: desktop icons live on the left (same layout as the wallpaper mode)
     hudPos: { left: 'auto', right: '64px', alignItems: 'flex-end', textAlign: 'right' },
     indicators: [{ label: 'IA', color: S.error ? '#FB7185' : '#34D399' }, { label: 'LOCAL', color: '#34D399' }, { label: 'VOZ', color: S.voiceDown ? '#FB7185' : '#34D399' }],
-    upcoming: S.reminders.slice(0, 3).map(r => {
-      const rd = new Date(r.at);
+    // reminders and calendar events together, the next three
+    upcoming: [
+      ...S.reminders.map(r => ({ id: 'r' + r.id, at: r.at, alarm: r.alarm, text: r.text, cancel: () => api && api.cancelReminder(r.id) })),
+      ...(S.calendar || []).filter(e => e.end > Date.now() && !e.allDay).map(e => ({ id: 'c' + e.start + e.title, at: e.start, text: e.title, event: true })),
+    ].sort((a, b) => a.at - b.at).slice(0, 3).map(x => {
+      const rd = new Date(x.at);
       const day = rd.toDateString() === today ? '' : rd.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' }).replace('.', '').toUpperCase() + ' · ';
-      return { id: r.id, alarm: r.alarm, text: r.text, time: day + hm(r.at), cancel: () => api && api.cancelReminder(r.id) };
+      return { ...x, time: day + hm(x.at) };
     }),
   };
 }

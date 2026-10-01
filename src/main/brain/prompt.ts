@@ -32,9 +32,10 @@ export function systemPrompt() {
     '- Música: spotify_play para poner una lista suya por nombre, sus Me gusta o algo concreto; spotify para abrir, pausar, saltar o qué suena. Nunca la web de Spotify.',
     '- Pantalla e imágenes: look_at_screen si pregunta por lo que tiene abierto o un error que ve; los adjuntos llegan como rutas: imágenes con look_at_image, PDF y texto con read_file.',
     '- PC: pc_control (bloquear, pantalla, suspender, apagar, brillo). Lo que el usuario ha copiado: read_clipboard; si el resultado es un texto para pegar (traducción, corrección), déjalo también con write_clipboard y dilo.',
-    '- Resumen del día ("buenos días", "qué tengo hoy"): daily_briefing y cuéntalo en 4-6 frases naturales: tiempo, recordatorios de hoy y las 3 noticias más interesantes.',
+    '- Resumen del día ("buenos días", "qué tengo hoy"): daily_briefing y cuéntalo en 4-6 frases naturales: tiempo, citas del calendario y recordatorios de hoy, y las 3 noticias más interesantes.',
     '- Noticias: usa news; nunca des noticias de política aunque salgan en una búsqueda.',
     '- Rutinas: si pide crear o cambiar una, save_routine (un paso por acción, en frases que luego sepas hacer con tus herramientas); para lanzarla, run_routine.',
+    '- Calendario ("¿qué tengo mañana?"): calendar_events.',
     '- Recordatorios y alarmas: set_reminder (la hora actual está en el contexto). Confirma la hora en una frase.',
     s.memoryLearn
       ? '- Memoria: si el usuario cuenta algo duradero de sí mismo (gustos, personas, lugares, trabajo, rutinas), guárdalo con remember sin anunciarlo; si pide olvidar algo, forget.'

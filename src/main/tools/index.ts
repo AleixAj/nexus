@@ -4,6 +4,7 @@ import type { Settings } from '../settings'
 import type { Group, Tool, ToolResult } from './define'
 import { appTools } from './apps'
 import { briefingTools } from './briefing'
+import { calendarTools } from './calendar'
 import { fileTools } from './files'
 import { memoryTools } from './memory'
 import { musicTools } from './music'
@@ -15,7 +16,7 @@ import { systemTools } from './system'
 import { visionTools } from './vision'
 import { webTools } from './web'
 
-const ALL: Tool[] = [...appTools, ...musicTools, ...memoryTools, ...reminderTools, ...routineTools, ...newsTools, ...briefingTools, ...visionTools, ...pcTools, ...systemTools, ...webTools, ...fileTools]
+const ALL: Tool[] = [...appTools, ...musicTools, ...memoryTools, ...reminderTools, ...calendarTools, ...routineTools, ...newsTools, ...briefingTools, ...visionTools, ...pcTools, ...systemTools, ...webTools, ...fileTools]
 const BY_NAME = new Map(ALL.map(t => [t.name, t]))
 
 /** The switches in Settings → Agent. */

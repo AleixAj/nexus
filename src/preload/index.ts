@@ -29,6 +29,8 @@ contextBridge.exposeInMainWorld('nexus', {
   onProgress: (fn: (id: number, label: string) => void) => on('brain:progress', fn),
   onConfirm: (fn: (id: number, cid: number, req: { title: string; detail: string }) => void) => on('brain:confirm', fn),
   confirmReply: (cid: number, ok: boolean | 'always') => ipcRenderer.invoke('brain:confirm-reply', cid, ok),
+  setCalendar: (url: string) => ipcRenderer.invoke('calendar:set', url),
+  calendarEvents: (days: number) => ipcRenderer.invoke('calendar:events', days),
   listApprovals: () => ipcRenderer.invoke('approvals:list'),
   listRoutines: () => ipcRenderer.invoke('routines:list'),
   deleteRoutine: (id: number) => ipcRenderer.invoke('routines:delete', id),
