@@ -85,13 +85,6 @@ export default class NexusApp extends Component {
     ['apps', 'Abrir y cerrar aplicaciones', 'Sin confirmación'], ['music', 'Música y volumen', 'Spotify, YouTube, mezclador'], ['files', 'Leer archivos', 'Solo Documentos y Escritorio'],
     ['home', 'Luces del hogar', 'Philips Hue · 6 luces'], ['power', 'Apagar y reiniciar', 'Pide confirmación por voz'], ['msg', 'Enviar mensajes y correos', 'Desactivado'], ['cam', 'Cámara', 'Desactivado'],
   ];
-  LYR = ['Cruzo la noche sin hacer ruido', 'cada luz es una puerta abierta', 'giro en torno a lo que no se ve', 'y la gravedad me llama por mi nombre', '· · ·', 'Si caigo, que sea hacia ti', 'más allá del borde del tiempo', 'donde el silencio también brilla', 'horizonte de sucesos', 'no hay vuelta atrás', 'horizonte de sucesos', 'solo luz', '· · ·', 'Vuelvo a empezar desde el centro', 'como una estrella que no sabe apagarse', 'y en cada órbita te encuentro', 'horizonte de sucesos'];
-  QUEUE = [
-    { t: 'Órbita baja', a: 'Satélite Norte', d: '3:21', cover: 'linear-gradient(135deg,#38BDF8,#312E81)' },
-    { t: 'Polvo de estrellas', a: 'Mira Vale', d: '4:02', cover: 'linear-gradient(135deg,#F472B6,#4C1D95)' },
-    { t: 'Marea lunar', a: 'Kepler & Sons', d: '3:47', cover: 'linear-gradient(135deg,#FDE68A,#7C2D12)' },
-    { t: 'Señal débil', a: 'Aurora Lineal', d: '5:10', cover: 'linear-gradient(135deg,#A78BFA,#0F172A)' },
-  ];
   CMDS = [
     { cmd: '/rutina', desc: 'Ejecutar una rutina guardada' }, { cmd: '/abrir', desc: 'Abrir una aplicación' }, { cmd: '/recordar', desc: 'Guardar algo en memoria' },
     { cmd: '/sistema', desc: 'Estado del equipo' }, { cmd: '/musica', desc: 'Controlar la reproducción' }, { cmd: '/voz', desc: 'Cambiar de voz o personalidad' },
@@ -106,7 +99,7 @@ export default class NexusApp extends Component {
     now: Date.now(), uiIn: false, core: 'idle', panel: null, overlay: false, onb: false, onbStep: 0, micPerm: null,
     words: [], wordsKind: null, actionLabel: '', error: false,
     notifs: [],
-    music: false, musicPos: 72,
+    music: false, media: null, mediaAt: 0, mediaExtra: null,
     chat: [],
     chatInput: '', voiceSel: 'lyra', preview: null, sliders: { speed: 1, pitch: 0, warmth: 70, formal: 85, volume: 64, fx: 35 }, lang: 'es-ES', wakeWord: 'Hey Nexus', persona: 'butler', userName: 'señor',
     routineSel: 'work', routineOn: { work: true, night: true, home: true, pres: false }, runStep: -1,
@@ -179,6 +172,9 @@ export default class NexusApp extends Component {
       }));
       this.offs.push(api.onConfirm((id, cid, req) => this.onConfirm(id, cid, req)));
       this.offs.push(api.onCovered(covered => { const E = this.E(); E && E.setPaused(covered); }));
+      this.offs.push(api.onMedia(m => this.onMedia(m)));
+      this.offs.push(api.onMediaExtra(x => this.onMediaExtra(x)));
+      api.getMedia().then(r => { if (r.state) this.onMedia(r.state); if (r.extra && r.extra.key) this.onMediaExtra(r.extra); }).catch(() => {});
     }
     const go = async () => {
       const E = this.E(); if (!E) return setTimeout(go, 50);
@@ -290,10 +286,64 @@ export default class NexusApp extends Component {
     }
   }
   tick() {
-    const minute = Math.floor(Date.now() / 60000);
-    if (!this.state.music && minute === this.lastMinute) return;
+    const S = this.state, minute = Math.floor(Date.now() / 60000);
+    // every second only while a song plays on screen (panel or mini card); otherwise once a minute
+    const songOnScreen = S.music && (S.panel === 'music' || !S.panel);
+    if (!songOnScreen && minute === this.lastMinute) return;
     this.lastMinute = minute;
-    this.setState(s => (s.music ? { now: Date.now(), musicPos: s.musicPos >= 228 ? 0 : s.musicPos + 1 } : { now: Date.now() }));
+    this.setState({ now: Date.now() });
+  }
+  // ---------- Spotify (desktop app) ----------
+  onMedia(m) {
+    const playing = !!(m && m.playing);
+    this.setState({ media: m, mediaAt: Date.now(), music: playing });
+    if (playing) voice.startLoopback(); else voice.stopLoopback();
+    const core = this.state.core;
+    if (playing && core === 'idle') this.setCore('music');
+    else if (!playing && core === 'music') this.setCore('idle');
+  }
+  onMediaExtra(x) {
+    this.setState({ mediaExtra: x });
+    this.tintFrom(x && x.cover);
+  }
+  // the halo takes the colour of the cover
+  tintFrom(cover) {
+    const E = this.E(); if (!E) return;
+    if (!cover) { E.setTint([251, 146, 60]); this.setState({ mediaTint: null }); return; }
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas'); c.width = c.height = 24;
+      const g = c.getContext('2d'); g.drawImage(img, 0, 0, 24, 24);
+      const px = g.getImageData(0, 0, 24, 24).data;
+      // average weighted by saturation, so grey and black borders do not win
+      let r = 0, gg = 0, b = 0, w = 0;
+      for (let i = 0; i < px.length; i += 4) {
+        const mx = Math.max(px[i], px[i + 1], px[i + 2]), mn = Math.min(px[i], px[i + 1], px[i + 2]);
+        const k = (mx - mn) / 255 * (mx / 255) + .02;
+        r += px[i] * k; gg += px[i + 1] * k; b += px[i + 2] * k; w += k;
+      }
+      const col = [r / w, gg / w, b / w], top = Math.max(...col) || 1;
+      const tint = col.map(v => Math.round(Math.min(255, v / top * 235)));
+      E.setTint(tint); this.setState({ mediaTint: tint });
+    };
+    img.src = cover;
+  }
+  mediaPos() {
+    const m = this.state.media; if (!m) return 0;
+    const p = m.pos + (m.playing ? (Date.now() - this.state.mediaAt) / 1000 : 0);
+    return m.dur ? Math.min(p, m.dur) : p;
+  }
+  async musicCtl(action) {
+    if (!api) return;
+    const m = this.state.media;
+    // instant feedback; Spotify confirms a moment later
+    if (action === 'play_pause' && m) this.onMedia({ ...m, playing: !m.playing, pos: this.mediaPos() });
+    let ok = false;
+    try { ok = await api.mediaControl(action); } catch { /* reported below */ }
+    if (!ok) {
+      if (action === 'play_pause' && m) this.onMedia(m);
+      this.notify('MÚSICA', action === 'open' || action === 'liked' ? 'No encuentro Spotify' : 'Spotify no responde', action === 'open' || action === 'liked' ? 'Instala la app de escritorio de Spotify' : 'Ábrelo y vuelve a intentarlo', '#F5B971');
+    }
   }
   // real snapshot of the PC: taken when the System panel opens or on "Actualizar"
   async loadSystem() {
@@ -518,22 +568,20 @@ export default class NexusApp extends Component {
       )))
     , 800);
   }
-  startMusic() { const E = this.E(); E && E.setTint([251, 146, 60]); this.setState({ music: true, words: [], wordsKind: null }); this.setCore('music'); }
+  startMusic() { this.setState({ words: [], wordsKind: null }); this.setCore('music'); }
   stopAll() {
     const wasMusic = this.state.core === 'music';
     this.interrupt();
     this.setState({ words: [], wordsKind: null, actionLabel: '' });
-    if (wasMusic) { this.setState({ music: false }); this.setCore('idle'); return; }
+    if (wasMusic) return;
     this.setCore(this.state.music ? 'music' : 'idle');
   }
-  togglePlay() { if (this.state.music) { this.setState({ music: false }); if (this.state.core === 'music') this.setCore('idle'); } else this.startMusic(); }
+  togglePlay() { this.musicCtl('play_pause'); }
   openPanel(p, keepOpen) {
     if (p === 'system' && this.state.panel !== 'system') this.loadSystem();
     if (p === 'voice') this.prepareSamples();
     const opening = !!p && (keepOpen || this.state.panel !== p);
     this.setState({ panel: opening ? p : null, volOpen: false });
-    const busy = ['wake', 'listening', 'thinking', 'speaking', 'action'].includes(this.state.core);
-    if (opening && p === 'music' && !this.state.music && !busy) this.startMusic();
   }
   toggleOverlay() {
     const opening = !this.state.overlay;
@@ -812,8 +860,15 @@ export default class NexusApp extends Component {
       ...(si.battery ? [['BAT', si.battery.pct + ' %' + (si.battery.charging ? ' · cargando' : ''), 'Batería']] : []),
     ];
     const agenda = infoRaw.map((a, i) => ({ time: a[0], title: a[1], sub: a[2], op: 1, dot: 'rgb(var(--acc2))', timeColor: 'rgb(var(--acc2) / .8)', delay: (160 + i * 40) + 'ms' }));
-    const li = Math.floor((S.musicPos - 60) / 4), cur = Math.max(0, li) % this.LYR.length;
-    const lyrics = this.LYR.map((t, i) => { const dd = Math.abs(i - cur); return { t, size: i === cur ? '30px' : '22px', color: i === cur ? '#FFF6E9' : i < cur ? 'rgba(226,218,240,.28)' : 'rgba(226,218,240,.45)', blur: dd > 2 ? 'blur(1px)' : 'none', shadow: i === cur ? '0 0 24px rgba(251,146,60,.45)' : 'none' }; });
+    const md = S.media, mx = S.mediaExtra, mKey = md ? md.artist + '|' + md.title : '';
+    const mExtra = mx && mx.key === mKey ? mx : null, mPos = this.mediaPos(), clock = t => Math.floor(t / 60) + ':' + String(Math.floor(t % 60)).padStart(2, '0');
+    const REP = { None: 'Repetir', List: 'Repitiendo la lista', Track: 'Repitiendo la canción' };
+    const musicNow = md && md.title ? {
+      title: md.title, artist: md.artist, cover: mExtra ? mExtra.cover : '', playing: md.playing, shuffle: !!md.shuffle, repeat: md.repeat || 'None', repeatLabel: REP[md.repeat] || 'Repetir',
+      source: ['SPOTIFY', md.playing ? 'REPRODUCIENDO' : 'EN PAUSA', md.album].filter(Boolean).join(' · ').toUpperCase(),
+      pct: (md.dur ? mPos / md.dur * 100 : 0).toFixed(2) + '%', time: clock(mPos), duration: md.dur ? clock(md.dur) : '',
+    } : null;
+    const lyr = mExtra && mExtra.lyrics, curLine = lyr ? Math.max(0, lyr.findLastIndex(l => l.t <= mPos + .3)) : -1;
     const qN = { ultra: '2 600 PARTÍCULAS · 60 FPS', equilibrado: '1 500 PARTÍCULAS · 60 FPS', ahorro: '700 PARTÍCULAS · SIN GRANO' };
     const dockDef = [['chat', 'CHAT', 'chat'], ['voice', 'VOZ Y PERSONALIDAD', 'voice'], ['routines', 'RUTINAS', 'routines'], ['system', 'SISTEMA', 'system'], ['music', 'MÚSICA', 'music'], ['memory', 'MEMORIA', 'memory'], ['settings', 'AJUSTES', 'settings'], ['volume', 'VOLUMEN', 'volume']];
     const dock = dockDef.map(([id, label, ic]) => { const act = P === id || (id === 'volume' && S.volOpen); return {
@@ -852,12 +907,12 @@ export default class NexusApp extends Component {
       showHud: !P, showFrame: (S.uiIn && !S.overlay) || S.onb, showMic: false, showNotifs: !P,
       // info on the right: desktop icons live on the left (same layout as the wallpaper mode)
       hudPos: { left: 'auto', right: '64px', alignItems: 'flex-end', textAlign: 'right' },
-      notifPos: { top: 'auto', bottom: WALLPAPER ? '150px' : '128px' },
+      notifPos: { top: 'auto', bottom: (WALLPAPER ? 150 : 128) + (musicNow && !P ? 104 : 0) + 'px' },
       pillPointer: WALLPAPER ? 'none' : 'auto', dismissDisplay: WALLPAPER ? 'none' : 'grid',
       clockDigits, dateStr, greetText: `${this.greet()}, ${this.name()}.`,
       indicators: [{ label: 'IA', color: S.error ? '#FB7185' : '#34D399' }, { label: 'LOCAL', color: '#34D399' }, { label: 'VOZ', color: S.voiceDown ? '#FB7185' : '#34D399' }],
       pillLeft: L.x + 'px', pillText, pillDot, pillAnim: live || core === 'error' ? 'nx-pulse 1.4s ease-in-out infinite' : 'none',
-      onPill: () => core === 'error' ? this.retry() : core === 'listening' ? this.talk() : live || core === 'music' ? this.stopAll() : this.talk(),
+      onPill: () => core === 'error' ? this.retry() : core === 'listening' ? this.talk() : live ? this.stopAll() : core === 'music' ? this.musicCtl('pause') : this.talk(),
       notifs: S.notifs.map(n => ({ ...n, dismiss: () => this.setState(s => ({ notifs: s.notifs.filter(x => x.id !== n.id) })) })),
       capLeft: L.x + 'px', capTop: capTop + 'px', capWidth: (wide ? 640 : P === 'chat' ? 760 : 1000) + 'px',
       stateLabel: labels[core] || '', stateColor, showWave: core === 'listening',
@@ -868,9 +923,14 @@ export default class NexusApp extends Component {
       onCore: () => core === 'listening' ? this.talk() : live ? this.stopAll() : this.talk(),
       onMic: () => core === 'listening' ? this.talk() : live ? this.stopAll() : this.talk(), micRing: core === 'listening' || core === 'wake',
       micStatus: core === 'listening' ? 'LE ESCUCHO · TOQUE PARA TERMINAR' : live ? 'TOQUE PARA INTERRUMPIR' : `TOQUE O PULSE ${this.hotkeyLabel()}`,
-      showMusicMini: S.music && !P, musicPct: (S.musicPos / 228 * 100).toFixed(2) + '%', musicTime: Math.floor(S.musicPos / 60) + ':' + String(S.musicPos % 60).padStart(2, '0'),
-      playIcon: S.music ? 'M8 5v14M16 5v14' : 'M8 5v14l11-7z', togglePlay: () => this.togglePlay(), openMusic: () => this.openPanel('music'),
-      nextTrack: () => this.setState({ musicPos: 0 }), prevTrack: () => this.setState({ musicPos: 0 }),
+      showMusicMini: !!musicNow && !P, musicNow, musicGlow: 'rgba(' + (S.mediaTint || [251, 146, 60]).join(',') + ',.38)',
+      playIcon: md && md.playing ? 'M8 5v14M16 5v14' : 'M8 5v14l11-7z', togglePlay: () => this.togglePlay(), openMusic: () => this.openPanel('music'),
+      nextTrack: () => this.musicCtl('next'), prevTrack: () => this.musicCtl('previous'),
+      musicShuffle: () => this.musicCtl('shuffle'), musicRepeat: () => this.musicCtl('repeat'),
+      spotifyOpen: () => this.musicCtl('open'), spotifyLiked: () => this.musicCtl('liked'),
+      spotifyHint: { title: 'Spotify no está sonando', text: 'Abre la app de Spotify del PC y pon algo: aquí verás la carátula, los controles y la letra sincronizada.' },
+      lyricLines: lyr ? lyr.map((l, i) => ({ text: l.text, cur: i === curLine, past: i < curLine, far: Math.abs(i - curLine) > 3 })) : null, lyricCur: curLine,
+      lyricsNote: !musicNow ? '' : !mExtra ? 'Buscando la letra…' : 'Esta canción no tiene letra sincronizada.',
       isChat: P === 'chat' && !S.overlay, isVoice: P === 'voice' && !S.overlay, isRoutines: P === 'routines' && !S.overlay, isSystem: P === 'system' && !S.overlay, isMusic: P === 'music' && !S.overlay, isMemory: P === 'memory' && !S.overlay, isSettings: P === 'settings' && !S.overlay,
       closePanel: () => this.openPanel(null),
       chatRef: this.chatRef, modelName: S.provider === 'Auto' ? 'Automático' : S.model,
@@ -902,7 +962,6 @@ export default class NexusApp extends Component {
       gauges, coreBars, coreTitle: si ? 'CPU · ' + per.length + ' HILOS' : 'CPU', coreNote: si ? 'EL MÁS CARGADO ' + busiest + ' %' : '',
       sysHeader: si ? ('SISTEMA · ' + si.host + ' · ' + si.os).toUpperCase() : 'SISTEMA', sysLoading: !!S.sysLoading, refreshSystem: () => this.loadSystem(),
       sysTaken: si ? 'MEDIDO A LAS ' + this.hm() : '', procs, agenda, dateShort: d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' }).toUpperCase(),
-      lyrics, lyricY: (-(cur * 56) + 2 * 56) + 'px', queue: this.QUEUE.map((q, i) => ({ ...q, delay: (200 + i * 40) + 'ms' })),
       memQuery: S.memQuery, onMemQuery: e => this.setState({ memQuery: e.target.value }), memCount: 122 + S.mem.length + S.facts.length - 5,
       memFilters: ['Todo', 'Conversaciones', 'Preferencias', 'Personas', 'Lugares'].map(f => ({ label: f, bg: S.memFilter === f ? 'rgb(var(--acc) / .22)' : 'rgba(255,255,255,.03)', border: S.memFilter === f ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.16)', pick: () => this.setState({ memFilter: f }) })),
       memItems, memEmpty: memItems.length === 0,

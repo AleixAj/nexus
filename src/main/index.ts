@@ -1,13 +1,14 @@
-import { app, BrowserWindow, Menu, Notification, Tray, globalShortcut, ipcMain, nativeImage, screen, session, shell, type IpcMainInvokeEvent } from 'electron'
+import { app, BrowserWindow, Menu, Notification, Tray, desktopCapturer, globalShortcut, ipcMain, nativeImage, screen, session, shell, type IpcMainInvokeEvent } from 'electron'
 import { join } from 'path'
 import { PROVIDERS, getKey, loadSettings, saveSettings, setKey } from './settings'
 import { azureVoicesPaused, geminiVoicesPaused, isPremium, onAzureQuotaOut, onGeminiQuota, speak, speakDetailed, warmVoices } from './tts'
 import { createHash } from 'crypto'
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import { ask, abort, transcribe } from './brain'
-import { systemStatus } from './tools'
+import { spotify, systemStatus } from './tools'
 import { getWorld } from './world'
 import { systemSnapshot } from './sysinfo'
+import { coverFor, currentMedia, lyricsFor, mediaControl, watchMedia, type MediaState } from './media'
 import { attachToDesktop, refreshWallpaper, stopWatching, watchCovered } from './wallpaper'
 
 // the greeting plays on start, before any click
@@ -245,12 +246,33 @@ function registerIpc() {
 
   handle('system:status', () => systemStatus())
   handle('system:snapshot', () => systemSnapshot())
+  handle('media:get', () => ({ state: currentMedia(), extra: mediaExtra }))
+  handle('media:control', (_e, action) => {
+    const a = str(action, 20)
+    return a === 'open' || a === 'liked' ? spotify(a, '').then(r => !r.startsWith('No ')) : mediaControl(a)
+  })
   handle('world:get', () => getWorld())
   handle('app:autostart', (_e, on) => app.setLoginItemSettings({ openAtLogin: on === true }))
   handle('app:mode', (_e, m) => { if (m === 'window' || m === 'wallpaper') switchMode(m) })
 }
 
 // global hotkey: in wallpaper mode just listen, in window mode also bring the window up
+// ---------- what is playing ----------
+let mediaExtra: { key: string; cover: string; lyrics: { t: number; text: string }[] | null } = { key: '', cover: '', lyrics: null }
+const broadcast = (ch: string, data: unknown) => BrowserWindow.getAllWindows().forEach(w => { if (!w.isDestroyed()) w.webContents.send(ch, data) })
+
+async function onMedia(m: MediaState | null) {
+  broadcast('media:state', m)
+  if (!m || !m.title) return
+  const key = m.artist + '|' + m.title
+  if (key === mediaExtra.key) return
+  mediaExtra = { key, cover: '', lyrics: null }
+  const [cover, lyrics] = await Promise.all([coverFor(m.title, m.artist), lyricsFor(m.title, m.artist, m.album, m.dur)])
+  if (mediaExtra.key !== key) return // the song changed meanwhile
+  mediaExtra = { key, cover, lyrics }
+  broadcast('media:extra', mediaExtra)
+}
+
 function talk() {
   if (!win) { showWindow(); return }
   if (mode === 'window') {
@@ -273,6 +295,11 @@ if (!app.requestSingleInstanceLock()) {
     session.defaultSession.setPermissionRequestHandler((wc, permission, cb) => cb(permission === 'media' && wc === win?.webContents))
 
     registerIpc()
+    watchMedia(onMedia)
+    // the halo can follow the PC's audio (music): system loopback, no picker
+    session.defaultSession.setDisplayMediaRequestHandler((_req, cb) => {
+      desktopCapturer.getSources({ types: ['screen'] }).then(src => cb({ video: src[0], audio: 'loopback' })).catch(() => cb({}))
+    })
     onGeminiQuota(() => BrowserWindow.getAllWindows().forEach(w => w.webContents.send('tts:quota', 'Gemini')))
     onAzureQuotaOut(() => BrowserWindow.getAllWindows().forEach(w => w.webContents.send('tts:quota', 'Azure')))
     createTray()

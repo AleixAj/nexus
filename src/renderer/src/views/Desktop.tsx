@@ -261,21 +261,21 @@ export default function Desktop({ v }: { v: any }) {
       {/* music mini card */}
       {v.showMusicMini && (<>
         <div data-spot="1" style={{ position: "absolute", right: "24px", bottom: "112px", width: "360px", padding: "14px", display: "flex", gap: "14px", alignItems: "center", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgba(251,146,60,.45), rgb(var(--acc) / .1) 55%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07)", animation: "nx-up 700ms cubic-bezier(.16,1,.3,1) both" }} className="dc5">
-          <button onClick={v.openMusic} style={{ width: "64px", height: "64px", flex: "none", borderRadius: "10px", border: "none", cursor: "pointer", background: "repeating-linear-gradient(135deg, rgba(255,255,255,.08) 0 2px, transparent 2px 8px), linear-gradient(135deg,#FB923C,#9333EA 60%,#1E1B4B)", display: "grid", placeItems: "center", fontFamily: "'JetBrains Mono',monospace", fontSize: "8px", letterSpacing: ".15em", color: "rgba(255,255,255,.7)" }}>
-            CARÁTULA
+          <button onClick={v.openMusic} style={{ width: "64px", height: "64px", flex: "none", borderRadius: "10px", border: "none", padding: 0, overflow: "hidden", cursor: "pointer", background: "repeating-linear-gradient(135deg, rgba(255,255,255,.08) 0 2px, transparent 2px 8px), linear-gradient(135deg,#FB923C,#9333EA 60%,#1E1B4B)", boxShadow: "0 8px 24px " + v.musicGlow }}>
+            {v.musicNow?.cover && <img src={v.musicNow.cover} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />}
           </button>
           <div style={{ flex: "1", minWidth: "0", display: "flex", flexDirection: "column", gap: "6px" }}>
             <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", letterSpacing: ".2em", color: "#FDBA74" }}>
-              SPOTIFY · REPRODUCIENDO
+              {v.musicNow?.playing ? "SPOTIFY · REPRODUCIENDO" : "SPOTIFY · EN PAUSA"}
             </span>
             <span style={{ fontSize: "15px", fontWeight: "500", color: "#FFF6E9", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
-              Horizonte de sucesos
+              {v.musicNow?.title}
             </span>
-            <span style={{ fontSize: "12.5px", color: "rgba(226,218,240,.6)" }}>
-              Aurora Lineal
+            <span style={{ fontSize: "12.5px", color: "rgba(226,218,240,.6)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              {v.musicNow?.artist}
             </span>
             <div style={{ height: "2px", borderRadius: "2px", background: "rgba(255,255,255,.1)", overflow: "hidden" }}>
-              <div style={{ height: "100%", width: v.musicPct, background: "linear-gradient(90deg,#FB923C,rgb(var(--acc2)))", transition: "width 1000ms linear" }}></div>
+              <div style={{ height: "100%", width: v.musicNow?.pct, background: "linear-gradient(90deg,#FB923C,rgb(var(--acc2)))", transition: "width 1000ms linear" }}></div>
             </div>
           </div>
           <div style={{ display: "flex", gap: "2px" }}>

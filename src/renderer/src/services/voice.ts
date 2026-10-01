@@ -507,3 +507,36 @@ export function cancelListening() {
 }
 
 export const isListening = () => !!rec
+
+// ---------- PC audio (music) ----------
+// The halo follows what the PC plays: system loopback through getDisplayMedia (the main
+// process answers without a picker). The video track is dropped at once.
+let loop: { stream: MediaStream; ctx: AudioContext } | null = null
+let loopPending = false
+
+export async function startLoopback() {
+  if (loop || loopPending) return
+  loopPending = true
+  try {
+    const stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: true })
+    stream.getVideoTracks().forEach(t => { t.stop(); stream.removeTrack(t) })
+    if (!stream.getAudioTracks().length) return
+    const c = new AudioContext()
+    const an = c.createAnalyser()
+    an.fftSize = 512
+    an.smoothingTimeConstant = 0.6
+    c.createMediaStreamSource(stream).connect(an)
+    loop = { stream, ctx: c }
+    engine()?.attachSource('music', an)
+  } catch (e) {
+    console.warn('loopback', e) // the halo keeps its simulated beat
+  } finally { loopPending = false }
+}
+
+export function stopLoopback() {
+  if (!loop) return
+  engine()?.attachSource('music', null)
+  loop.stream.getTracks().forEach(t => t.stop())
+  loop.ctx.close()
+  loop = null
+}

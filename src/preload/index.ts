@@ -29,5 +29,9 @@ contextBridge.exposeInMainWorld('nexus', {
   onConfirm: (fn: (id: number, cid: number, req: { title: string; detail: string }) => void) => on('brain:confirm', fn),
   confirmReply: (cid: number, ok: boolean) => ipcRenderer.invoke('brain:confirm-reply', cid, ok),
   onTtsQuota: (fn: (engine: string) => void) => on('tts:quota', fn),
+  getMedia: () => ipcRenderer.invoke('media:get'),
+  mediaControl: (action: string) => ipcRenderer.invoke('media:control', action),
+  onMedia: (fn: (m: any) => void) => on('media:state', fn),
+  onMediaExtra: (fn: (x: any) => void) => on('media:extra', fn),
   onHotkey: (fn: () => void) => on('hotkey:talk', fn)
 })

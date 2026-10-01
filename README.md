@@ -13,6 +13,9 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   carpetas, mira estadísticas del equipo y procesos, crea o modifica archivos y ejecuta comandos de PowerShell.
   Todo lo que cambia el equipo pide permiso antes, y lo que borra va a la papelera.
 - **Acciones rápidas.** Abre aplicaciones y webs y controla la música y el volumen.
+- **Música de Spotify real.** Lee lo que suena en la app de escritorio de Spotify (no el navegador): carátula,
+  progreso, aleatorio, repetir, anterior/siguiente y letra sincronizada (LRCLIB, gratis). El halo toma el color de
+  la carátula y se mueve con el audio real del PC.
 - **Halo reactivo.** El núcleo y su halo se mueven con el sonido real: tu voz mientras escucha y la suya mientras habla.
 - **Personalidad.** Mayordomo británico, copiloto directo o sarcástico, con calidez y formalidad ajustables.
 - **Datos reales en el escritorio.** Hora, tiempo de tu ciudad y efeméride del día, a la derecha para no chocar con los iconos.
@@ -172,7 +175,7 @@ Open-Meteo (tiempo), Wikipedia (efemérides) e ipapi.co (ciudad aproximada).
 ## Pendiente
 
 - Palabra de activación «Hey Nexus» siempre escuchando.
-- Música real (ahora el panel de música es una demostración), memoria y rutinas editables.
+- Memoria y rutinas editables.
 - Temperatura de la CPU (Windows solo la da con permisos de administrador; se muestra la de la GPU).
 - Mini overlay flotante sobre otras apps y fondo de escritorio en varios monitores a la vez.
 - Instalador (`electron-builder`).

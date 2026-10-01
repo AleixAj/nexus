@@ -3,6 +3,7 @@ import { execFile } from 'child_process'
 import { readdirSync, type Dirent } from 'fs'
 import { join, basename, extname } from 'path'
 import os from 'os'
+import { currentMedia, mediaControl } from './media'
 
 // Tools the assistant can call (OpenAI function-calling format)
 export const TOOL_DEFS = [
@@ -26,10 +27,10 @@ export const TOOL_DEFS = [
     type: 'function',
     function: {
       name: 'spotify',
-      description: 'Spotify de escritorio: abrir, Me gusta, buscar canción/artista/lista, reproducir/pausar, siguiente, anterior.',
+      description: 'Spotify de escritorio: abrir, Me gusta, buscar canción/artista/lista, qué suena, reproducir/pausar, siguiente, anterior.',
       parameters: {
         type: 'object',
-        properties: { action: { type: 'string', enum: ['open', 'liked', 'search', 'play_pause', 'next', 'previous'] }, query: { type: 'string' } },
+        properties: { action: { type: 'string', enum: ['open', 'liked', 'search', 'now_playing', 'play_pause', 'next', 'previous'] }, query: { type: 'string' } },
         required: ['action']
       }
     }
@@ -72,7 +73,7 @@ async function openSpotify(uri?: string) {
   try { await shell.openExternal(uri || 'spotify:'); return true } catch { return false } // Microsoft Store version
 }
 
-async function spotify(action: string, query: string) {
+export async function spotify(action: string, query: string) {
   switch (action) {
     case 'open': return (await openSpotify()) ? 'Spotify abierto' : 'No encuentro Spotify instalado'
     case 'liked': return (await openSpotify('spotify:collection:tracks')) ? 'Abiertas tus canciones que te gustan en Spotify' : 'No encuentro Spotify instalado'
@@ -80,8 +81,13 @@ async function spotify(action: string, query: string) {
       if (!query.trim()) return 'Falta qué buscar'
       return (await openSpotify('spotify:search:' + encodeURIComponent(query.trim()))) ? `Buscando «${query}» en Spotify` : 'No encuentro Spotify instalado'
     }
+    case 'now_playing': {
+      const m = currentMedia()
+      return m && m.title ? `${m.playing ? 'Suena' : 'En pausa'}: «${m.title}» de ${m.artist || 'artista desconocido'} (${m.app.replace('.exe', '')})` : 'No suena nada ahora mismo'
+    }
     case 'play_pause': case 'next': case 'previous':
-      await sendKey(KEYS[action])
+      // the media session of Spotify first; the media keys if that fails
+      if (!(await mediaControl(action))) await sendKey(KEYS[action])
       return { play_pause: 'Reproducir / pausar', next: 'Siguiente canción', previous: 'Canción anterior' }[action]
     default: return 'Acción desconocida'
   }
