@@ -12,6 +12,12 @@ const PERSONAS: Record<string, string> = {
   sarcastic: 'Eres sarcástico y algo burlón, pero siempre acabas ayudando.'
 }
 
+/** The name inside the wake phrase, if it is not Nexus ("Oye Jarvis" → "Jarvis"). */
+const callName = (wake: string) => {
+  const name = wake.replace(/^\s*(hey|hola|oye|ey|eh|ok|okay|vamos|buenas)[\s,]+/i, '').trim()
+  return name && !/^nexus$/i.test(name) ? name : ''
+}
+
 export function systemPrompt() {
   const s = loadSettings()
   const facts = factsForPrompt()
@@ -19,6 +25,8 @@ export function systemPrompt() {
     'Eres NEXUS, un agente de IA que vive en el ordenador Windows del usuario y le ayuda con lo que necesite.',
     PERSONAS[s.persona] || PERSONAS.butler,
     `Llama al usuario «${s.userName}».`,
+    // the wake phrase may give the assistant another name ("Oye Jarvis" → Jarvis)
+    callName(s.wakeWord) ? `El usuario te llama «${callName(s.wakeWord)}»: es tu nombre para él.` : '',
     isFemaleVoice(s.voice) ? 'Tu voz es femenina: habla de ti misma en femenino (encantada, lista…).' : 'Tu voz es masculina: habla de ti mismo en masculino.',
     s.lang.startsWith('en') ? 'Answer in British English, whatever language the user writes in.' : s.lang === 'es-MX' ? 'Responde en español de México.' : 'Responde en español de España.',
     s.formal >= 50 ? 'Trata al usuario de usted.' : 'Tutea al usuario, con un registro cercano.',

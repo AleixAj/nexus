@@ -16,7 +16,7 @@ import { addFact, approveFact, clearMemory, deleteExchange, deleteFact, getMemor
 import { currentExtra, currentMedia, mediaControl } from './media'
 import { HOTKEY, isDev, switchMode } from './window'
 import { typeText } from './dictation'
-import { feedWakeWord, startWakeWord, stopWakeWord } from './wakeword'
+import { ensureModel, feedWakeWord, modelReady, startWakeWord, stopWakeWord } from './wakeword'
 import { broadcast } from './window'
 import { listApprovals, revoke } from './approvals'
 import { calendarConnected, events, setCalendarUrl } from './calendar'
@@ -83,7 +83,11 @@ export function registerIpc() {
   })
   handle('tts:warm', () => warmVoices(loadSettings().lang))
   // "Hey Nexus": audio comes in small pieces many times a second, so it is a one-way message
-  handle('wake:start', () => startWakeWord(() => broadcast('wake:detected')))
+  handle('wake:start', async (_e, phrase) => {
+    // the first time, the Spanish model is downloaded (the window shows the progress)
+    if (!modelReady()) await ensureModel(p => broadcast('wake:progress', p))
+    startWakeWord(str(phrase, 60) || 'Hey Nexus', () => broadcast('wake:detected'))
+  })
   handle('wake:stop', () => stopWakeWord())
   ipcMain.on('wake:audio', (e, data) => { if (trusted(e as any) && data instanceof Float32Array) feedWakeWord(data) })
   handle('dictation:type', (_e, text) => typeText(str(text, 20000)))

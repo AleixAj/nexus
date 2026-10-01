@@ -12,7 +12,7 @@ export const settings = {
     this.setState(st => ({
       provider: s.provider, model: s.model, providers: s.providers, voiceSel: s.voice, userName: s.userName, persona: s.persona,
       theme: s.theme, quality: s.quality, reduced: s.reduced, autostart: !!s.autostart, hotkey: s.hotkey || st.hotkey,
-      subtitles: !!s.subtitles, learn: s.memoryLearn !== false, newsTopics: s.newsTopics, newsAvoid: s.newsAvoid, briefing: s.briefing, lastBriefing: s.lastBriefing, wakeListen: !!s.wakeListen, spotifyClientId: s.spotifyClientId,
+      subtitles: !!s.subtitles, learn: s.memoryLearn !== false, newsTopics: s.newsTopics, newsAvoid: s.newsAvoid, briefing: s.briefing, lastBriefing: s.lastBriefing, wakeListen: !!s.wakeListen, wakeWord: s.wakeWord || 'Hey Nexus', spotifyClientId: s.spotifyClientId,
       premiumPaused: !!s.premiumPaused, azurePaused: !!s.azurePaused, hasAzure: !!s.hasAzure, azureRegion: s.azureRegion,
       agent: { web: s.agentWeb, files: s.agentFiles, write: s.agentWrite, shell: s.agentShell }, micId: s.micId || '',
       gemini: { tts: s.geminiTts, search: s.geminiSearch, stt: s.geminiStt, vision: s.geminiVision, memory: s.geminiMemory, fallback: s.geminiFallback },

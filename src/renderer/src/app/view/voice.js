@@ -2,6 +2,14 @@
 import { PERSONAS, SLIDERS, VOICES } from '../constants';
 import { card, seg } from '../util';
 
+/** Advice on the wake phrase: very short ones wake it up by mistake. */
+function wakeHint(w) {
+  const letters = (w || '').replace(/[^a-záéíóúüñ]/gi, '').length;
+  if (letters < 6) return 'Muy corta: puede despertarse sola. Mejor dos palabras, como «Oye Jarvis».';
+  if (letters > 22) return 'Larga: cuesta decirla. Con dos palabras basta.';
+  return 'Se activa en Ajustes → Escuchar siempre. Funciona en tu PC, sin internet.';
+}
+
 /** How a premium voice describes itself depending on its key and quota. */
 function voiceDesc(v, S) {
   if (!v.premium) return v.desc;
@@ -38,7 +46,8 @@ export function voiceView(app, c) {
     voiceSliders: ['speed', 'pitch', 'fx', 'warmth', 'formal'].map((k, i) => ({ ...sliderView(S, k), delay: (200 + i * 40) + 'ms' })),
     volSlider: sliderView(S, 'volume'), onSlider: e => app.onSlider(e),
     langOpts: [['es-ES', 'Español (ES)'], ['es-MX', 'Español (MX)'], ['en', 'English']].map(([id, label]) => ({ label, ...seg(S.lang === id), pick: () => { app.setState({ lang: id }); app.save({ lang: id }); } })),
-    wakeWord: S.wakeWord, onWake: e => app.setState({ wakeWord: e.target.value }),
+    wakeWord: S.wakeWord, onWake: e => app.setWakeWord(e.target.value),
+    wakeHint: wakeHint(S.wakeWord),
     userName: S.userName, onName: e => app.setName(e.target.value),
     testVoice: () => app.testVoice(),
   };

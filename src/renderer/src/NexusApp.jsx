@@ -89,6 +89,7 @@ export default class NexusApp extends Component {
     on(api.onHotkey, () => this.talk());
     on(api.onDictate, () => this.toggleDictation());
     on(api.onWake, () => this.onWakeWord());
+    on(api.onWakeProgress, p => this.onWakeProgress(p));
     on(api.onDelta, (id, t) => this.onDelta(id, t));
     on(api.onAction, (id, label) => this.onAction(id, label));
     on(api.onProgress, (id, label) => { if (id === this.reqId) this.setState({ actionLabel: label.toUpperCase() }); });

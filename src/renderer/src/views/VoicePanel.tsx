@@ -113,7 +113,8 @@ export default function VoicePanel({ v }: { v: any }) {
                 <span style={{ fontSize: "14.5px", color: "rgba(241,234,248,.85)" }}>
                   Palabra de activación
                 </span>
-                <input value={v.wakeWord} readOnly title="Fija: se activa en Ajustes → Escuchar «Hey Nexus» siempre" style={{ height: "40px", padding: "0 14px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.16)", color: "#FFF6E9", fontSize: "14px", outline: "none" }} />
+                <input value={v.wakeWord} onChange={v.onWake} maxLength={40} placeholder="Hey Nexus" title={v.wakeHint} style={{ height: "40px", padding: "0 14px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.16)", color: "#FFF6E9", fontSize: "14px", outline: "none" }} />
+                <span style={{ fontSize: "11.5px", lineHeight: "1.4", color: "rgba(226,218,240,.45)" }}>{v.wakeHint}</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <span style={{ fontSize: "14.5px", color: "rgba(241,234,248,.85)" }}>

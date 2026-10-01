@@ -13,8 +13,11 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   carpetas, mira estadísticas del equipo y procesos, crea o modifica archivos y ejecuta comandos de PowerShell.
   Todo lo que cambia el equipo pide permiso antes, y lo que borra va a la papelera.
 - **Acciones rápidas.** Abre aplicaciones y webs y controla la música y el volumen.
-- **«Hey Nexus» sin internet.** Con el interruptor de Ajustes, NEXUS se despierta al oírlo (también con acento español).
-  Lo detecta un modelo pequeño en tu PC (sherpa-onnx): no se graba ni se envía nada.
+- **Tu frase de activación, sin internet.** «Hey Nexus», «Oye Jarvis», «Hola Viernes»… la que escribas en Voz y
+  personalidad. Con el interruptor de Ajustes, NEXUS se despierta al oírla. Un reconocedor de voz en español funciona en
+  tu PC (sherpa-onnx con el modelo comunitario de Kroko, CC-BY-SA, ~124 MB que se descargan la primera vez) y busca la
+  frase por cómo suena. No se graba ni se envía nada. Gasta en torno a un 6 % de un núcleo mientras escucha.
+  Si la frase incluye un nombre («Oye Jarvis»), NEXUS lo toma como suyo al hablar contigo.
 - **Rutinas de verdad.** «Crea una rutina Modo trabajo que abra VS Code y ponga mi lista Focus cuando diga modo trabajo»,
   «cada día a las 8 dime el resumen del día». Los pasos son frases que el agente hace con sus herramientas; se lanzan con
   su frase, a su hora o con el botón, y se pausan o borran en el panel Rutinas (o con `/rutina nombre` en el chat).
@@ -182,7 +185,7 @@ src/
     reminders.ts            recordatorios y alarmas
     routines.ts             rutinas: pasos, frase y horario
     calendar.ts             calendario por dirección iCal
-    wakeword.ts             «Hey Nexus» en local (modelo en resources/kws)
+    wakeword.ts             frase de activación en local (descarga el modelo la primera vez)
     approvals.ts            acciones permitidas para siempre
     offlineVoice.ts         voz de Windows cuando no hay internet
     media.ts                lo que suena en Spotify, carátula y letra
