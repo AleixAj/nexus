@@ -205,6 +205,7 @@ export default class NexusApp extends Component {
     this.setState(st => ({
       provider: s.provider, model: s.model, providers: s.providers, voiceSel: s.voice, userName: s.userName, persona: s.persona,
       theme: s.theme, quality: s.quality, reduced: s.reduced, autostart: !!s.autostart, hotkey: s.hotkey || st.hotkey,
+      subtitles: !!s.subtitles,
       premiumPaused: !!s.premiumPaused, azurePaused: !!s.azurePaused, hasAzure: !!s.hasAzure, azureRegion: s.azureRegion,
       agent: { web: s.agentWeb, files: s.agentFiles, write: s.agentWrite, shell: s.agentShell }, micId: s.micId || '',
       gemini: { tts: s.geminiTts, search: s.geminiSearch, stt: s.geminiStt, fallback: s.geminiFallback },
@@ -852,7 +853,7 @@ export default class NexusApp extends Component {
       notifs: S.notifs.map(n => ({ ...n, dismiss: () => this.setState(s => ({ notifs: s.notifs.filter(x => x.id !== n.id) })) })),
       capLeft: L.x + 'px', capTop: capTop + 'px', capWidth: (wide ? 640 : P === 'chat' ? 760 : 1000) + 'px',
       stateLabel: labels[core] || '', stateColor, showWave: core === 'listening',
-      words: S.words, wordsColor: wk === 'nexus' ? '#FFE9D2' : 'rgba(255,246,233,.95)', wordsOpacity: wk === 'userDim' ? .45 : 1, wordsSize: wide ? '22px' : '30px',
+      words: S.subtitles ? S.words : [], wordsColor: wk === 'nexus' ? '#FFE9D2' : 'rgba(255,246,233,.95)', wordsOpacity: wk === 'userDim' ? .45 : 1, wordsSize: wide ? '22px' : '30px',
       hasAction: !!S.actionLabel, actionLabel: S.actionLabel, hasError: core === 'error', errorTitle: S.errorTitle || 'No puedo conectar con el modelo', errorDetail: S.errorDetail || '',
       // invisible button over the core (only where the core is on screen and clickable)
       coreHit: !WALLPAPER && S.uiIn && !S.overlay && !S.onb && (!P || P === 'chat') ? { x: L.x, y: L.y, r: 190 * L.s } : null,
@@ -911,6 +912,7 @@ export default class NexusApp extends Component {
         { label: 'Fondo de escritorio', note: 'Nexus se pone detrás de sus iconos · hable con ' + this.hotkeyLabel().toLowerCase() + ' y vuelva desde la bandeja', on: false, toggle: () => api && api.setMode('wallpaper') },
         { label: 'Iniciar con Windows', note: 'Se abre sola al encender el PC', on: S.autostart, toggle: () => this.setAutostart(!S.autostart) },
         { label: `Escuchar «${S.wakeWord}» siempre`, note: 'Próximamente · de momento use el micro o ' + this.hotkeyLabel().toLowerCase(), on: false, toggle: () => {} },
+        { label: 'Subtítulos', note: 'Muestra bajo el núcleo lo que dice Nexus', on: !!S.subtitles, toggle: () => { this.setState({ subtitles: !S.subtitles }); this.save({ subtitles: !S.subtitles }); } },
         { label: 'Reducir movimiento', note: 'Sin parallax, estelas ni partículas extra', on: S.reduced, toggle: () => this.setReduced(!S.reduced) },
       ].map(t => ({ ...t, ...this.toggleT(t.on) })),
       themeCards: Object.keys(this.TH).map(id => { const t = this.TH[id], sel = S.theme === id; return { name: t.name, c1: t.c1, c2: t.c2, bg: sel ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.02)', border: sel ? t.c2 : 'rgba(196,181,253,.1)', pick: () => this.setTheme(id) }; }),

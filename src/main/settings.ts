@@ -28,6 +28,7 @@ export type Settings = {
   geminiStt: boolean
   geminiFallback: boolean
   azureRegion: string
+  subtitles: boolean
   theme: string
   quality: string
   reduced: boolean
@@ -71,6 +72,8 @@ const DEFAULTS: Settings = {
   geminiStt: false,
   geminiFallback: false,
   azureRegion: 'westeurope',
+  // text of what Nexus says under the core: off by default
+  subtitles: false,
   theme: 'nexus',
   quality: 'ultra',
   reduced: false
