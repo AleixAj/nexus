@@ -150,6 +150,20 @@ export default function Desktop({ v }: { v: any }) {
               {v.factText}
             </span>
           </div>
+          {v.upcoming?.length > 0 && (
+            <div style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "inherit", animation: "nx-left 800ms cubic-bezier(.16,1,.3,1) 280ms both" }}>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .6)" }}>PRÓXIMOS AVISOS</span>
+              {v.upcoming.map(r => (
+                <div key={r.id} className="nx-rem" style={{ display: "flex", alignItems: "center", gap: "10px", maxWidth: "380px" }}>
+                  <button onClick={r.cancel} title="Cancelar" className="nx-rem-x" style={{ width: "22px", height: "22px", borderRadius: "6px", border: "none", background: "transparent", color: "rgba(226,218,240,.45)", cursor: "pointer", display: "grid", placeItems: "center", padding: 0 }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 6l12 12M18 6L6 18" /></svg>
+                  </button>
+                  <span style={{ fontSize: "14.5px", color: "rgba(241,234,248,.85)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.text}</span>
+                  <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11.5px", letterSpacing: ".1em", color: r.alarm ? "#FDBA74" : "rgb(var(--acc2) / .85)", whiteSpace: "nowrap" }}>{r.alarm ? "⏰ " : ""}{r.time}</span>
+                </div>
+              ))}
+            </div>
+          )}
           <div style={{ display: "flex", gap: "8px", animation: "nx-left 800ms cubic-bezier(.16,1,.3,1) 320ms both" }}>
             {(v.indicators || []).map((ind, indIndex) => (<Fragment key={ind?.id ?? indIndex}>
               <span style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 11px", borderRadius: "999px", border: "1px solid rgba(196,181,253,.16)", background: "rgba(0,0,0,.25)", fontFamily: "'JetBrains Mono',monospace", fontSize: "10.5px", letterSpacing: ".2em", color: "rgba(226,218,240,.78)" }}>

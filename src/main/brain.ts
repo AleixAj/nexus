@@ -2,6 +2,7 @@ import { PROVIDERS, getKey, loadSettings } from './settings'
 import { TOOL_DEFS, runTool } from './tools'
 import { AGENT_TOOLS, describe, needsConfirm, progressLabel, runAgentTool, userFolders } from './agent'
 import { worldSummary } from './world'
+import { REMINDER_TOOLS, runReminderTool } from './reminders'
 import { MEMORY_TOOLS, factsForPrompt, getMemory, logExchange, runMemoryTool } from './memory'
 
 type Msg = { role: string; content?: string | null; tool_calls?: any[]; tool_call_id?: string }
@@ -37,6 +38,7 @@ function systemPrompt() {
     s.agentFiles ? `- Carpetas del usuario: ${userFolders()}. Lee un archivo antes de modificarlo.` : '- No puedes ver los archivos del usuario.',
     s.agentWrite || s.agentShell ? '- Lo que modifica el equipo pide permiso al usuario; si lo deniega, no insistas. Nunca borres nada que no te pidan.' : '',
     '- Música: usa la herramienta spotify (app de escritorio), nunca la web de Spotify.',
+    '- Recordatorios y alarmas: set_reminder (la hora actual está en el contexto). Confirma la hora en una frase.',
     s.memoryLearn
       ? '- Memoria: si el usuario cuenta algo duradero de sí mismo (gustos, personas, lugares, trabajo, rutinas), guárdalo con remember sin anunciarlo; si pide olvidar algo, forget.'
       : '- Memoria: guarda con remember solo lo que el usuario te pida recordar expresamente; si pide olvidar algo, forget.',
@@ -60,6 +62,7 @@ function toolsFor() {
   return [
     ...TOOL_DEFS.filter(t => t.function.name !== 'system_status'),
     ...MEMORY_TOOLS,
+    ...REMINDER_TOOLS,
     ...AGENT_TOOLS.system,
     ...(s.agentWeb ? AGENT_TOOLS.web : []),
     ...(s.agentFiles ? AGENT_TOOLS.files : []),
@@ -274,7 +277,7 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
         if (!r) {
           const label = progressLabel(tool, args)
           if (label) h.onProgress(label)
-          r = runMemoryTool(tool, args) || (await runAgentTool(tool, args)) || (await runTool(tool, args))
+          r = runMemoryTool(tool, args) || runReminderTool(tool, args) || (await runAgentTool(tool, args)) || (await runTool(tool, args))
         }
       } catch (e: any) {
         if (e?.name === 'AbortError') throw e

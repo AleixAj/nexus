@@ -13,6 +13,9 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   carpetas, mira estadísticas del equipo y procesos, crea o modifica archivos y ejecuta comandos de PowerShell.
   Todo lo que cambia el equipo pide permiso antes, y lo que borra va a la papelera.
 - **Acciones rápidas.** Abre aplicaciones y webs y controla la música y el volumen.
+- **Recordatorios y alarmas por voz.** «Avísame en 20 minutos», «mañana a las 9 recuérdame…», «pon una alarma de
+  lunes a viernes a las 7». Suena un aviso, lo dice en voz alta y sale una notificación de Windows. Los próximos aparecen
+  a la derecha del escritorio. Si el PC estaba apagado, te avisa al abrir de lo que se pasó.
 - **Memoria real.** Nexus aprende datos tuyos de lo que hablas (gustos, personas, lugares, trabajo) y los usa
   después; puedes añadirlos, borrarlos o desactivar el aprendizaje en el panel Memoria. Las conversaciones se guardan y
   el chat se recupera al reiniciar. Todo va cifrado con Windows (DPAPI) en `%APPDATA%\nexus\memory.bin`.

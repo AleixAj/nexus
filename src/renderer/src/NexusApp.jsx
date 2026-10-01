@@ -106,6 +106,7 @@ export default class NexusApp extends Component {
     perms: { apps: true, music: true, files: true, home: true, power: true, msg: false, cam: false },
     sys: { cpu: 34, gpu: 58, ram: 38, net: 48, disk: 61, temp: 61 }, cpuHist: Array.from({ length: 40 }, (_, i) => 30 + Math.sin(i / 3) * 8 + Math.random() * 6),
     memQuery: '', memFilter: 'Todo', learn: true,
+    reminders: [],
     memChats: [], facts: [], factInput: '', forgetArmed: false,
     provider: 'Groq', model: 'openai/gpt-oss-120b', providers: {}, keyInput: '', showKey: false, autostart: false, alwaysListen: false, hotkey: 'Control+Alt+Space', micIdx: 0, outIdx: 0,
     dirOpen: true, showDirector: false, hoverDock: null, volOpen: false,
@@ -159,6 +160,9 @@ export default class NexusApp extends Component {
       this.offs.push(api.onConfirm((id, cid, req) => this.onConfirm(id, cid, req)));
       this.offs.push(api.onCovered(covered => { const E = this.E(); E && E.setPaused(covered); }));
       this.offs.push(api.onMedia(m => this.onMedia(m)));
+      this.offs.push(api.onReminder(r => this.onReminderDue(r)));
+      this.offs.push(api.onRemindersChanged(l => this.setState({ reminders: l })));
+      api.listReminders().then(l => this.setState({ reminders: l })).catch(() => {});
       this.offs.push(api.onMediaExtra(x => this.onMediaExtra(x)));
       api.getMedia().then(r => { if (r.state) this.onMedia(r.state); if (r.extra && r.extra.key) this.onMediaExtra(r.extra); }).catch(() => {});
     }
@@ -308,6 +312,16 @@ export default class NexusApp extends Component {
     if (!songOnScreen && minute === this.lastMinute) return;
     this.lastMinute = minute;
     this.setState({ now: Date.now() });
+  }
+  // ---------- reminders ----------
+  onReminderDue(r) {
+    const secs = sfx.chime(r.alarm);
+    this.notify(r.alarm ? 'ALARMA' : 'RECORDATORIO', r.text, r.late ? 'Era para las ' + new Date(r.at).toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }) + ' · NEXUS estaba cerrado' : 'Ahora · ' + this.hm(), '#F5B971');
+    // said aloud after the chime, unless Nexus is busy talking or listening
+    this.later(() => {
+      if (!['idle', 'music'].includes(this.state.core) || this.state.onb) return;
+      this.say(`${this.cap(this.name())}, ${r.late ? 'se te pasó un recordatorio' : 'te recuerdo'}: ${r.text}.`);
+    }, Math.min(secs, 3.2) * 1000);
   }
   // ---------- Spotify (desktop app) ----------
   onMedia(m) {
@@ -948,6 +962,7 @@ export default class NexusApp extends Component {
       onCore: () => core === 'listening' ? this.talk() : live ? this.stopAll() : this.talk(),
       onMic: () => core === 'listening' ? this.talk() : live ? this.stopAll() : this.talk(), micRing: core === 'listening' || core === 'wake',
       micStatus: core === 'listening' ? 'LE ESCUCHO · TOQUE PARA TERMINAR' : live ? 'TOQUE PARA INTERRUMPIR' : `TOQUE O PULSE ${this.hotkeyLabel()}`,
+      upcoming: S.reminders.slice(0, 3).map(r => { const d = new Date(r.at), today = new Date().toDateString() === d.toDateString(); return { id: r.id, alarm: r.alarm, text: r.text, time: (today ? '' : d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric' }).replace('.', '').toUpperCase() + ' · ') + d.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' }), cancel: () => api && api.cancelReminder(r.id) }; }),
       showMusicMini: !!musicNow && !P, musicNow, musicGlow: 'rgba(' + (S.mediaTint || [251, 146, 60]).join(',') + ',.38)',
       playIcon: md && md.playing ? 'M8 5v14M16 5v14' : 'M8 5v14l11-7z', togglePlay: () => this.togglePlay(), openMusic: () => this.openPanel('music'),
       nextTrack: () => this.musicCtl('next'), prevTrack: () => this.musicCtl('previous'),

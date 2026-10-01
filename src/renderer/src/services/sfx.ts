@@ -130,3 +130,15 @@ export function ignition(burstDelay = 1) {
   // a low, round root note under the arpeggio
   epNote(ac, lofi, 87.31, t, .05, 2.2)
 }
+
+/** Reminder chime: three soft notes; an alarm plays it `times` times, a bit brighter. */
+export function chime(alarm = false, times = alarm ? 4 : 1) {
+  const { ac, out } = sfxBus()
+  const echo = tapeEcho(ac, out)
+  const notes = alarm ? [783.99, 1046.5, 1318.51] : [523.25, 659.25, 783.99]
+  for (let k = 0; k < times; k++) {
+    const t0 = ac.currentTime + .05 + k * 1.6
+    notes.forEach((f, i) => epNote(ac, echo, f, t0 + i * .16, alarm ? .2 : .14, 1.4))
+  }
+  return times * 1.6
+}

@@ -8,6 +8,7 @@ import { ask, abort, resetHistory, transcribe } from './brain'
 import { spotify, systemStatus } from './tools'
 import { getWorld } from './world'
 import { systemSnapshot } from './sysinfo'
+import { cancelReminder, listReminders, startReminders, when, type Reminder } from './reminders'
 import { addFact, clearMemory, deleteExchange, deleteFact, getMemory } from './memory'
 import { coverFor, currentMedia, lyricsFor, mediaControl, watchMedia, type MediaState } from './media'
 import { attachToDesktop, refreshWallpaper, stopWatching, watchCovered } from './wallpaper'
@@ -247,6 +248,8 @@ function registerIpc() {
 
   handle('system:status', () => systemStatus())
   handle('system:snapshot', () => systemSnapshot())
+  handle('reminders:list', () => listReminders())
+  handle('reminders:cancel', (_e, id) => cancelReminder(Number(id)))
   handle('memory:get', () => getMemory())
   handle('memory:add', (_e, text, cat) => addFact(str(text, 300), str(cat, 30)))
   handle('memory:delete-fact', (_e, id) => deleteFact(Number(id)))
@@ -263,6 +266,14 @@ function registerIpc() {
 }
 
 // global hotkey: in wallpaper mode just listen, in window mode also bring the window up
+// ---------- reminders ----------
+function onReminder(r: Reminder, late: boolean) {
+  if (Notification.isSupported()) {
+    new Notification({ title: r.alarm ? '⏰ Alarma' : 'Recordatorio', body: (late ? 'Se te pasó (' + when(r.at) + '): ' : '') + r.text, icon: join(RES, 'icon.png') }).show()
+  }
+  broadcast('reminder:due', { ...r, late })
+}
+
 // ---------- what is playing ----------
 let mediaExtra: { key: string; cover: string; lyrics: { t: number; text: string }[] | null } = { key: '', cover: '', lyrics: null }
 const broadcast = (ch: string, data: unknown) => BrowserWindow.getAllWindows().forEach(w => { if (!w.isDestroyed()) w.webContents.send(ch, data) })
@@ -302,6 +313,7 @@ if (!app.requestSingleInstanceLock()) {
 
     registerIpc()
     watchMedia(onMedia)
+    startReminders(onReminder, () => broadcast('reminders:changed', listReminders()))
     // the halo can follow the PC's audio (music): system loopback, no picker
     session.defaultSession.setDisplayMediaRequestHandler((_req, cb) => {
       desktopCapturer.getSources({ types: ['screen'] }).then(src => cb({ video: src[0], audio: 'loopback' })).catch(() => cb({}))
