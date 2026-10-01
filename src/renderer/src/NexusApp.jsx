@@ -36,9 +36,8 @@ export default class NexusApp extends Component {
     // voice and personality
     voiceSel: 'lyra', preview: null, persona: 'butler', userName: 'señor', lang: 'es-ES', wakeWord: 'Hey Nexus',
     sliders: { speed: 1, pitch: 0, warmth: 70, formal: 85, volume: 64, fx: 35 },
-    // routines (design preview)
-    routineSel: 'work', routineOn: { work: true, night: true, home: true, pres: false }, runStep: -1,
-    perms: { apps: true, music: true, files: true, home: true, power: true, msg: false, cam: false },
+    // routines and the actions approved for good
+    routines: [], approvals: [], routineSel: null, runStep: -1, runningRoutine: null,
     // memory and reminders
     // news
     news: null, newsTopics: 'tech,science,curious', newsAvoid: 'política',
@@ -97,6 +96,9 @@ export default class NexusApp extends Component {
     on(api.onMediaExtra, x => this.onMediaExtra(x));
     on(api.onReminder, r => this.onReminderDue(r));
     on(api.onRemindersChanged, l => this.setState({ reminders: l }));
+    on(api.onRoutineRun, r => this.onRoutineDue(r));
+    on(api.onRoutinesChanged, () => this.loadRoutines());
+    this.loadRoutines();
     api.listReminders().then(l => this.setState({ reminders: l })).catch(() => {});
     api.getMedia().then(r => { if (r.state) this.onMedia(r.state); if (r.extra && r.extra.key) this.onMediaExtra(r.extra); }).catch(() => {});
   }
@@ -162,6 +164,7 @@ export default class NexusApp extends Component {
     if (opening && p === 'voice') this.prepareSamples();
     if (opening && p === 'memory') this.loadMemory();
     if (opening && p === 'news') this.loadNews();
+    if (opening && p === 'routines') this.loadRoutines();
     if (opening && p === 'settings') this.loadSpotify();
     this.setState({ panel: opening ? p : null, volOpen: false });
   }

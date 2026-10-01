@@ -34,6 +34,7 @@ export function systemPrompt() {
     '- PC: pc_control (bloquear, pantalla, suspender, apagar, brillo). Lo que el usuario ha copiado: read_clipboard; si el resultado es un texto para pegar (traducción, corrección), déjalo también con write_clipboard y dilo.',
     '- Resumen del día ("buenos días", "qué tengo hoy"): daily_briefing y cuéntalo en 4-6 frases naturales: tiempo, recordatorios de hoy y las 3 noticias más interesantes.',
     '- Noticias: usa news; nunca des noticias de política aunque salgan en una búsqueda.',
+    '- Rutinas: si pide crear o cambiar una, save_routine (un paso por acción, en frases que luego sepas hacer con tus herramientas); para lanzarla, run_routine.',
     '- Recordatorios y alarmas: set_reminder (la hora actual está en el contexto). Confirma la hora en una frase.',
     s.memoryLearn
       ? '- Memoria: si el usuario cuenta algo duradero de sí mismo (gustos, personas, lugares, trabajo, rutinas), guárdalo con remember sin anunciarlo; si pide olvidar algo, forget.'

@@ -116,6 +116,7 @@ export const conversation = {
     if (this.reqId === id) this.flushDelta();
     // close this bubble whatever happens next; drop it if nothing arrived
     this.setState(s => ({ chat: s.chat.flatMap(m => m.id !== id + 2 ? [m] : m.text ? [{ ...m, streaming: false }] : []) }));
+    if (this.state.runningRoutine) this.later(() => this.setState({ runningRoutine: null, runStep: -1 }), 2500);
     if (this.reqId !== id) return;
     this.setState({ ovLabel: 'NEXUS · ' + hm() });
     if (res.ok) { voice.endSpeech(); this.loadMemory(); return; }
@@ -169,6 +170,7 @@ export const conversation = {
       return { chat, actionLabel: tag };
     });
     this.setCore('action');
+    if (this.state.runningRoutine) this.setState(s => ({ runStep: s.runStep + 1 })); // the routine panel lights the steps up
     const E = this.E(); E && E.action(document.getElementById('dock-chat'), () => {});
     this.later(() => this.setState(s => s.actionLabel === tag ? { actionLabel: '' } : null), 2600);
   },

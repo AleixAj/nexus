@@ -10,11 +10,12 @@ import { musicTools } from './music'
 import { newsTools } from './news'
 import { pcTools } from './pc'
 import { reminderTools } from './reminders'
+import { routineTools } from './routines'
 import { systemTools } from './system'
 import { visionTools } from './vision'
 import { webTools } from './web'
 
-const ALL: Tool[] = [...appTools, ...musicTools, ...memoryTools, ...reminderTools, ...newsTools, ...briefingTools, ...visionTools, ...pcTools, ...systemTools, ...webTools, ...fileTools]
+const ALL: Tool[] = [...appTools, ...musicTools, ...memoryTools, ...reminderTools, ...routineTools, ...newsTools, ...briefingTools, ...visionTools, ...pcTools, ...systemTools, ...webTools, ...fileTools]
 const BY_NAME = new Map(ALL.map(t => [t.name, t]))
 
 /** The switches in Settings → Agent. */

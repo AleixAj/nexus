@@ -1,4 +1,5 @@
-// Generated from design/NEXUS.dc.html by scripts/convert-design.mjs
+// Routines: the list (with a pause switch), the steps of the selected one and the actions
+// Nexus may do without asking. Routines are created and changed by talking to Nexus.
 import { Fragment } from 'react'
 
 export default function RoutinesPanel({ v }: { v: any }) {
@@ -9,20 +10,24 @@ export default function RoutinesPanel({ v }: { v: any }) {
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "26px 32px 18px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", animation: "nx-in 500ms cubic-bezier(.16,1,.3,1) 80ms both" }}>
             <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
-              RUTINAS Y COMANDOS
+              RUTINAS · FRASE, HORA O BOTÓN
             </span>
             <span style={{ fontSize: "30px", fontWeight: "400" }}>
               Automatizaciones
             </span>
           </div>
+          <div style={{ display: "flex", gap: "10px" }}>
+          <button onClick={v.newRoutine} style={{ height: "40px", padding: "0 16px", borderRadius: "10px", border: "1px solid rgb(var(--acc2) / .35)", background: "rgb(var(--acc) / .18)", color: "#FFF6E9", fontSize: "14px", cursor: "pointer" }}>+ Nueva rutina</button>
           <button onClick={v.closePanel} style={{ width: "40px", height: "40px", borderRadius: "10px", border: "1px solid rgba(196,181,253,.14)", background: "rgba(255,255,255,.02)", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc26">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
           </button>
+          </div>
         </div>
         <div style={{ flex: "1", minHeight: "0", display: "grid", gridTemplateColumns: "400px minmax(0,1fr)", gap: "28px", padding: "4px 32px 28px" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px", minHeight: "0", overflow: "auto" }}>
+            {v.routinesEmpty && <span style={{ padding: "18px 4px", fontSize: "14px", lineHeight: "1.6", color: "rgba(226,218,240,.55)" }}>Aún no tienes rutinas. Pídeselas a Nexus, por ejemplo: «crea una rutina Modo trabajo que abra VS Code y ponga mi lista Focus, cuando diga modo trabajo» o «cada día a las 8 dime el resumen del día».</span>}
             {(v.routineCards || []).map((r, rIndex) => (<Fragment key={r?.id ?? rIndex}>
               <div data-spot="1" onClick={r.select} style={{ position: "relative", padding: "14px 16px", display: "flex", alignItems: "center", gap: "14px", cursor: "pointer", borderRadius: "12px", background: r.bg, border: `1px solid ${r.border}`, transition: "transform 300ms cubic-bezier(.34,1.2,.64,1), border-color 300ms, background 300ms", animation: "nx-in 600ms cubic-bezier(.16,1,.3,1) both", animationDelay: r.delay }} className="dc27 dc28">
                 <div style={{ flex: "1", minWidth: "0", display: "flex", flexDirection: "column", gap: "5px" }}>
@@ -39,9 +44,10 @@ export default function RoutinesPanel({ v }: { v: any }) {
               </div>
             </Fragment>))}
             <span style={{ marginTop: "14px", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
-              PERMISOS · QUÉ PUEDE CONTROLAR
+              PERMISOS · LO QUE HACE SIN PREGUNTAR
             </span>
-            {(v.permRows || []).map((p, pIndex) => (<Fragment key={p?.id ?? pIndex}>
+            {v.approvalsEmpty && <span style={{ padding: "8px 2px", fontSize: "12.5px", lineHeight: "1.5", color: "rgba(226,218,240,.45)" }}>Nada todavía. Lo que permitas con «Permitir siempre» aparecerá aquí, y puedes quitarlo con el interruptor.</span>}
+            {(v.approvalRows || []).map((p, pIndex) => (<Fragment key={p?.id ?? pIndex}>
               <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "9px 2px", borderBottom: "1px solid rgba(196,181,253,.07)" }}>
                 <div style={{ flex: "1", display: "flex", flexDirection: "column", gap: "3px" }}>
                   <span style={{ fontSize: "14px", color: "rgba(241,234,248,.88)" }}>
@@ -61,18 +67,21 @@ export default function RoutinesPanel({ v }: { v: any }) {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                 <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "10.5px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
-                  EDITOR POR PASOS
+                  PASOS · {v.selRoutine.trigger.toUpperCase()}
                 </span>
                 <span style={{ fontSize: "22px", fontWeight: "400", color: "#FFF6E9" }}>
                   {v.selRoutine.name}
                 </span>
               </div>
+              {v.hasRoutine && <div style={{ display: "flex", gap: "8px" }}>
+              <button onClick={v.deleteRoutine} style={{ height: "40px", padding: "0 14px", borderRadius: "10px", border: "1px solid rgba(251,113,133,.35)", background: "rgba(251,113,133,.06)", color: "#FDA4AF", fontSize: "13.5px", cursor: "pointer" }}>{v.deleteLabel}</button>
               <button onClick={v.runRoutine} style={{ display: "flex", alignItems: "center", gap: "10px", height: "40px", padding: "0 18px", borderRadius: "10px", border: "1px solid rgba(255,255,255,.18)", background: "linear-gradient(180deg, rgb(var(--acc) / .95), rgb(var(--acc) / .7))", color: "#fff", fontSize: "14px", fontWeight: "500", whiteSpace: "nowrap", cursor: "pointer", boxShadow: "0 0 24px rgb(var(--acc) / .4), inset 0 1px 0 rgba(255,255,255,.25)" }} className="dc29">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor">
                   <path d="M8 5v14l11-7z" />
                 </svg>
                 Ejecutar ahora
               </button>
+              </div>}
             </div>
             <div style={{ flex: "1", overflow: "auto", padding: "6px 24px 24px", display: "flex", flexDirection: "column", alignItems: "center" }}>
               {(v.routineSteps || []).map((st, stIndex) => (<Fragment key={st?.id ?? stIndex}>
@@ -99,9 +108,9 @@ export default function RoutinesPanel({ v }: { v: any }) {
                 </div>
               </Fragment>))}
               <div style={{ width: "2px", height: "22px", background: "rgba(196,181,253,.15)" }}></div>
-              <button style={{ display: "flex", alignItems: "center", gap: "8px", height: "36px", padding: "0 16px", borderRadius: "999px", border: "1px dashed rgba(196,181,253,.3)", background: "transparent", color: "rgba(226,218,240,.7)", fontSize: "13px", cursor: "pointer" }} className="dc30">
-                + Añadir paso
-              </button>
+              {v.hasRoutine && <button onClick={v.editRoutine} style={{ display: "flex", alignItems: "center", gap: "8px", height: "36px", padding: "0 16px", borderRadius: "999px", border: "1px dashed rgba(196,181,253,.3)", background: "transparent", color: "rgba(226,218,240,.7)", fontSize: "13px", cursor: "pointer" }} className="dc30">
+                Cambiar pasos con Nexus
+              </button>}
             </div>
           </div>
         </div>

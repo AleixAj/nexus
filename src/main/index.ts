@@ -3,6 +3,7 @@ import { app, desktopCapturer, globalShortcut, session } from 'electron'
 import { loadSettings } from './settings'
 import { onAzureQuotaOut, onGeminiQuota } from './tts'
 import { listReminders, startReminders, when } from './reminders'
+import { listRoutines, startRoutines } from './routines'
 import { watchMedia } from './media'
 import { registerIpc } from './ipc'
 import { DICTATE_HOTKEY } from './dictation'
@@ -21,6 +22,7 @@ function startWatchers() {
     notify(r.alarm ? '⏰ Alarma' : 'Recordatorio', (late ? `Se te pasó (${when(r.at)}): ` : '') + r.text)
     broadcast('reminder:due', { ...r, late })
   }, () => broadcast('reminders:changed', listReminders()))
+  startRoutines(r => broadcast('routine:run', r), () => broadcast('routines:changed', listRoutines()))
   onGeminiQuota(() => broadcast('tts:quota', 'Gemini'))
   onAzureQuotaOut(() => broadcast('tts:quota', 'Azure'))
 }

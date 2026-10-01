@@ -17,6 +17,7 @@ import { currentExtra, currentMedia, mediaControl } from './media'
 import { HOTKEY, isDev, switchMode } from './window'
 import { typeText } from './dictation'
 import { listApprovals, revoke } from './approvals'
+import { deleteRoutine, listRoutines, setRoutineEnabled, triggerText } from './routines'
 import { REDIRECT, connectSpotify, disconnectSpotify, spotifyStatus } from './spotifyApi'
 
 const trusted = (e: IpcMainInvokeEvent) => {
@@ -109,6 +110,9 @@ export function registerIpc() {
   handle('brain:abort', () => { abort(); pendingConfirms.forEach((_, cid) => answerConfirm(cid, false)) })
   handle('brain:confirm-reply', (_e, cid, ok) => answerConfirm(Number(cid), ok === 'always' ? 'always' : ok === true))
   handle('approvals:list', () => listApprovals())
+  handle('routines:list', () => listRoutines().map(r => ({ ...r, trigger: triggerText(r) })))
+  handle('routines:delete', (_e, id) => deleteRoutine(Number(id)))
+  handle('routines:enable', (_e, id, on) => setRoutineEnabled(Number(id), on === true))
   handle('approvals:revoke', (_e, key) => revoke(str(key, 100)))
 
   // ---------- panels ----------

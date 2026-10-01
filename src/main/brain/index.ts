@@ -10,6 +10,7 @@ import { isSimple } from './complexity'
 import { redact } from '../lib/privacy'
 import { noteTool, resetTaint } from '../lib/taint'
 import { approvalKey, approve, isApproved } from '../approvals'
+import { markRun, routineFor, routinePrompt } from '../routines'
 
 type Msg = { role: string; content?: string | null; tool_calls?: any[]; tool_call_id?: string }
 
@@ -95,15 +96,19 @@ async function useTool(name: string, args: any, h: Handlers, signal: AbortSignal
 async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise<string> {
   if (ctl.signal.aborted) throw aborted()
   const s = loadSettings()
-  const simple = isSimple(text)
+  const simple = isSimple(text) && !routineFor(text)
   const all = await targets(s, simple)
   if (!all.length) throw new Error('NO_KEY')
   const guard = new LoopGuard()
   resetTaint()
 
   restoreHistory()
+  // a routine's phrase (or "/rutina nombre") becomes the routine's steps
+  const routine = routineFor(text)
+  if (routine) markRun(routine.id)
+  const asked = routine ? routinePrompt(routine) : text
   // work on a copy; history only changes if the whole turn succeeds
-  const turn: Msg[] = [...history, { role: 'user', content: `${text}\n\n${contextNote()}` }]
+  const turn: Msg[] = [...history, { role: 'user', content: `${asked}\n\n${contextNote()}` }]
   const tools = toolDefs(s)
   let full = ''
 

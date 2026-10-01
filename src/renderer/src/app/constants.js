@@ -99,19 +99,3 @@ export const providerInfo = p => PROVIDER_INFO[p] || { name: p, url: '', note: '
 
 // Gemini switches: the key alone turns nothing on (its free quota is small)
 export const GEMINI_SETTING = { tts: 'geminiTts', search: 'geminiSearch', stt: 'geminiStt', vision: 'geminiVision', fallback: 'geminiFallback' };
-
-// ---------- routines (still a design preview; they become real in a later step) ----------
-export const ROUTINES = [
-  { id: 'work', name: 'Modo trabajo', trigger: '«NEXUS, MODO TRABAJO»', steps: [
-    ['trigger', 'DISPARADOR', 'Frase de voz', '«modo trabajo»'], ['app', 'ABRIR APLICACIÓN', 'VS Code', 'nexus-core'], ['audio', 'MÚSICA', 'Spotify', 'Enfoque profundo'], ['bell', 'SISTEMA', 'Silenciar notificaciones', '2 h'], ['speak', 'RESPUESTA', 'Decir «Todo listo»', 'voz Orión']] },
-  { id: 'night', name: 'Buenas noches', trigger: '23:30 · CADA DÍA', steps: [
-    ['trigger', 'DISPARADOR', 'Hora programada', '23:30'], ['save', 'ARCHIVOS', 'Guardar trabajo abierto', '4 apps'], ['light', 'HOGAR', 'Bajar luces', '10 % · Hue'], ['audio', 'MÚSICA', 'Pausar reproducción', 'Spotify'], ['power', 'SISTEMA', 'Apagar el equipo', 'en 10 min']] },
-  { id: 'home', name: 'Llego a casa', trigger: 'AL CONECTAR A «CASA-5G»', steps: [
-    ['trigger', 'DISPARADOR', 'Red Wi-Fi', 'CASA-5G'], ['light', 'HOGAR', 'Encender salón', '60 %'], ['speak', 'RESPUESTA', 'Resumen del día', '3 puntos'], ['audio', 'MÚSICA', 'Lista Relax', 'volumen 30 %']] },
-  { id: 'pres', name: 'Presentación', trigger: 'AL ABRIR POWERPOINT', steps: [
-    ['trigger', 'DISPARADOR', 'Aplicación abierta', 'PowerPoint'], ['bell', 'SISTEMA', 'No molestar', 'hasta cerrar'], ['app', 'ESCRITORIO', 'Ocultar iconos', 'pantalla 2'], ['audio', 'AUDIO', 'Volumen del sistema', '40 %']] },
-];
-export const PERMS = [
-  ['apps', 'Abrir y cerrar aplicaciones', 'Sin confirmación'], ['music', 'Música y volumen', 'Spotify, YouTube, mezclador'], ['files', 'Leer archivos', 'Solo Documentos y Escritorio'],
-  ['home', 'Luces del hogar', 'Philips Hue · 6 luces'], ['power', 'Apagar y reiniciar', 'Pide confirmación por voz'], ['msg', 'Enviar mensajes y correos', 'Desactivado'], ['cam', 'Cámara', 'Desactivado'],
-];
