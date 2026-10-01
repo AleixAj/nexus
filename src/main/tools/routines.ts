@@ -31,7 +31,7 @@ export const routineTools: Tool[] = [
     }
   },
   {
-    name: 'list_routines',
+    name: 'list_routines', readOnly: true,
     description: 'Lista las rutinas del usuario.',
     run: () => {
       const l = listRoutines()

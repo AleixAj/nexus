@@ -38,13 +38,13 @@ function topProcesses(sort = 'cpu', count = 10) {
 
 export const systemTools: Tool[] = [
   {
-    name: 'system_status',
+    name: 'system_status', readOnly: true,
     description: 'Estado del PC: CPU, RAM, discos, GPU, batería.',
     progress: () => 'Revisando el equipo',
     run: async () => ({ result: await systemStatus(), label: 'Estado del equipo' })
   },
   {
-    name: 'top_processes',
+    name: 'top_processes', readOnly: true,
     description: 'Procesos que más consumen.',
     params: { sort: oneOf(['cpu', 'memory']), count: num('Cuántos') },
     progress: () => 'Revisando procesos',

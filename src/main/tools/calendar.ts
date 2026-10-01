@@ -4,7 +4,7 @@ import { num, said, type Tool } from './define'
 
 export const calendarTools: Tool[] = [
   {
-    name: 'calendar_events',
+    name: 'calendar_events', readOnly: true,
     description: 'Eventos del calendario del usuario desde hoy hasta dentro de N días.',
     params: { days: num('Cuántos días mirar (1 = hoy, 7 = la semana)') },
     progress: () => 'Mirando tu calendario',

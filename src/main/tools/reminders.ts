@@ -33,7 +33,7 @@ export const reminderTools: Tool[] = [
     }
   },
   {
-    name: 'list_reminders',
+    name: 'list_reminders', readOnly: true,
     description: 'Lista los recordatorios y alarmas pendientes.',
     run: () => {
       const l = listReminders()

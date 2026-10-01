@@ -53,6 +53,9 @@ export function shellView(app, c) {
     }),
     hasHover: !!S.hoverDock && !S.volOpen, hoverLabel: S.hoverDock, volOpen: S.volOpen,
 
+    // what NEXUS just looked at
+    visionPreview: S.visionPreview, closeVision: () => app.setState({ visionPreview: null }),
+
     // approval card (the agent wants to change something)
     confirm: S.confirm, confirmYes: () => app.answerConfirm(true), confirmNo: () => app.answerConfirm(false), confirmAlways: () => app.answerConfirm('always'),
 

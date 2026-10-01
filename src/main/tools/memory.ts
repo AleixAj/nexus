@@ -23,7 +23,7 @@ export const memoryTools: Tool[] = [
     }
   },
   {
-    name: 'search_memory',
+    name: 'search_memory', readOnly: true,
     description: 'Busca en conversaciones pasadas con el usuario (lo que hablasteis otros días).',
     params: { query: str('Qué buscar') },
     required: ['query'],

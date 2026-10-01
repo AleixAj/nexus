@@ -1,5 +1,5 @@
 // The NEXUS window in its two modes (normal window or desktop wallpaper) and the tray icon.
-import { app, BrowserWindow, Menu, Notification, Tray, nativeImage, screen, shell } from 'electron'
+import { app, BrowserWindow, Menu, Notification, Tray, ipcMain, nativeImage, screen, shell } from 'electron'
 import { join } from 'path'
 import { loadSettings, saveSettings } from './settings'
 import { attachToDesktop, refreshWallpaper, stopWatching, watchCovered } from './wallpaper'
@@ -30,6 +30,20 @@ function secondaryArea() {
 /** Sends an event to every open window. */
 export const broadcast = (channel: string, ...data: unknown[]) =>
   BrowserWindow.getAllWindows().forEach(w => { if (!w.isDestroyed()) w.webContents.send(channel, ...data) })
+
+/** Asks the window to do something only it can do (take a photo…) and waits for its answer. */
+let askSeq = 0
+const pendingAsks = new Map<number, (v: unknown) => void>()
+ipcMain.on('window:answer', (e, id, value) => { if (e.sender === win?.webContents) { pendingAsks.get(id)?.(value); pendingAsks.delete(id) } })
+export function askWindow(channel: string, timeout = 10000, ...args: unknown[]) {
+  return new Promise<unknown>(resolve => {
+    if (!win || win.isDestroyed()) { resolve({ error: 'la ventana no está abierta' }); return }
+    const id = ++askSeq
+    pendingAsks.set(id, resolve)
+    win.webContents.send(channel, id, ...args)
+    setTimeout(() => { if (pendingAsks.delete(id)) resolve({ error: 'no ha respondido a tiempo' }) }, timeout)
+  })
+}
 
 export function notify(title: string, body: string) {
   if (Notification.isSupported()) new Notification({ title, body, icon: ICON }).show()

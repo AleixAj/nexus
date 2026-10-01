@@ -17,6 +17,7 @@ import { routines } from './app/features/routines';
 import { settings } from './app/features/settings';
 import { startup } from './app/features/startup';
 import { voices } from './app/features/voices';
+import { vision } from './app/features/vision';
 import { wakeword } from './app/features/wakeword';
 
 export default class NexusApp extends Component {
@@ -34,7 +35,7 @@ export default class NexusApp extends Component {
     // music
     music: false, media: null, mediaAt: 0, mediaExtra: null,
     // chat and quick overlay
-    chat: [], chatInput: '', attachments: [], ovInput: '', ovState: 'idle', ovLabel: 'NEXUS', ovReply: '',
+    chat: [], chatInput: '', attachments: [], currentFiles: [], ovInput: '', ovState: 'idle', ovLabel: 'NEXUS', ovReply: '',
     // voice and personality
     voiceSel: 'lyra', preview: null, persona: 'butler', userName: 'señor', lang: 'es-ES', wakeWord: 'Hey Nexus',
     sliders: { speed: 1, pitch: 0, warmth: 70, formal: 85, volume: 64, fx: 35 },
@@ -97,6 +98,8 @@ export default class NexusApp extends Component {
     on(api.onHotkey, () => this.talk());
     on(api.onDictate, () => this.toggleDictation());
     on(api.onWake, () => this.onWakeWord());
+    on(api.onVisionPreview, p => this.onVisionPreview(p));
+    on(api.onCameraSnap, id => this.onCameraSnap(id));
     on(api.onWakeProgress, p => this.onWakeProgress(p));
     on(api.onDelta, (id, t) => this.onDelta(id, t));
     on(api.onAction, (id, label) => this.onAction(id, label));
@@ -195,4 +198,4 @@ export default class NexusApp extends Component {
   }
 }
 
-Object.assign(NexusApp.prototype, conversation, dictation, memory, music, news, power, routines, settings, startup, voices, wakeword);
+Object.assign(NexusApp.prototype, conversation, dictation, memory, music, news, power, routines, settings, startup, vision, voices, wakeword);

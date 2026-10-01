@@ -75,6 +75,12 @@ export default function ChatPanel({ v }: { v: any }) {
               </Fragment>))}
             </div>
           </>)}
+          {v.currentFiles && (
+            <div style={{ display: "flex", alignItems: "center", gap: "8px", fontSize: "12.5px", color: "rgba(226,218,240,.6)" }}>
+              <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>📎 Trabajando con <b style={{ color: "#FFF6E9", fontWeight: 500 }}>{v.currentFiles}</b> · di «resúmelo», «tradúcelo»…</span>
+              <button onClick={v.forgetCurrentFile} title="Olvidar este archivo" style={{ border: "none", background: "none", color: "rgba(226,218,240,.5)", cursor: "pointer", padding: 0 }}>✕</button>
+            </div>
+          )}
           {v.attachments.length > 0 && (
             <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
               {v.attachments.map(a => (

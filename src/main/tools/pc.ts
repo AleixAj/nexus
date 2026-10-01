@@ -57,6 +57,13 @@ export const pcTools: Tool[] = [
     description: 'Controla el PC: bloquear, apagar pantalla, suspender, apagar o reiniciar (en X min), cancelar apagado, brillo (0-100).',
     params: { action: oneOf(Object.keys(ACTIONS)), minutes: num('Para apagar/reiniciar: dentro de cuántos minutos (por defecto 1)'), value: num('Brillo 0-100') },
     required: ['action'],
+    // shutting down, restarting, sleeping or locking only if the user's words ask for it
+    intent: a => ({
+      shutdown: /apag|cierra (el |todo)|shut ?down|desconect/i,
+      restart: /reinici|restart|reboot/i,
+      sleep: /suspend|duerm|dormir|sleep|hiberna/i,
+      lock: /bloque|lock/i,
+    } as Record<string, RegExp>)[a.action] || null,
     // sleeping, shutting down and restarting always ask first
     confirm: a => ACTIONS[a.action]?.ask ? { title: ACTIONS[a.action].ask!, detail: a.action === 'sleep' ? 'Ahora mismo' : `Dentro de ${minutes(a)} min` } : null,
     run: async a => {
@@ -66,7 +73,7 @@ export const pcTools: Tool[] = [
     }
   },
   {
-    name: 'read_clipboard',
+    name: 'read_clipboard', readOnly: true,
     description: 'Lee lo que el usuario ha copiado (texto o imagen) para traducirlo, resumirlo, corregirlo… ',
     progress: () => 'Leyendo el portapapeles',
     run: async () => {

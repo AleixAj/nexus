@@ -589,3 +589,22 @@ export function stopWakeMic() {
   wake.ctx.close()
   wake = null
 }
+
+// ---------- camera ----------
+/** One photo from the webcam (JPEG base64); the camera is switched off right after. */
+export async function cameraPhoto() {
+  const stream = await navigator.mediaDevices.getUserMedia({ video: { width: { ideal: 1280 }, height: { ideal: 720 } } })
+  try {
+    const v = document.createElement('video')
+    v.srcObject = stream
+    v.muted = true
+    await v.play()
+    await new Promise(r => setTimeout(r, 600)) // let the exposure settle
+    const c = document.createElement('canvas')
+    c.width = v.videoWidth; c.height = v.videoHeight
+    c.getContext('2d')!.drawImage(v, 0, 0)
+    return c.toDataURL('image/jpeg', 0.85).split(',')[1]
+  } finally {
+    stream.getTracks().forEach(t => t.stop())
+  }
+}

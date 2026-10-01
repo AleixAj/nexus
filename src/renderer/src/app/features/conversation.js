@@ -80,7 +80,8 @@ export const conversation = {
     const files = this.state.attachments;
     const text = this.state.chatInput.trim() || (files.length ? (files.length > 1 ? '¿Qué son estos archivos? Resúmemelos.' : '¿Qué es esto? Resúmemelo.') : '');
     if (!text) return;
-    this.setState({ chatInput: '', attachments: [] });
+    // what was dropped stays "the current file" for the next questions ("resúmelo", "tradúcelo")
+    this.setState(s => ({ chatInput: '', attachments: [], currentFiles: files.length ? files : s.currentFiles }));
     this.ask(withAttachments(text, files));
   },
   // files dropped on the window: they wait above the chat box until the message is sent
@@ -91,6 +92,7 @@ export const conversation = {
     this.setState(s => ({ attachments: [...s.attachments, ...files.filter(f => !s.attachments.some(a => a.path === f.path))].slice(0, 6), dragOver: false }));
     this.openPanel('chat', true);
   },
+  forgetCurrentFile() { this.setState({ currentFiles: [] }); api && api.clearCurrentFile(); },
   removeAttachment(path) { this.setState(s => ({ attachments: s.attachments.filter(a => a.path !== path) })); },
   ovAsk() {
     const q = this.state.ovInput.trim(); if (!q) return;

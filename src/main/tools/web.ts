@@ -5,30 +5,38 @@ import { str, type Tool } from './define'
 
 const BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140 Safari/537.36'
 
+export type Hit = { title: string; url: string; snippet: string }
+
 // Keyless search: DuckDuckGo's HTML results (titles, links and snippets).
-// The model then opens the most useful ones with read_webpage.
-async function ddgSearch(query: string) {
+export async function ddgResults(query: string, max = 8, signal?: AbortSignal): Promise<Hit[]> {
   const res = await fetch('https://html.duckduckgo.com/html/', {
     method: 'POST',
-    signal: AbortSignal.timeout(12000),
+    signal: signal ? AbortSignal.any([signal, AbortSignal.timeout(12000)]) : AbortSignal.timeout(12000),
     headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'User-Agent': BROWSER_UA },
     body: new URLSearchParams({ q: query, kl: 'es-es' })
   })
-  if (!res.ok) return `La búsqueda no ha respondido (HTTP ${res.status}).`
+  if (!res.ok) throw new Error(`La búsqueda no ha respondido (HTTP ${res.status})`)
   const html = await res.text()
-  const results: string[] = []
+  const out: Hit[] = []
   const re = /class="result__a" href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?class="result__snippet"[^>]*>([\s\S]*?)<\/a>/g
   let m
-  while ((m = re.exec(html)) && results.length < 8) {
+  while ((m = re.exec(html)) && out.length < max) {
     let url = m[1]
     const redirect = url.match(/[?&]uddg=([^&]+)/)
     if (redirect) url = decodeURIComponent(redirect[1])
     if (url.startsWith('//')) url = 'https:' + url
     if (/duckduckgo\.com\/y\.js|ad_domain/.test(url)) continue // ads
-    results.push(`${results.length + 1}. ${htmlToText(m[2])}\n   ${url}\n   ${htmlToText(m[3])}`)
+    out.push({ title: htmlToText(m[2]), url, snippet: htmlToText(m[3]) })
   }
-  return results.length
-    ? `Resultados para «${query}» (abre con read_webpage los que necesites para dar datos concretos):\n\n` + results.join('\n')
+  return out
+}
+
+// The model then opens the most useful ones with read_webpage.
+async function ddgSearch(query: string) {
+  let hits: Hit[]
+  try { hits = await ddgResults(query) } catch (e: any) { return e.message }
+  return hits.length
+    ? `Resultados para «${query}» (abre con read_webpage los que necesites para dar datos concretos):\n\n` + hits.map((h, i) => `${i + 1}. ${h.title}\n   ${h.url}\n   ${h.snippet}`).join('\n')
     : `Sin resultados para «${query}».`
 }
 
@@ -76,7 +84,7 @@ async function webSearch(query: string) {
   return ddgSearch(query)
 }
 
-async function readWebpage(url: string) {
+export async function readWebpage(url: string) {
   let u: URL
   try { u = new URL(url) } catch { return 'URL no válida' }
   if (!['http:', 'https:'].includes(u.protocol)) return 'Solo páginas http(s)'
@@ -99,7 +107,7 @@ async function wikipedia(topic: string) {
 
 export const webTools: Tool[] = [
   {
-    name: 'web_search',
+    name: 'web_search', readOnly: true,
     group: 'web',
     description: 'Busca en internet datos actuales (noticias, precios, resultados…). Devuelve resumen y fuentes.',
     params: { query: str('Consulta concreta') },
@@ -108,7 +116,7 @@ export const webTools: Tool[] = [
     run: async a => ({ result: await webSearch(String(a.query || '')), label: 'Búsqueda web · ' + short(a.query, 50) })
   },
   {
-    name: 'read_webpage',
+    name: 'read_webpage', readOnly: true,
     group: 'web',
     description: 'Lee el texto de una web.',
     params: { url: str('URL') },
@@ -117,7 +125,7 @@ export const webTools: Tool[] = [
     run: async a => ({ result: await readWebpage(String(a.url || '')), label: 'Página leída' })
   },
   {
-    name: 'wikipedia',
+    name: 'wikipedia', readOnly: true,
     group: 'web',
     description: 'Resumen de Wikipedia.',
     params: { topic: str('Tema') },

@@ -61,7 +61,7 @@ export const musicTools: Tool[] = [
     }
   },
   {
-    name: 'spotify_playlists',
+    name: 'spotify_playlists', readOnly: true,
     description: 'Lista las playlists del usuario en Spotify.',
     run: async () => {
       if (!spotifyStatus().connected) return said('Spotify no está conectado (Ajustes → Spotify).')

@@ -5,7 +5,7 @@ import { oneOf, type Tool } from './define'
 
 export const newsTools: Tool[] = [
   {
-    name: 'news',
+    name: 'news', readOnly: true,
     description: 'Noticias de hoy según los temas que le gustan al usuario (sin política). Para resúmenes del día o "qué hay de nuevo".',
     params: { topic: oneOf(['mine', ...Object.keys(TOPICS)], 'mine = sus temas guardados') },
     progress: () => 'Leyendo las noticias',

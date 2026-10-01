@@ -1,7 +1,7 @@
 // Every tool the agent can use, in one list. To add one: write it in the file of its
 // group (or a new file) and add that list here.
 import type { Settings } from '../settings'
-import type { Group, Tool, ToolResult } from './define'
+import type { Group, RunCtx, Tool, ToolResult } from './define'
 import { appTools } from './apps'
 import { briefingTools } from './briefing'
 import { calendarTools } from './calendar'
@@ -11,12 +11,13 @@ import { musicTools } from './music'
 import { newsTools } from './news'
 import { pcTools } from './pc'
 import { reminderTools } from './reminders'
+import { researchTools } from './research'
 import { routineTools } from './routines'
 import { systemTools } from './system'
 import { visionTools } from './vision'
 import { webTools } from './web'
 
-const ALL: Tool[] = [...appTools, ...musicTools, ...memoryTools, ...reminderTools, ...calendarTools, ...routineTools, ...newsTools, ...briefingTools, ...visionTools, ...pcTools, ...systemTools, ...webTools, ...fileTools]
+const ALL: Tool[] = [...appTools, ...musicTools, ...memoryTools, ...reminderTools, ...calendarTools, ...routineTools, ...newsTools, ...briefingTools, ...visionTools, ...pcTools, ...systemTools, ...webTools, ...researchTools, ...fileTools]
 const BY_NAME = new Map(ALL.map(t => [t.name, t]))
 
 /** The switches in Settings → Agent. */
@@ -34,9 +35,9 @@ export function toolDefs(s: Settings) {
 export const findTool = (name: string) => BY_NAME.get(name)
 
 /** Runs a tool; errors come back as text for the model, never thrown (except an abort). */
-export async function runTool(t: Tool, args: any): Promise<ToolResult> {
+export async function runTool(t: Tool, args: any, ctx: RunCtx): Promise<ToolResult> {
   try {
-    return await t.run(args)
+    return await t.run(args, ctx)
   } catch (e: any) {
     if (e?.name === 'AbortError') throw e
     const msg = e?.code === 'ENOENT' ? 'No existe esa ruta' : e?.code === 'EPERM' || e?.code === 'EACCES' ? 'Sin permiso de Windows para esa ruta' : e?.message || String(e)
@@ -46,4 +47,4 @@ export async function runTool(t: Tool, args: any): Promise<ToolResult> {
 
 export { userFolders } from './files'
 export { spotify } from './music'
-export type { Tool, ToolResult } from './define'
+export type { RunCtx, Tool, ToolResult } from './define'

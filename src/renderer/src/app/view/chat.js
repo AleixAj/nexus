@@ -17,6 +17,7 @@ export function chatView(app, c) {
     onChatKey: e => { if (e.key === 'Enter') { e.preventDefault(); app.sendChat(); } }, onChatSend: () => app.sendChat(),
     showSlash: S.chatInput.startsWith('/'),
     attachments: S.attachments.map(a => ({ ...a, remove: () => app.removeAttachment(a.path) })),
+    currentFiles: S.attachments.length ? '' : S.currentFiles.map(f => f.name).join(', '), forgetCurrentFile: () => app.forgetCurrentFile(),
     dragOver: !!S.dragOver,
     onDragOver: e => { if (WALLPAPER || !e.dataTransfer.types.includes('Files')) return; e.preventDefault(); if (!S.dragOver) app.setState({ dragOver: true }); },
     onDragLeave: e => { if (!e.relatedTarget) app.setState({ dragOver: false }); },

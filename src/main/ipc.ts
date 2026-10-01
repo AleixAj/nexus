@@ -5,7 +5,7 @@ import { mkdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
 import { PROVIDERS, getKey, loadSettings, saveSettings, setKey, testKey } from './settings'
 import { azureVoicesPaused, geminiVoicesPaused, isPremium, speak, speakDetailed, warmVoices } from './tts'
-import { abort, ask, resetHistory } from './brain'
+import { abort, ask, clearCurrentFiles, resetHistory } from './brain'
 import { transcribe } from './stt'
 import { spotify } from './tools'
 import { getWorld } from './world'
@@ -118,6 +118,7 @@ export function registerIpc() {
       return { ok: false, error: err.message || String(err) }
     }
   })
+  handle('brain:clear-file', () => clearCurrentFiles())
   handle('brain:abort', () => { abort(); pendingConfirms.forEach((_, cid) => answerConfirm(cid, false)) })
   handle('brain:confirm-reply', (_e, cid, ok) => answerConfirm(Number(cid), ok === 'always' ? 'always' : ok === true))
   handle('calendar:set', (_e, url) => setCalendarUrl(str(url, 1000)))

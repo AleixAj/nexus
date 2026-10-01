@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld('nexus', {
   ask: (id: number, text: string) => ipcRenderer.invoke('brain:ask', id, text),
   // where a file dropped on the window lives (the agent reads it from there)
   pathForFile: (file: File) => webUtils.getPathForFile(file),
+  clearCurrentFile: () => ipcRenderer.invoke('brain:clear-file'),
   abort: () => ipcRenderer.invoke('brain:abort'),
   systemSnapshot: () => ipcRenderer.invoke('system:snapshot'),
   getWorld: () => ipcRenderer.invoke('world:get'),
@@ -65,5 +66,8 @@ contextBridge.exposeInMainWorld('nexus', {
   wakeStop: () => ipcRenderer.invoke('wake:stop'),
   wakeAudio: (samples: Float32Array) => ipcRenderer.send('wake:audio', samples),
   onWake: (fn: () => void) => on('wake:detected', fn),
+  onVisionPreview: (fn: (p: { src: string; source: string }) => void) => on('vision:preview', fn),
+  onCameraSnap: (fn: (id: number) => void) => on('camera:snap', fn),
+  answer: (id: number, value: unknown) => ipcRenderer.send('window:answer', id, value),
   typeText: (text: string) => ipcRenderer.invoke('dictation:type', text)
 })

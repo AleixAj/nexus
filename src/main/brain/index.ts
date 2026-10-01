@@ -30,6 +30,7 @@ const KEEP_TOOL_CHARS = 400
 const KEEP_ANSWER_CHARS = 900
 const MAX_ANSWER_TOKENS = 1200
 const SIMPLE_ANSWER_TOKENS = 700
+const REPORT_TOKENS = 2600 // a deep research report
 
 let history: Msg[] = []
 let restored = false
@@ -72,11 +73,27 @@ export function ask(text: string, h: Handlers): Promise<string> {
   return run
 }
 
-async function useTool(name: string, args: any, h: Handlers, signal: AbortSignal, guard: LoopGuard): Promise<ToolResult> {
+// ---------- the file the user is working with ----------
+// A file dropped in the chat stays "the current file" for a while: "resúmelo", "tradúcelo" or
+// "haz una presentación con esto" work without saying which one.
+const ATTACHED = /\[Adjuntos: ([^\]]+)\]\s*$/
+let currentFiles: { paths: string[]; at: number } | null = null
+export const getCurrentFiles = () => (currentFiles && Date.now() - currentFiles.at < 60 * 60e3 ? currentFiles.paths : [])
+export const clearCurrentFiles = () => { currentFiles = null }
+
+type Turn = { said: string; h: Handlers; signal: AbortSignal; guard: LoopGuard }
+
+async function useTool(name: string, args: any, turn: Turn): Promise<ToolResult> {
+  const { h, signal, guard } = turn
   const t = findTool(name)
   if (!t) return { result: 'Herramienta desconocida', label: name }
   const loop = guard.check(name, args)
   if (loop) return { result: loop, label: 'Repetición evitada' }
+  // serious actions need the user's own words, not just the model's decision
+  const wanted = t.intent?.(args)
+  if (wanted && !wanted.test(turn.said)) {
+    return { result: 'No lo hago: el usuario no lo ha pedido con sus palabras en este mensaje. Si lo quiere, que lo pida él directamente.', label: 'Acción bloqueada · no la has pedido tú' }
+  }
   const req = t.confirm?.(args)
   const key = approvalKey(name, args)
   if (req && !isApproved(key)) {
@@ -88,7 +105,7 @@ async function useTool(name: string, args: any, h: Handlers, signal: AbortSignal
   const label = t.progress?.(args)
   if (label) h.onProgress(label)
   noteTool(name)
-  const r = await runTool(t, args)
+  const r = await runTool(t, args, { progress: h.onProgress, signal })
   // keys, passwords or card numbers found in a file, the clipboard or the screen never reach the online AI
   return { ...r, result: redact(r.result) }
 }
@@ -107,10 +124,16 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
   const routine = routineFor(text)
   if (routine) markRun(routine.id)
   const asked = routine ? routinePrompt(routine) : text
+  const files = ATTACHED.exec(text)
+  if (files) currentFiles = { paths: files[1].split(' | '), at: Date.now() }
+  else if (getCurrentFiles().length) currentFiles!.at = Date.now()
+  const working = !files && getCurrentFiles().length ? `\n[Archivo actual (lo último que el usuario arrastró; «esto», «el archivo»…): ${getCurrentFiles().join(' | ')}]` : ''
   // work on a copy; history only changes if the whole turn succeeds
-  const turn: Msg[] = [...history, { role: 'user', content: `${asked}\n\n${contextNote()}` }]
+  const turn: Msg[] = [...history, { role: 'user', content: `${asked}${working}\n\n${contextNote()}` }]
+  const ctx: Turn = { said: asked, h, signal: ctl.signal, guard }
   const tools = toolDefs(s)
   let full = ''
+  let report = false
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
     const last = round === MAX_ROUNDS - 1
@@ -118,7 +141,7 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
       model,
       stream: true,
       temperature: 0.5,
-      max_tokens: simple ? SIMPLE_ANSWER_TOKENS : MAX_ANSWER_TOKENS,
+      max_tokens: report ? REPORT_TOKENS : simple ? SIMPLE_ANSWER_TOKENS : MAX_ANSWER_TOKENS,
       // keep thinking short: faster answers and fewer free-tier tokens
       ...(/gpt-oss|gemini/.test(model) ? { reasoning_effort: 'low' } : {}),
       // on the last round force an answer instead of more tool calls
@@ -135,13 +158,23 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
     }
     turn.push({ role: 'assistant', content: content || null, tool_calls: toolCalls })
 
-    for (const call of toolCalls) {
-      if (ctl.signal.aborted) throw aborted()
+    const calls = toolCalls.map(call => {
       let args: any = {}
       try { args = JSON.parse(call.function.arguments || '{}') } catch { /* keep empty */ }
-      const r = await useTool(call.function.name, args, h, ctl.signal, guard)
+      return { call, args }
+    })
+    // tools that only read (search, look, list…) run at the same time; anything that changes the
+    // PC runs one by one, in order (idea from JARVIS-OS: _execute_tool_batch)
+    if (calls.some(c => c.call.function.name === 'deep_research')) report = true
+    const parallel = calls.length > 1 && calls.every(({ call }) => findTool(call.function.name)?.readOnly)
+    const results = parallel
+      ? await Promise.all(calls.map(({ call, args }) => useTool(call.function.name, args, ctx)))
+      : []
+    for (let i = 0; i < calls.length; i++) {
+      if (ctl.signal.aborted) throw aborted()
+      const r = parallel ? results[i] : await useTool(calls[i].call.function.name, calls[i].args, ctx)
       h.onAction(r.label)
-      turn.push({ role: 'tool', tool_call_id: call.id, content: r.result })
+      turn.push({ role: 'tool', tool_call_id: calls[i].call.id, content: r.result })
     }
   }
 

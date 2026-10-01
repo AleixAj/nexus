@@ -22,7 +22,7 @@ async function briefing() {
 
 export const briefingTools: Tool[] = [
   {
-    name: 'daily_briefing',
+    name: 'daily_briefing', readOnly: true,
     description: 'Resumen del día: fecha, tiempo, recordatorios de hoy y noticias. Para "buenos días", "resumen del día" o "qué tengo hoy".',
     progress: () => 'Preparando el resumen',
     run: async () => ({ result: await briefing(), label: 'Resumen del día' })

@@ -144,28 +144,28 @@ const PATH = { path: str('Ruta o escritorio/documentos/descargas/imagenes/musica
 
 export const fileTools: Tool[] = [
   {
-    name: 'list_directory', group: 'files',
+    name: 'list_directory', readOnly: true, group: 'files',
     description: 'Lista una carpeta.',
     params: PATH, required: ['path'],
     progress: a => 'Mirando · ' + short(nameOf(a.path) || a.path),
     run: async a => ({ result: await listDirectory(a.path), label: 'Carpeta revisada' })
   },
   {
-    name: 'find_files', group: 'files',
+    name: 'find_files', readOnly: true, group: 'files',
     description: 'Busca archivos por nombre o extensión (recursivo).',
     params: { query: str('Texto o .ext'), folder: str('Carpeta; por defecto la del usuario') }, required: ['query'],
     progress: a => 'Buscando archivos · ' + short(a.query),
     run: async a => ({ result: await findFiles(String(a.query || ''), a.folder), label: 'Archivos buscados · ' + short(a.query, 30) })
   },
   {
-    name: 'read_file', group: 'files',
+    name: 'read_file', readOnly: true, group: 'files',
     description: 'Lee un archivo de texto o PDF.',
     params: { path: str('Ruta'), offset: num('Desde el carácter') }, required: ['path'],
     progress: a => 'Leyendo · ' + short(nameOf(a.path)),
     run: async a => ({ result: await readFile(a.path, a.offset), label: 'Leído · ' + nameOf(a.path) })
   },
   {
-    name: 'folder_size', group: 'files',
+    name: 'folder_size', readOnly: true, group: 'files',
     description: 'Qué ocupa una carpeta y sus elementos más grandes.',
     params: { path: str('Carpeta') }, required: ['path'],
     progress: a => 'Analizando espacio · ' + short(nameOf(a.path) || a.path),
@@ -213,6 +213,7 @@ export const fileTools: Tool[] = [
   },
   {
     name: 'delete_path', group: 'write', noAlways: true,
+    intent: () => /borr|elimin|papelera|quita|tira|delete|remove/i,
     description: 'Envía a la papelera (solo si lo piden).',
     params: { path: str('Ruta') }, required: ['path'],
     confirm: a => ({ title: 'Enviar a la papelera', detail: showPath(a.path) }),
