@@ -34,6 +34,7 @@ export type Settings = {
   subtitles: boolean
   newsTopics: string
   briefing: boolean
+  wakeListen: boolean
   spotifyClientId: string
   lastBriefing: string
   newsAvoid: string
@@ -91,6 +92,8 @@ const DEFAULTS: Settings = {
   newsTopics: 'tech,science,curious',
   // spoken summary the first time NEXUS starts each day
   briefing: true,
+  // "Hey Nexus" always listening (on the PC, nothing is sent): off until the user turns it on
+  wakeListen: false,
   // the user's own app at developer.spotify.com (for playlists by name)
   spotifyClientId: '',
   lastBriefing: '',

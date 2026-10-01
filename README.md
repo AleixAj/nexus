@@ -13,6 +13,13 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   carpetas, mira estadísticas del equipo y procesos, crea o modifica archivos y ejecuta comandos de PowerShell.
   Todo lo que cambia el equipo pide permiso antes, y lo que borra va a la papelera.
 - **Acciones rápidas.** Abre aplicaciones y webs y controla la música y el volumen.
+- **«Hey Nexus» sin internet.** Con el interruptor de Ajustes, NEXUS se despierta al oírlo (también con acento español).
+  Lo detecta un modelo pequeño en tu PC (sherpa-onnx): no se graba ni se envía nada.
+- **Rutinas de verdad.** «Crea una rutina Modo trabajo que abra VS Code y ponga mi lista Focus cuando diga modo trabajo»,
+  «cada día a las 8 dime el resumen del día». Los pasos son frases que el agente hace con sus herramientas; se lanzan con
+  su frase, a su hora o con el botón, y se pausan o borran en el panel Rutinas (o con `/rutina nombre` en el chat).
+- **Calendario.** Google Calendar, Outlook o iCloud con su dirección secreta iCal (sin iniciar sesión): «¿qué tengo
+  mañana?», tus citas en el resumen del día y a la derecha del escritorio.
 - **Tus listas de Spotify por nombre** (Premium). «Pon mi lista Gym», «pon mis Me gusta en aleatorio». Se conecta una
   vez desde Ajustes → Spotify con una app gratuita de developer.spotify.com (Redirect URI `http://127.0.0.1:8737/callback`).
   El inicio de sesión es en la web de Spotify (PKCE): NEXUS nunca ve tu contraseña.
@@ -33,6 +40,9 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 - **Recordatorios y alarmas por voz.** «Avísame en 20 minutos», «mañana a las 9 recuérdame…», «pon una alarma de
   lunes a viernes a las 7». Suena un aviso, lo dice en voz alta y sale una notificación de Windows. Los próximos aparecen
   a la derecha del escritorio. Si el PC estaba apagado, te avisa al abrir de lo que se pasó.
+- **Memoria que busca.** «¿Qué te conté de mis vacaciones?» encuentra conversaciones pasadas por palabras y por
+  significado (embeddings gratuitos de Gemini u Ollama). Lo que aprende mientras lee una web o un archivo queda
+  «pendiente» hasta que tú lo confirmas, para que una página no pueda colarle datos falsos.
 - **Memoria real.** Nexus aprende datos tuyos de lo que hablas (gustos, personas, lugares, trabajo) y los usa
   después; puedes añadirlos, borrarlos o desactivar el aprendizaje en el panel Memoria. Las conversaciones se guardan y
   el chat se recupera al reiniciar. Todo va cifrado con Windows (DPAPI) en `%APPDATA%\nexus\memory.bin`.
@@ -166,10 +176,15 @@ src/
     tools/                  herramientas del agente, una lista por tema
       define.ts             formato común: descripción para la IA + lo que se ejecuta
       index.ts              registro: qué herramientas están activas según los ajustes
-      apps.ts briefing.ts music.ts news.ts pc.ts vision.ts web.ts files.ts system.ts memory.ts reminders.ts
+      apps.ts briefing.ts calendar.ts music.ts news.ts pc.ts routines.ts vision.ts web.ts files.ts system.ts memory.ts reminders.ts
     lib/                    piezas comunes: PowerShell, archivos de datos y texto
     memory.ts               memoria cifrada: datos sobre ti y conversaciones
     reminders.ts            recordatorios y alarmas
+    routines.ts             rutinas: pasos, frase y horario
+    calendar.ts             calendario por dirección iCal
+    wakeword.ts             «Hey Nexus» en local (modelo en resources/kws)
+    approvals.ts            acciones permitidas para siempre
+    offlineVoice.ts         voz de Windows cuando no hay internet
     media.ts                lo que suena en Spotify, carátula y letra
     spotifyApi.ts           cuenta de Spotify: tus listas por nombre
     news.ts                 noticias por RSS, por temas y sin política
@@ -211,6 +226,16 @@ Open-Meteo (tiempo), Wikipedia (efemérides), ipapi.co (ciudad aproximada), iTun
 
 ### Seguridad
 
+Varias de estas ideas vienen de [OpenJarvis](https://github.com/open-jarvis/OpenJarvis) (Stanford, Apache-2.0).
+
+- **Privacidad:** antes de enviar a la IA lo que sale de un archivo, el portapapeles o la pantalla, se ocultan claves,
+  contraseñas, tarjetas e IBAN. Los archivos de claves (`.env`, `.ssh`, `.pem`…) no se pueden leer.
+- **Permisos:** lo que cambia el equipo pide permiso; con «Permitir siempre» deja de preguntar para ese tipo de acción
+  (se quita en Rutinas → Permisos). Borrar y PowerShell preguntan siempre.
+- **Freno de bucles:** si el agente repite la misma acción tres veces, se para (ahorra cupo gratis).
+- **Modelo según la pregunta:** la charla corta va al modelo pequeño y rápido; lo que necesita herramientas, al grande.
+- **Voz de respaldo:** sin internet, NEXUS habla con las voces de Windows en vez de quedarse callado.
+
 - La interfaz se ejecuta aislada del sistema (sandbox) y solo puede usar las funciones que expone el preload.
 - Lo que modifica el equipo (escribir, mover o borrar archivos, PowerShell) pide permiso en cada uso y
   se puede desactivar en Ajustes. Las apps se abren sin pasar por la consola, así que un nombre nunca ejecuta un comando.
@@ -218,8 +243,7 @@ Open-Meteo (tiempo), Wikipedia (efemérides), ipapi.co (ciudad aproximada), iTun
 
 ## Pendiente
 
-- Palabra de activación «Hey Nexus» siempre escuchando.
-- Rutinas editables.
+- Hablar con NEXUS desde el móvil (Telegram).
 - Probar la conexión con la cuenta de Spotify (hecha, falta probarla con una cuenta real).
 - Temperatura de la CPU (Windows solo la da con permisos de administrador; se muestra la de la GPU).
 - Mini overlay flotante sobre otras apps y fondo de escritorio en varios monitores a la vez.

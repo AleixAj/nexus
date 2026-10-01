@@ -60,5 +60,9 @@ contextBridge.exposeInMainWorld('nexus', {
   onMediaExtra: (fn: (x: any) => void) => on('media:extra', fn),
   onHotkey: (fn: () => void) => on('hotkey:talk', fn),
   onDictate: (fn: () => void) => on('hotkey:dictate', fn),
+  wakeStart: () => ipcRenderer.invoke('wake:start'),
+  wakeStop: () => ipcRenderer.invoke('wake:stop'),
+  wakeAudio: (samples: Float32Array) => ipcRenderer.send('wake:audio', samples),
+  onWake: (fn: () => void) => on('wake:detected', fn),
   typeText: (text: string) => ipcRenderer.invoke('dictation:type', text)
 })

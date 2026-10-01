@@ -541,3 +541,28 @@ export function stopLoopback() {
   loop.ctx.close()
   loop = null
 }
+
+// ---------- "Hey Nexus" ----------
+// The microphone stays open at 16 kHz and every ~100 ms of sound goes to the keyword spotter
+// in the main process (on the PC: nothing is recorded or sent online).
+let wake: { stream: MediaStream; ctx: AudioContext; node: ScriptProcessorNode } | null = null
+
+export async function startWakeMic(onChunk: (samples: Float32Array) => void) {
+  if (wake) return
+  const stream = await openMic()
+  const c = new AudioContext({ sampleRate: 16000 })
+  const src = c.createMediaStreamSource(stream)
+  const node = c.createScriptProcessor(2048, 1, 1)
+  node.onaudioprocess = e => onChunk(new Float32Array(e.inputBuffer.getChannelData(0)))
+  src.connect(node)
+  node.connect(c.destination) // needed for the processor to run; it outputs silence
+  wake = { stream, ctx: c, node }
+}
+
+export function stopWakeMic() {
+  if (!wake) return
+  wake.node.disconnect()
+  wake.stream.getTracks().forEach(t => t.stop())
+  wake.ctx.close()
+  wake = null
+}

@@ -16,6 +16,8 @@ import { addFact, approveFact, clearMemory, deleteExchange, deleteFact, getMemor
 import { currentExtra, currentMedia, mediaControl } from './media'
 import { HOTKEY, isDev, switchMode } from './window'
 import { typeText } from './dictation'
+import { feedWakeWord, startWakeWord, stopWakeWord } from './wakeword'
+import { broadcast } from './window'
 import { listApprovals, revoke } from './approvals'
 import { calendarConnected, events, setCalendarUrl } from './calendar'
 import { deleteRoutine, listRoutines, setRoutineEnabled, triggerText } from './routines'
@@ -80,6 +82,10 @@ export function registerIpc() {
     return audio
   })
   handle('tts:warm', () => warmVoices(loadSettings().lang))
+  // "Hey Nexus": audio comes in small pieces many times a second, so it is a one-way message
+  handle('wake:start', () => startWakeWord(() => broadcast('wake:detected')))
+  handle('wake:stop', () => stopWakeWord())
+  ipcMain.on('wake:audio', (e, data) => { if (trusted(e as any) && data instanceof Float32Array) feedWakeWord(data) })
   handle('dictation:type', (_e, text) => typeText(str(text, 20000)))
   handle('stt:transcribe', (_e, audio) => {
     if (!(audio instanceof ArrayBuffer) || audio.byteLength > 25e6) throw new Error('Audio no válido')

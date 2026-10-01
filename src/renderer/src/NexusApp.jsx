@@ -16,6 +16,7 @@ import { routines } from './app/features/routines';
 import { settings } from './app/features/settings';
 import { startup } from './app/features/startup';
 import { voices } from './app/features/voices';
+import { wakeword } from './app/features/wakeword';
 
 export default class NexusApp extends Component {
   chatRef = createRef();
@@ -67,6 +68,7 @@ export default class NexusApp extends Component {
       this.loadWorld();
       this.countMics();
       this.loadMemory(true);
+      if (s && s.wakeListen) this.startWake();
       // cinematic intro on a real start; straight to the core after a mode switch
       this.onboarded = !s || s.onboarded;
       if (QUIET || this.state.reduced) this.firstScreen();
@@ -86,6 +88,7 @@ export default class NexusApp extends Component {
     const on = (sub, fn) => this.offs.push(sub(fn));
     on(api.onHotkey, () => this.talk());
     on(api.onDictate, () => this.toggleDictation());
+    on(api.onWake, () => this.onWakeWord());
     on(api.onDelta, (id, t) => this.onDelta(id, t));
     on(api.onAction, (id, label) => this.onAction(id, label));
     on(api.onProgress, (id, label) => { if (id === this.reqId) this.setState({ actionLabel: label.toUpperCase() }); });
@@ -135,7 +138,7 @@ export default class NexusApp extends Component {
     removeEventListener('resize', this.onResize); removeEventListener('keydown', this.onKey);
     clearInterval(this.iv); clearInterval(this.worldIv); clearInterval(this.calIv); this.clearFlow();
     (this.offs || []).forEach(off => off());
-    voice.cancelListening(); voice.stopSpeech(); voice.stopLoopback();
+    voice.cancelListening(); voice.stopSpeech(); voice.stopLoopback(); voice.stopWakeMic();
     const E = this.E(); E && E.disableMic();
   }
 
@@ -183,4 +186,4 @@ export default class NexusApp extends Component {
   }
 }
 
-Object.assign(NexusApp.prototype, conversation, dictation, memory, music, news, routines, settings, startup, voices);
+Object.assign(NexusApp.prototype, conversation, dictation, memory, music, news, routines, settings, startup, voices, wakeword);
