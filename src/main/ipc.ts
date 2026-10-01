@@ -74,9 +74,9 @@ export function registerIpc() {
     const dir = join(app.getPath('userData'), 'voice-samples')
     const file = join(dir, createHash('sha1').update(JSON.stringify([str(text, 300), o])).digest('hex') + '.bin')
     try { return await readFile(file) } catch { /* not cached yet */ }
-    const { audio, premium } = await speakDetailed(str(text, 300), o)
+    const { audio, premium, offline } = await speakDetailed(str(text, 300), o)
     // a premium voice that fell back to a regular one (no key or no quota) is not cached as its sample
-    if (!isPremium(o.voice) || premium) mkdir(dir, { recursive: true }).then(() => writeFile(file, audio)).catch(() => {})
+    if (!offline && (!isPremium(o.voice) || premium)) mkdir(dir, { recursive: true }).then(() => writeFile(file, audio)).catch(() => {})
     return audio
   })
   handle('tts:warm', () => warmVoices(loadSettings().lang))

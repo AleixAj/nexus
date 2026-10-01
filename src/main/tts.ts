@@ -1,5 +1,6 @@
 import { MsEdgeTTS, OUTPUT_FORMAT } from 'msedge-tts'
 import { getKey, loadSettings } from './settings'
+import { windowsSpeak } from './offlineVoice'
 
 // Voices of the app mapped to Microsoft neural voices (free, no key).
 // The "Multilingual" ones are the most natural (the voices of Copilot); they speak
@@ -189,7 +190,7 @@ export async function speak(text: string, o: SpeakOptions): Promise<Buffer> {
 }
 
 /** Also tells whether the premium engine (Gemini/Azure) produced the audio or a fallback did. */
-export async function speakDetailed(text: string, o: SpeakOptions): Promise<{ audio: Buffer; premium: boolean }> {
+export async function speakDetailed(text: string, o: SpeakOptions): Promise<{ audio: Buffer; premium: boolean; offline?: boolean }> {
   const v = Object.hasOwn(VOICES, o.voice) ? VOICES[o.voice] : VOICES.lyra
   if (v.azure && getKey('Azure') && Date.now() > azurePausedUntil) {
     try { return { audio: await azureSpeak(v.azure, text, o), premium: true } } catch (e: any) { console.warn('[tts] Azure:', e?.message) }
@@ -199,5 +200,11 @@ export async function speakDetailed(text: string, o: SpeakOptions): Promise<{ au
     try { return { audio: await gemini(key, v.gemini, text, o.lang), premium: true } } catch (e: any) { console.warn('[tts] Gemini:', e?.message) /* fall back to the Microsoft voice */ }
   }
   const name = o.lang.startsWith('en') ? v.en : o.lang === 'es-MX' ? v.mx : v.es
-  return { audio: await edge(name, text, v.rate + (num(o.speed, 1) - 1) * 100, v.pitch + num(o.pitch, 0) * 2), premium: false }
+  try {
+    return { audio: await edge(name, text, v.rate + (num(o.speed, 1) - 1) * 100, v.pitch + num(o.pitch, 0) * 2), premium: false }
+  } catch (e: any) {
+    // no internet (or the service is down): a Windows voice, so Nexus never goes silent
+    console.warn('[tts] Edge:', e?.message, '· Windows voice instead')
+    return { audio: await windowsSpeak(text, o.lang, num(o.speed, 1)), premium: false, offline: true }
+  }
 }
