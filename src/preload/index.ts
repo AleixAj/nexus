@@ -18,6 +18,7 @@ contextBridge.exposeInMainWorld('nexus', {
   ask: (id: number, text: string) => ipcRenderer.invoke('brain:ask', id, text),
   abort: () => ipcRenderer.invoke('brain:abort'),
   systemStatus: () => ipcRenderer.invoke('system:status'),
+  systemSnapshot: () => ipcRenderer.invoke('system:snapshot'),
   getWorld: () => ipcRenderer.invoke('world:get'),
   setAutostart: (on: boolean) => ipcRenderer.invoke('app:autostart', on),
   setMode: (mode: 'window' | 'wallpaper') => ipcRenderer.invoke('app:mode', mode),

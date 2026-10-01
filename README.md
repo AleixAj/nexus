@@ -15,7 +15,9 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 - **Acciones rápidas.** Abre aplicaciones y webs y controla la música y el volumen.
 - **Halo reactivo.** El núcleo y su halo se mueven con el sonido real: tu voz mientras escucha y la suya mientras habla.
 - **Personalidad.** Mayordomo británico, copiloto directo o sarcástico, con calidez y formalidad ajustables.
-- **Datos reales en el escritorio.** Hora, tiempo de tu ciudad y efeméride del día.
+- **Datos reales en el escritorio.** Hora, tiempo de tu ciudad y efeméride del día, a la derecha para no chocar con los iconos.
+- **Estado del equipo real.** CPU (con cada hilo), GPU NVIDIA (uso, VRAM, temperatura y ventilador), RAM, disco, red y
+  procesos que más consumen. Se mide solo al abrir el panel (unos 2 s) o al pulsar *Actualizar*; nada en segundo plano.
 - **Temas y calidad gráfica.** Cinco temas de color y tres niveles de calidad para PCs potentes o portátiles.
 - **Fondo de escritorio.** NEXUS puede ponerse detrás de los iconos del escritorio y quedarse ahí en segundo plano.
 
@@ -171,6 +173,6 @@ Open-Meteo (tiempo), Wikipedia (efemérides) e ipapi.co (ciudad aproximada).
 
 - Palabra de activación «Hey Nexus» siempre escuchando.
 - Música real (ahora el panel de música es una demostración), memoria y rutinas editables.
-- Panel de sistema: CPU y RAM son reales; GPU, red y temperatura todavía son simuladas.
+- Temperatura de la CPU (Windows solo la da con permisos de administrador; se muestra la de la GPU).
 - Mini overlay flotante sobre otras apps y fondo de escritorio en varios monitores a la vez.
 - Instalador (`electron-builder`).

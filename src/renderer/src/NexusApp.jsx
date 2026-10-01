@@ -289,23 +289,18 @@ export default class NexusApp extends Component {
       default: return { x: 960, y: 480, s: 1, v: 1 };
     }
   }
-  async tick() {
-    // CPU and RAM are real; GPU, network and temperature are still simulated
-    if (this.ticking) return;
-    this.ticking = true;
-    let real = null;
-    if (api && this.state.panel === 'system') { try { real = await api.systemStatus(); } catch { /* keep simulated */ } }
-    this.ticking = false;
+  tick() {
     const minute = Math.floor(Date.now() / 60000);
-    if (!real && !this.state.music && this.state.panel !== 'system' && minute === this.lastMinute) return;
+    if (!this.state.music && minute === this.lastMinute) return;
     this.lastMinute = minute;
-    this.setState(s => {
-      const w = (v, a, b, d) => Math.max(a, Math.min(b, Math.round(v + (Math.random() - .5) * d)));
-      const sys = { cpu: real ? real.cpu : w(s.sys.cpu, 12, 88, 12), gpu: w(s.sys.gpu, 20, 95, 10), ram: real ? real.ram : w(s.sys.ram, 30, 60, 3), net: w(s.sys.net, 2, 240, 30), disk: s.sys.disk, temp: w(s.sys.temp, 48, 78, 3) };
-      const out = { now: Date.now(), sys, cpuHist: [...s.cpuHist.slice(1), sys.cpu] };
-      if (s.music) out.musicPos = s.musicPos >= 228 ? 0 : s.musicPos + 1;
-      return out;
-    });
+    this.setState(s => (s.music ? { now: Date.now(), musicPos: s.musicPos >= 228 ? 0 : s.musicPos + 1 } : { now: Date.now() }));
+  }
+  // real snapshot of the PC: taken when the System panel opens or on "Actualizar"
+  async loadSystem() {
+    if (!api || this.state.sysLoading) return;
+    this.setState({ sysLoading: true });
+    try { this.setState({ sysInfo: await api.systemSnapshot() }); } catch (e) { console.warn(e); }
+    this.setState({ sysLoading: false });
   }
 
   // ---------- flows ----------
@@ -533,6 +528,7 @@ export default class NexusApp extends Component {
   }
   togglePlay() { if (this.state.music) { this.setState({ music: false }); if (this.state.core === 'music') this.setCore('idle'); } else this.startMusic(); }
   openPanel(p, keepOpen) {
+    if (p === 'system' && this.state.panel !== 'system') this.loadSystem();
     if (p === 'voice') this.prepareSamples();
     const opening = !!p && (keepOpen || this.state.panel !== p);
     this.setState({ panel: opening ? p : null, volOpen: false });
@@ -788,22 +784,34 @@ export default class NexusApp extends Component {
     const memItems = mem.map((m, i) => { const head = m.group !== lastG; lastG = m.group; return { ...m, head, delay: (i * 40 + 120) + 'ms', del: () => this.setState(s => ({ mem: s.mem.filter(x => x.id !== m.id) })) }; });
     const r = this.ROUT.find(x => x.id === S.routineSel);
     const sl = k => { const c = this.SL[k], v = S.sliders[k]; return { key: k, label: c.label, val: c.fmt(v), pct: ((v - c.min) / (c.max - c.min) * 100).toFixed(1) + '%' }; };
-    const g6 = [
-      { label: 'CPU', val: S.sys.cpu, unit: ' %', detail: 'RYZEN 9 · 4,2 GHZ', p: S.sys.cpu / 100 },
-      { label: 'GPU', val: S.sys.gpu, unit: ' %', detail: 'RTX 4070 · 8,1 / 12 GB', p: S.sys.gpu / 100 },
-      { label: 'TEMP', val: S.sys.temp, unit: ' °C', detail: 'CPU · 1 180 RPM', p: S.sys.temp / 100, warn: S.sys.temp > 72 },
-      { label: 'RED', val: S.sys.net, unit: ' Mb/s', detail: '↑ 6,2 MB/S · WI-FI 6', p: Math.min(1, S.sys.net / 250) },
-      { label: 'DISCO C:', val: S.sys.disk, unit: ' %', detail: '612 / 1 000 GB', p: S.sys.disk / 100 },
-      { label: 'RAM', val: (S.sys.ram * .32).toFixed(1).replace('.', ','), unit: ' GB', detail: 'DE 32 GB · DDR5', p: S.sys.ram / 100 },
+    const si = S.sysInfo, fmt = (n, dec = 1) => n == null ? '—' : Number(n).toFixed(dec).replace('.', ',');
+    const gb = n => fmt(n, n >= 100 ? 0 : 1);
+    // short labels: they must fit inside the rings
+    const g6 = !si ? ['CPU', 'GPU', 'TEMP. GPU', 'RED', 'DISCO C:', 'RAM'].map(label => ({ label, val: '··', unit: '', detail: 'MIDIENDO…', p: 0 })) : [
+      { label: 'CPU', val: si.cpu.use, unit: ' %', detail: si.cpu.name.replace(/^(Intel|AMD)\s+(Core\s+|Ryzen\s+)?/i, '').toUpperCase().slice(0, 16), p: si.cpu.use / 100, warn: si.cpu.use > 90 },
+      { label: 'GPU', val: si.gpu.use ?? '—', unit: si.gpu.use != null ? ' %' : '', detail: si.gpu.memTotal ? 'VRAM ' + fmt(si.gpu.memUsed / 1024) + ' / ' + fmt(si.gpu.memTotal / 1024, 0) + ' GB' : si.gpu.name.toUpperCase().slice(0, 18), p: (si.gpu.use || 0) / 100, warn: si.gpu.memTotal && si.gpu.memUsed / si.gpu.memTotal > .95 },
+      { label: 'TEMP. GPU', val: si.gpu.temp ?? '—', unit: si.gpu.temp != null ? ' °C' : '', detail: si.gpu.fan != null ? 'VENTILADOR ' + si.gpu.fan + ' %' : 'NO DISPONIBLE', p: (si.gpu.temp || 0) / 100, warn: si.gpu.temp > 83 },
+      { label: 'RED ↓', val: si.net.rxMbps != null ? fmt(si.net.rxMbps) : '—', unit: si.net.rxMbps != null ? ' Mb/s' : '', detail: si.net.txMbps != null ? '↑ ' + fmt(si.net.txMbps) + ' MB/S' : '', p: Math.min(1, (si.net.rxMbps || 0) / 100) },
+      { label: 'DISCO C:', val: si.disk ? Math.round(si.disk.used / si.disk.total * 100) : '—', unit: si.disk ? ' %' : '', detail: si.disk ? 'LIBRES ' + gb(si.disk.total - si.disk.used) + ' GB' : '', p: si.disk ? si.disk.used / si.disk.total : 0, warn: si.disk && si.disk.used / si.disk.total > .9 },
+      { label: 'RAM', val: fmt(si.ram.used), unit: ' GB', detail: ('DE ' + si.ram.total + ' GB' + (si.ram.type ? ' · ' + si.ram.type : '')).toUpperCase(), p: si.ram.used / si.ram.total, warn: si.ram.used / si.ram.total > .9 },
     ];
     const ang = [-90, -30, 30, 90, 150, 210];
     const gauges = g6.map((g, i) => { const a = ang[i] * Math.PI / 180; return { ...g, left: (960 + Math.cos(a) * 300 - 85) + 'px', top: (520 + Math.sin(a) * 262 - 85) + 'px', dash: (414.7 * g.p).toFixed(1) + ' 999', color: g.warn ? '#FB7185' : i === 2 ? '#F5B971' : 'rgb(var(--acc2))', delay: (200 + i * 60) + 'ms' }; });
-    const hist = S.cpuHist, cpuPoly = hist.map((v, i) => (i * 356 / (hist.length - 1)).toFixed(1) + ',' + (66 - v * .64).toFixed(1)).join(' ');
-    const procs = [['Blender', 18, '3,2 GB'], ['Chrome · 24 pestañas', 9, '2,8 GB'], ['VS Code', 5, '1,1 GB'], ['Nexus · motor', 3, '420 MB'], ['Spotify', 2, '310 MB'], ['Discord', 1, '280 MB']]
-      .map((p, i) => { const c = Math.max(1, Math.round(p[1] * S.sys.cpu / 34)); return { name: p[0], cpu: c + ' %', ram: p[2], pct: Math.min(100, c * 3) + '%', delay: (160 + i * 40) + 'ms' }; });
-    const agendaRaw = [['09:30', 'Revisión de diseño', 'Laura · sala Órbita', 1], ['12:00', 'Dentista', 'Clínica Arganzuela', 1], ['16:00', 'Llamada con Tokio', 'Equipo de motor', 1], ['19:30', 'Entrenamiento', 'Gimnasio', 1], ['23:30', 'Rutina «Buenas noches»', 'Automática', 0]];
-    const nowH = d.getHours() + d.getMinutes() / 60;
-    const agenda = agendaRaw.map((a, i) => { const [h, m] = a[0].split(':').map(Number), past = h + m / 60 < nowH; return { time: a[0], title: a[1], sub: a[2], op: past ? .45 : 1, dot: past ? 'rgba(196,181,253,.3)' : a[3] ? 'rgb(var(--acc2))' : '#F5B971', timeColor: past ? 'rgba(226,218,240,.35)' : '#FFF6E9', delay: (160 + i * 40) + 'ms' }; });
+    const per = si ? si.cpu.perThread : [];
+    const coreBars = per.map((u, i) => ({ h: Math.max(3, u) + '%', color: u > 90 ? '#FB7185' : u > 60 ? '#F5B971' : 'rgb(var(--acc2))', tip: 'Hilo ' + (i + 1) + ': ' + u + ' %' }));
+    const busiest = per.length ? Math.max(...per) : 0;
+    const procs = (si ? si.procs : []).slice(0, 6).map((p, i) => ({ name: p.name + (p.count > 1 ? ' · ' + p.count : ''), cpu: p.cpu + ' %', ram: p.ramMB >= 1024 ? fmt(p.ramMB / 1024) + ' GB' : Math.round(p.ramMB) + ' MB', pct: Math.min(100, Math.max(2, p.cpu * 2)) + '%', delay: (160 + i * 40) + 'ms' }));
+    const up = si ? (si.uptimeH >= 24 ? Math.floor(si.uptimeH / 24) + ' d ' + Math.round(si.uptimeH % 24) + ' h' : fmt(si.uptimeH) + ' h') : '';
+    const infoRaw = !si ? [['···', 'Midiendo el equipo…', 'Un segundo']] : [
+      ['SO', si.os, si.host + ' · ' + si.user],
+      ['ON', 'Encendido hace ' + up, 'Desde el último reinicio'],
+      ['CPU', si.cpu.name, (si.cpu.cores ? si.cpu.cores + ' núcleos · ' : '') + si.cpu.threads + ' hilos' + (si.cpu.ghz ? ' · ' + fmt(si.cpu.ghz) + ' GHz' : '')],
+      ['GPU', si.gpu.name.replace('NVIDIA ', ''), [si.gpu.memTotal ? fmt(si.gpu.memTotal / 1024, 0) + ' GB VRAM' : '', si.gpu.driver ? 'driver ' + si.gpu.driver : ''].filter(Boolean).join(' · ')],
+      ['RAM', si.ram.total + ' GB' + (si.ram.type ? ' ' + si.ram.type : ''), si.ram.speed ? si.ram.speed + ' MT/s' : 'Memoria del sistema'],
+      ['RED', si.net.ip || 'Sin conexión', [si.net.name, si.net.link].filter(Boolean).join(' · ')],
+      ...(si.battery ? [['BAT', si.battery.pct + ' %' + (si.battery.charging ? ' · cargando' : ''), 'Batería']] : []),
+    ];
+    const agenda = infoRaw.map((a, i) => ({ time: a[0], title: a[1], sub: a[2], op: 1, dot: 'rgb(var(--acc2))', timeColor: 'rgb(var(--acc2) / .8)', delay: (160 + i * 40) + 'ms' }));
     const li = Math.floor((S.musicPos - 60) / 4), cur = Math.max(0, li) % this.LYR.length;
     const lyrics = this.LYR.map((t, i) => { const dd = Math.abs(i - cur); return { t, size: i === cur ? '30px' : '22px', color: i === cur ? '#FFF6E9' : i < cur ? 'rgba(226,218,240,.28)' : 'rgba(226,218,240,.45)', blur: dd > 2 ? 'blur(1px)' : 'none', shadow: i === cur ? '0 0 24px rgba(251,146,60,.45)' : 'none' }; });
     const qN = { ultra: '2 600 PARTÍCULAS · 60 FPS', equilibrado: '1 500 PARTÍCULAS · 60 FPS', ahorro: '700 PARTÍCULAS · SIN GRANO' };
@@ -891,7 +899,9 @@ export default class NexusApp extends Component {
         bg: act ? 'rgba(245,185,113,.12)' : done ? 'rgba(52,211,153,.06)' : 'rgba(10,7,20,.7)', border: act ? 'rgba(245,185,113,.6)' : done ? 'rgba(52,211,153,.35)' : 'rgba(196,181,253,.14)', glow: act ? '0 0 30px rgba(245,185,113,.25)' : 'none', iconColor: act ? '#F5B971' : done ? '#34D399' : 'rgb(var(--acc2))' }; }),
       runRoutine: () => this.runRoutine(),
       permRows: this.PERMS.map(([id, label, note]) => ({ label, note, ...this.toggleT(S.perms[id]), toggle: () => this.setState(s => ({ perms: { ...s.perms, [id]: !s.perms[id] } })) })),
-      gauges, cpuPoly, cpuMax: Math.round(Math.max(...hist)), procs, agenda, dateShort: d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' }).toUpperCase(),
+      gauges, coreBars, coreTitle: si ? 'CPU · ' + per.length + ' HILOS' : 'CPU', coreNote: si ? 'EL MÁS CARGADO ' + busiest + ' %' : '',
+      sysHeader: si ? ('SISTEMA · ' + si.host + ' · ' + si.os).toUpperCase() : 'SISTEMA', sysLoading: !!S.sysLoading, refreshSystem: () => this.loadSystem(),
+      sysTaken: si ? 'MEDIDO A LAS ' + this.hm() : '', procs, agenda, dateShort: d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' }).toUpperCase(),
       lyrics, lyricY: (-(cur * 56) + 2 * 56) + 'px', queue: this.QUEUE.map((q, i) => ({ ...q, delay: (200 + i * 40) + 'ms' })),
       memQuery: S.memQuery, onMemQuery: e => this.setState({ memQuery: e.target.value }), memCount: 122 + S.mem.length + S.facts.length - 5,
       memFilters: ['Todo', 'Conversaciones', 'Preferencias', 'Personas', 'Lugares'].map(f => ({ label: f, bg: S.memFilter === f ? 'rgb(var(--acc) / .22)' : 'rgba(255,255,255,.03)', border: S.memFilter === f ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.16)', pick: () => this.setState({ memFilter: f }) })),

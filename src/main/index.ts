@@ -7,6 +7,7 @@ import { mkdir, readFile, writeFile } from 'fs/promises'
 import { ask, abort, transcribe } from './brain'
 import { systemStatus } from './tools'
 import { getWorld } from './world'
+import { systemSnapshot } from './sysinfo'
 import { attachToDesktop, refreshWallpaper, stopWatching, watchCovered } from './wallpaper'
 
 // the greeting plays on start, before any click
@@ -243,6 +244,7 @@ function registerIpc() {
   handle('brain:confirm-reply', (_e, cid, ok) => answerConfirm(Number(cid), ok === true))
 
   handle('system:status', () => systemStatus())
+  handle('system:snapshot', () => systemSnapshot())
   handle('world:get', () => getWorld())
   handle('app:autostart', (_e, on) => app.setLoginItemSettings({ openAtLogin: on === true }))
   handle('app:mode', (_e, m) => { if (m === 'window' || m === 'wallpaper') switchMode(m) })

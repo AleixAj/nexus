@@ -312,11 +312,11 @@ async function createFolder(p: string) {
 }
 
 // ---------- system ----------
-export function powershell(command: string, timeout = 30000): Promise<string> {
+export function powershell(command: string, timeout = 30000, env?: Record<string, string>): Promise<string> {
   return new Promise(res => {
     // UTF-8 output so accents survive
     const cmd = `[Console]::OutputEncoding = [Text.Encoding]::UTF8; $ProgressPreference = 'SilentlyContinue'; ${command}`
-    execFile('powershell', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', cmd], { windowsHide: true, timeout, maxBuffer: 4e6 }, (err, out, errOut) => {
+    execFile('powershell', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-Command', cmd], { windowsHide: true, timeout, maxBuffer: 4e6, ...(env ? { env: { ...process.env, ...env } } : {}) }, (err, out, errOut) => {
       const text = (out || '').trim() + (errOut?.trim() ? `\n[errores]\n${errOut.trim()}` : '')
       res(err && (err as any).killed ? 'El comando tardó demasiado y se ha cancelado.' : text || (err ? `Error: ${err.message}` : '(sin salida)'))
     })

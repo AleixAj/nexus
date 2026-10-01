@@ -7,10 +7,16 @@ export default function SystemPanel({ v }: { v: any }) {
     {v.isSystem && (<>
       <div style={{ position: "absolute", left: "64px", top: "48px", display: "flex", flexDirection: "column", gap: "8px", animation: "nx-left 700ms cubic-bezier(.16,1,.3,1) both" }}>
         <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
-          SISTEMA · NEXUS-PC · WINDOWS 11
+          {v.sysHeader}
         </span>
         <span style={{ fontSize: "34px", fontWeight: "400" }}>
           Estado del equipo
+        </span>
+        <button onClick={v.refreshSystem} disabled={v.sysLoading} style={{ alignSelf: "flex-start", marginTop: "6px", height: "32px", padding: "0 14px", borderRadius: "999px", border: "1px solid rgb(var(--acc2) / .3)", background: "rgba(7,5,14,.4)", color: "rgba(241,234,248,.85)", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".18em", cursor: "pointer", opacity: v.sysLoading ? .6 : 1 }}>
+          {v.sysLoading ? 'MIDIENDO…' : '↻ ACTUALIZAR'}
+        </button>
+        <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", letterSpacing: ".2em", color: "rgba(226,218,240,.4)" }}>
+          {v.sysTaken}
         </span>
       </div>
       <button onClick={v.closePanel} style={{ position: "absolute", right: "64px", top: "56px", width: "40px", height: "40px", borderRadius: "10px", border: "1px solid rgba(196,181,253,.14)", background: "rgba(7,5,14,.4)", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc31">
@@ -70,21 +76,24 @@ export default function SystemPanel({ v }: { v: any }) {
         <div style={{ marginTop: "8px", display: "flex", flexDirection: "column", gap: "8px" }}>
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "10.5px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
-              CPU · ÚLTIMOS 60 S
+              {v.coreTitle}
             </span>
             <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "10.5px", color: "rgba(226,218,240,.5)" }}>
-              MÁX {v.cpuMax} %
+              {v.coreNote}
             </span>
           </div>
-          <svg width="356" height="70" viewBox="0 0 356 70">
-            <line x1="0" y1="35" x2="356" y2="35" stroke="rgba(196,181,253,.08)" strokeDasharray="2 4" />
-            <polyline points={v.cpuPoly} fill="none" style={{ stroke: "rgb(var(--acc2))" }} strokeWidth="1.2" strokeLinejoin="round" />
-          </svg>
+          <div style={{ height: "70px", display: "flex", alignItems: "flex-end", gap: "3px", borderBottom: "1px solid rgba(196,181,253,.12)" }}>
+            {(v.coreBars || []).map((b, i) => (
+              <div key={i} title={b.tip} style={{ flex: "1", height: "100%", display: "flex", alignItems: "flex-end", background: "rgba(196,181,253,.05)", borderRadius: "2px 2px 0 0" }}>
+                <div style={{ width: "100%", height: b.h, background: b.color, borderRadius: "2px 2px 0 0", boxShadow: `0 0 8px ${b.color}`, transformOrigin: "bottom", animation: `nxi-bar 700ms cubic-bezier(.16,1,.3,1) ${i * 25}ms both` }} />
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       <div style={{ position: "absolute", right: "64px", top: "190px", width: "380px", padding: "22px", display: "flex", flexDirection: "column", gap: "4px", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(205deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07)", animation: "nx-right 700ms cubic-bezier(.16,1,.3,1) 120ms both" }} className="dc33">
         <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)", marginBottom: "10px" }}>
-          HOY · {v.dateShort}
+          EQUIPO
         </span>
         {(v.agenda || []).map((a, aIndex) => (<Fragment key={a?.id ?? aIndex}>
           <div style={{ display: "grid", gridTemplateColumns: "56px 12px minmax(0,1fr)", gap: "12px", alignItems: "stretch", animation: "nx-in 500ms cubic-bezier(.16,1,.3,1) both", animationDelay: a.delay }}>

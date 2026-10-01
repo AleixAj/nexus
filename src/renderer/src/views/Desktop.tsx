@@ -142,9 +142,6 @@ export default function Desktop({ v }: { v: any }) {
               </span>
             </div>
           </div>
-          <span style={{ fontSize: "24px", fontWeight: "400", color: "rgba(255,246,233,.92)", animation: "nx-left 800ms cubic-bezier(.16,1,.3,1) 160ms both" }}>
-            {v.greetText}
-          </span>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "380px", animation: "nx-left 800ms cubic-bezier(.16,1,.3,1) 240ms both" }}>
             <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .6)" }}>
               EN UN DÍA COMO HOY · {v.factYear}
