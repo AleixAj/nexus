@@ -12,7 +12,7 @@ import { getWorld } from './world'
 import { TOPICS, getNews } from './news'
 import { systemSnapshot } from './sysinfo'
 import { cancelReminders, listReminders } from './reminders'
-import { addFact, clearMemory, deleteExchange, deleteFact, getMemory } from './memory'
+import { addFact, approveFact, clearMemory, deleteExchange, deleteFact, getMemory } from './memory'
 import { currentExtra, currentMedia, mediaControl } from './media'
 import { HOTKEY, isDev, switchMode } from './window'
 import { typeText } from './dictation'
@@ -125,6 +125,7 @@ export function registerIpc() {
   handle('memory:get', () => getMemory())
   handle('memory:add', (_e, text, cat) => addFact(str(text, 300), str(cat, 30)))
   handle('memory:delete-fact', (_e, id) => deleteFact(Number(id)))
+  handle('memory:approve-fact', (_e, id) => approveFact(Number(id)))
   handle('memory:delete-chat', (_e, id) => deleteExchange(Number(id)))
   handle('memory:clear', (_e, what) => { clearMemory(what === 'chats' ? 'chats' : 'all'); resetHistory() })
   handle('spotify:status', () => ({ ...spotifyStatus(), redirect: REDIRECT }))

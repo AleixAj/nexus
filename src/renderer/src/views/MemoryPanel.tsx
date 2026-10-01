@@ -83,6 +83,7 @@ export default function MemoryPanel({ v }: { v: any }) {
                       {f.t}
                     </span>
                   </div>
+                  {f.pending && <button onClick={f.approve} title="Sí, guárdalo" style={{ width: "28px", height: "28px", borderRadius: "8px", border: "1px solid rgba(52,211,153,.4)", background: "rgba(52,211,153,.1)", color: "#34D399", display: "grid", placeItems: "center", cursor: "pointer" }}>✓</button>}
                   <button onClick={f.del} style={{ width: "28px", height: "28px", borderRadius: "8px", border: "none", background: "transparent", color: "rgba(226,218,240,.4)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc47">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                       <path d="M6 6l12 12M18 6L6 18" />

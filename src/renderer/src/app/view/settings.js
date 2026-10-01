@@ -10,6 +10,7 @@ const GEMINI_TOGGLES = [
   ['search', 'Buscar con Google', 'Si está apagado busco con DuckDuckGo, sin límite'],
   ['stt', 'Entender mi voz', 'Si está apagado uso Groq para transcribir'],
   ['vision', 'Ver pantalla e imágenes', 'Solo cuando me lo pidas o me pases una imagen'],
+  ['memory', 'Memoria por significado', 'Encuentro conversaciones pasadas aunque uses otras palabras'],
   ['fallback', 'Respaldo', 'Si otra IA agota su cupo, sigo con Gemini'],
 ];
 const AGENT_TOGGLES = [

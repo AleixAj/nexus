@@ -19,6 +19,10 @@ export const memory = {
     this.setState({ factInput: '' });
     api.addFact(t, cat).then(() => this.loadMemory());
   },
+  approveFact(id) {
+    this.setState(s => ({ facts: s.facts.map(x => (x.id === id ? { ...x, pending: false } : x)) }));
+    api && api.approveFact(id);
+  },
   deleteFact(id) {
     this.setState(s => ({ facts: s.facts.filter(x => x.id !== id) }));
     api && api.deleteFact(id);

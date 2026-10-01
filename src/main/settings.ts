@@ -29,6 +29,7 @@ export type Settings = {
   geminiStt: boolean
   geminiFallback: boolean
   geminiVision: boolean
+  geminiMemory: boolean
   azureRegion: string
   subtitles: boolean
   newsTopics: string
@@ -81,6 +82,8 @@ const DEFAULTS: Settings = {
   geminiFallback: false,
   // seeing the screen or an image: only when the user asks (no free alternative to Gemini)
   geminiVision: true,
+  // search the memory by meaning (Gemini embeddings: their own free quota, not the answers' one)
+  geminiMemory: true,
   azureRegion: 'westeurope',
   // text of what Nexus says under the core: off by default
   subtitles: false,

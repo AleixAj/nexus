@@ -46,6 +46,7 @@ contextBridge.exposeInMainWorld('nexus', {
   getMemory: () => ipcRenderer.invoke('memory:get'),
   addFact: (text: string, cat: string) => ipcRenderer.invoke('memory:add', text, cat),
   deleteFact: (id: number) => ipcRenderer.invoke('memory:delete-fact', id),
+  approveFact: (id: number) => ipcRenderer.invoke('memory:approve-fact', id),
   deleteChat: (id: number) => ipcRenderer.invoke('memory:delete-chat', id),
   clearMemory: (what: 'all' | 'chats') => ipcRenderer.invoke('memory:clear', what),
   spotifyStatus: () => ipcRenderer.invoke('spotify:status'),

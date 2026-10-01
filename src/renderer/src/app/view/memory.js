@@ -17,7 +17,7 @@ export function memoryView(app, c) {
     memFilters: ['Todo', ...MEMORY_CATEGORIES].map(f => ({ label: f, ...chip(S.memFilter === f), pick: () => app.setState({ memFilter: f }) })),
     memItems, memEmpty: !memItems.length,
     memEmptyText: q ? `Nada coincide con «${S.memQuery}».` : 'Aún no hay conversaciones. Lo que hables con Nexus aparecerá aquí, guardado y cifrado solo en este equipo.',
-    factItems: facts.map((f, i) => ({ id: f.id, cat: f.cat.toUpperCase(), t: f.text, delay: (160 + Math.min(i, 12) * 40) + 'ms', del: () => app.deleteFact(f.id) })),
+    factItems: facts.map((f, i) => ({ id: f.id, cat: f.pending ? 'PENDIENTE · ¿LO GUARDO?' : f.cat.toUpperCase(), pending: !!f.pending, approve: () => app.approveFact(f.id), t: f.text, delay: (160 + Math.min(i, 12) * 40) + 'ms', del: () => app.deleteFact(f.id) })),
     factsEmpty: !facts.length, factsEmptyText: S.facts.length ? 'Nada en esta categoría.' : 'Todavía no sé nada de ti. Cuéntamelo hablando o escríbelo aquí abajo.',
     factInput: S.factInput, onFactInput: e => app.setState({ factInput: e.target.value }), onFactKey: e => { if (e.key === 'Enter') { e.preventDefault(); app.addFact(); } }, addFact: () => app.addFact(),
     learnT: { bg: learn.tBg, border: learn.tBorder, left: learn.tLeft }, toggleLearn: () => app.flip('learn', 'memoryLearn'),

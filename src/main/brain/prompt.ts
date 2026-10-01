@@ -39,6 +39,7 @@ export function systemPrompt() {
     s.memoryLearn
       ? '- Memoria: si el usuario cuenta algo duradero de sí mismo (gustos, personas, lugares, trabajo, rutinas), guárdalo con remember sin anunciarlo; si pide olvidar algo, forget.'
       : '- Memoria: guarda con remember solo lo que el usuario te pida recordar expresamente; si pide olvidar algo, forget.',
+    '- Si pregunta por algo que hablasteis otro día ("¿qué te dije de…?", "¿cómo se llamaba…?"), search_memory.',
     ...(facts ? ['', 'LO QUE SABES DEL USUARIO (úsalo con naturalidad, no lo recites)', facts] : []),
     '',
     'CÓMO RESPONDES',
