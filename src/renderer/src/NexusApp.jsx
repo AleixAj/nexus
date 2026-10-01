@@ -380,7 +380,7 @@ export default class NexusApp extends Component {
     this.setCore('wake');
     this.later(() => { if (this.state.core === 'wake') this.setCore('listening'); }, 450);
     voice.listen({
-      onTranscribing: () => { this.clearFlow(); this.setCore('thinking'); this.setState({ words: ['…'], wordsKind: 'userDim' }); },
+      onTranscribing: () => { this.clearFlow(); this.setCore('thinking'); },
       onResult: text => {
         if (!text) { this.settle(); return; }
         this.ask(text);
@@ -397,7 +397,7 @@ export default class NexusApp extends Component {
     this.setState(s => ({
       chat: [...s.chat, { id, role: 'user', text, fresh: true }, { id: id + 2, role: 'nexus', text: '', shown: '', streaming: true, fresh: true }].slice(-120),
       ovState: 'thinking', ovLabel: 'PENSANDO…', ovReply: '', actionLabel: '',
-      words: text.split(/\s+/), wordsKind: 'userDim',
+      words: [], wordsKind: null,
     }));
     this.setCore('thinking');
     voice.beginSpeech(this.speechHandlers());
@@ -776,7 +776,7 @@ export default class NexusApp extends Component {
     const labels = { idle: 'EN REPOSO', wake: 'ACTIVANDO', listening: 'ESCUCHANDO', thinking: 'PENSANDO', speaking: 'HABLANDO', action: 'EJECUTANDO ACCIÓN', error: 'SIN CONEXIÓN', music: 'MODO MÚSICA' };
     const stateColor = core === 'error' ? '#FB7185' : core === 'thinking' || core === 'action' ? '#F5B971' : core === 'speaking' ? '#FFE4C4' : core === 'music' ? '#FDBA74' : 'rgb(var(--acc2) / .75)';
     const live = ['wake', 'listening', 'thinking', 'speaking', 'action'].includes(core);
-    const pillText = core === 'error' ? 'SIN CONEXIÓN · TOCA PARA REINTENTAR' : live ? 'EN VIVO · TOCA PARA PARAR' : core === 'music' ? 'MÚSICA · TOCA PARA PAUSAR' : WALLPAPER ? 'EN ESPERA · ' + this.hotkeyLabel() + ' PARA HABLAR' : 'EN ESPERA · TOCA PARA HABLAR';
+    const pillText = core === 'error' ? 'SIN CONEXIÓN · TOCA PARA REINTENTAR' : live ? 'EN VIVO · TOCA PARA PARAR' : core === 'music' ? 'MÚSICA · TOCA PARA PAUSAR' : WALLPAPER ? 'EN ESPERA · ' + this.hotkeyLabel() + ' PARA HABLAR' : 'EN ESPERA · TOCA EL NÚCLEO PARA HABLAR';
     const pillDot = core === 'error' ? '#FB7185' : live ? '#FB7185' : core === 'music' ? '#FDBA74' : '#34D399';
     const capTop = S.panel === 'system' ? 905 : L.y + 150 * L.s * 2.3 + 12;
     const wk = S.wordsKind;
@@ -840,7 +840,7 @@ export default class NexusApp extends Component {
       bgFilter: S.overlay ? 'blur(12px) brightness(.3)' : P === 'music' ? 'brightness(.85)' : P === 'system' ? 'blur(3px) brightness(.78)' : P ? 'blur(6px) brightness(.7)' : 'none',
       overlay: S.overlay,
       showUI: S.uiIn && !S.overlay && !S.onb,
-      showHud: !P || P === 'chat', showFrame: (S.uiIn && !S.overlay) || S.onb, showMic: !WALLPAPER && (!P || P === 'chat'), showNotifs: !P,
+      showHud: !P || P === 'chat', showFrame: (S.uiIn && !S.overlay) || S.onb, showMic: false, showNotifs: !P,
       // wallpaper: info on the right (desktop icons live on the left), no clickable controls
       hudPos: WALLPAPER ? { left: 'auto', right: '64px', alignItems: 'flex-end', textAlign: 'right' } : null,
       notifPos: WALLPAPER ? { top: 'auto', bottom: '150px' } : null,
@@ -854,6 +854,9 @@ export default class NexusApp extends Component {
       stateLabel: labels[core] || '', stateColor, showWave: core === 'listening',
       words: S.words, wordsColor: wk === 'nexus' ? '#FFE9D2' : 'rgba(255,246,233,.95)', wordsOpacity: wk === 'userDim' ? .45 : 1, wordsSize: wide ? '22px' : '30px',
       hasAction: !!S.actionLabel, actionLabel: S.actionLabel, hasError: core === 'error', errorTitle: S.errorTitle || 'No puedo conectar con el modelo', errorDetail: S.errorDetail || '',
+      // invisible button over the core (only where the core is on screen and clickable)
+      coreHit: !WALLPAPER && S.uiIn && !S.overlay && !S.onb && (!P || P === 'chat') ? { x: L.x, y: L.y, r: 190 * L.s } : null,
+      onCore: () => core === 'listening' ? this.talk() : live ? this.stopAll() : this.talk(),
       onMic: () => core === 'listening' ? this.talk() : live ? this.stopAll() : this.talk(), micRing: core === 'listening' || core === 'wake',
       micStatus: core === 'listening' ? 'LE ESCUCHO · TOQUE PARA TERMINAR' : live ? 'TOQUE PARA INTERRUMPIR' : `TOQUE O PULSE ${this.hotkeyLabel()}`,
       showMusicMini: S.music && !P, musicPct: (S.musicPos / 228 * 100).toFixed(2) + '%', musicTime: Math.floor(S.musicPos / 60) + ':' + String(S.musicPos % 60).padStart(2, '0'),

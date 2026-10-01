@@ -62,8 +62,8 @@ npm run dist
 
 | Acción | Cómo |
 | --- | --- |
-| Hablarle | Botón del micro, **Ctrl + Alt + Espacio** desde cualquier app o **Alt + N** con la ventana activa |
-| Terminar de hablar | Se para solo al callarte, o vuelve a tocar el micro |
+| Hablarle | Tocar el núcleo, **Ctrl + Alt + Espacio** desde cualquier app o **Alt + N** con la ventana activa |
+| Terminar de hablar | Se para solo al callarte, o vuelve a tocar el núcleo |
 | Interrumpirle | **Esc** o la píldora de arriba |
 | Escribirle | Icono de chat en el dock |
 | Cambiar voz y personalidad | Icono de ondas en el dock |
