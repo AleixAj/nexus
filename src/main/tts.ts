@@ -82,6 +82,12 @@ async function edge(name: string, text: string, rate: number, pitch: number) {
 
 // ---------- Gemini TTS (premium voices) ----------
 let geminiPausedUntil = 0
+let onQuota: () => void = () => {}
+
+/** Called when the premium voices run out of free quota (the app tells the user). */
+export function onGeminiQuota(fn: () => void) { onQuota = fn }
+
+export const geminiVoicesPaused = () => Date.now() < geminiPausedUntil
 
 function wav(pcm: Buffer, rate = 24000) {
   const h = Buffer.alloc(44)
@@ -91,30 +97,36 @@ function wav(pcm: Buffer, rate = 24000) {
   return Buffer.concat([h, pcm])
 }
 
-// Gemini TTS follows a spoken-style direction placed before the text (it is not read aloud)
+// Accent and tone go in the system instruction: anything placed in the text itself gets read aloud
 const ACCENT: Record<string, string> = {
-  'es-ES': 'Say in Spanish from Spain, with a natural Castilian accent and a warm, conversational tone:',
-  'es-MX': 'Say in Mexican Spanish, with a natural, warm and conversational tone:',
-  en: 'Say in British English, with a natural, warm and conversational tone:'
+  'es-ES': 'Habla en español de España, con acento castellano natural y un tono cálido y conversacional.',
+  'es-MX': 'Habla en español de México, con un tono natural, cálido y conversacional.',
+  en: 'Speak British English with a natural, warm and conversational tone.'
 }
+let noSystemInstruction = false
 
 async function gemini(key: string, voiceName: string, text: string, lang: string): Promise<Buffer> {
   const direction = ACCENT[lang] || ACCENT[lang.slice(0, 2)] || ACCENT['es-ES']
-  const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-tts:generateContent', {
+  const call = (withStyle: boolean) => fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash-tts:generateContent', {
     method: 'POST',
     signal: AbortSignal.timeout(20000),
     headers: { 'Content-Type': 'application/json', 'x-goog-api-key': key },
     body: JSON.stringify({
-      contents: [{ parts: [{ text: `${direction}\n${text}` }] }],
+      ...(withStyle ? { systemInstruction: { parts: [{ text: direction }] } } : {}),
+      contents: [{ parts: [{ text }] }],
       generationConfig: { responseModalities: ['AUDIO'], speechConfig: { voiceConfig: { prebuiltVoiceConfig: { voiceName } } } }
     })
   })
+  let res = await call(!noSystemInstruction)
+  // if the model does not take a system instruction, the plain text still sounds right
+  if (res.status === 400 && !noSystemInstruction) { noSystemInstruction = true; res = await call(false) }
   if (res.status === 429) {
     // free quota used up: plain voices for a while
     geminiPausedUntil = Date.now() + 60 * 60e3
+    onQuota()
     throw new Error('Gemini TTS sin cupo')
   }
-  if (!res.ok) throw new Error(`Gemini TTS HTTP ${res.status}`)
+  if (!res.ok) throw new Error(`Gemini TTS HTTP ${res.status}: ${(await res.text()).slice(0, 300)}`)
   const part = (await res.json()).candidates?.[0]?.content?.parts?.find((p: any) => p.inlineData)
   if (!part) throw new Error('Gemini TTS sin audio')
   const data = Buffer.from(part.inlineData.data, 'base64')
@@ -134,7 +146,7 @@ export async function speak(text: string, o: SpeakOptions): Promise<Buffer> {
   const v = Object.hasOwn(VOICES, o.voice) ? VOICES[o.voice] : VOICES.lyra
   const key = v.gemini && loadSettings().geminiTts ? getKey('Gemini') : ''
   if (v.gemini && key && Date.now() > geminiPausedUntil) {
-    try { return await gemini(key, v.gemini, text, o.lang) } catch { /* fall back to the Microsoft voice */ }
+    try { return await gemini(key, v.gemini, text, o.lang) } catch (e: any) { console.warn('[tts] Gemini:', e?.message) /* fall back to the Microsoft voice */ }
   }
   const name = o.lang.startsWith('en') ? v.en : o.lang === 'es-MX' ? v.mx : v.es
   return edge(name, text, v.rate + (num(o.speed, 1) - 1) * 100, v.pitch + num(o.pitch, 0) * 2)

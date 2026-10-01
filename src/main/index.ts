@@ -1,7 +1,7 @@
 import { app, BrowserWindow, Menu, Notification, Tray, globalShortcut, ipcMain, nativeImage, screen, session, shell, type IpcMainInvokeEvent } from 'electron'
 import { join } from 'path'
 import { PROVIDERS, getKey, loadSettings, saveSettings, setKey } from './settings'
-import { isPremium, speak, warmVoices } from './tts'
+import { geminiVoicesPaused, isPremium, onGeminiQuota, speak, warmVoices } from './tts'
 import { createHash } from 'crypto'
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import { ask, abort, transcribe } from './brain'
@@ -174,6 +174,7 @@ function registerIpc() {
   handle('settings:get', () => ({
     ...loadSettings(),
     hotkey: HOTKEY,
+    premiumPaused: geminiVoicesPaused(),
     autostart: app.getLoginItemSettings().openAtLogin,
     providers: Object.fromEntries(Object.entries(PROVIDERS).map(([k, p]) => [k, { models: p.models, needsKey: p.needsKey, hasKey: !!getKey(k) }]))
   }))
@@ -261,6 +262,7 @@ if (!app.requestSingleInstanceLock()) {
     session.defaultSession.setPermissionRequestHandler((wc, permission, cb) => cb(permission === 'media' && wc === win?.webContents))
 
     registerIpc()
+    onGeminiQuota(() => BrowserWindow.getAllWindows().forEach(w => w.webContents.send('tts:quota')))
     createTray()
     createWindow(loadSettings().mode === 'wallpaper' ? 'wallpaper' : 'window')
 

@@ -162,6 +162,10 @@ export default class NexusApp extends Component {
       this.offs.push(api.onDelta((id, t) => this.onDelta(id, t)));
       this.offs.push(api.onAction((id, label) => this.onAction(id, label)));
       this.offs.push(api.onProgress((id, label) => { if (id === this.reqId) this.setState({ actionLabel: label.toUpperCase() }); }));
+      this.offs.push(api.onTtsQuota(() => {
+        if (!this.state.premiumPaused) this.notify('VOZ PREMIUM', 'Cupo de voz de Gemini agotado por hoy', 'Mientras tanto hablo con una voz normal · se renueva a las 9:00', '#F5B971');
+        this.setState({ premiumPaused: true });
+      }));
       this.offs.push(api.onConfirm((id, cid, req) => this.onConfirm(id, cid, req)));
       this.offs.push(api.onCovered(covered => { const E = this.E(); E && E.setPaused(covered); }));
     }
@@ -190,6 +194,7 @@ export default class NexusApp extends Component {
     this.setState(st => ({
       provider: s.provider, model: s.model, providers: s.providers, voiceSel: s.voice, userName: s.userName, persona: s.persona,
       theme: s.theme, quality: s.quality, reduced: s.reduced, autostart: !!s.autostart, hotkey: s.hotkey || st.hotkey,
+      premiumPaused: !!s.premiumPaused,
       agent: { web: s.agentWeb, files: s.agentFiles, write: s.agentWrite, shell: s.agentShell }, micId: s.micId || '',
       gemini: { tts: s.geminiTts, search: s.geminiSearch, stt: s.geminiStt, fallback: s.geminiFallback },
       lang: s.lang, sliders: { ...st.sliders, speed: s.speed, pitch: s.pitch, volume: s.volume, warmth: s.warmth, formal: s.formal, fx: s.fx },
@@ -836,7 +841,7 @@ export default class NexusApp extends Component {
       onChatKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.sendChat(); } }, onChatSend: () => this.sendChat(),
       showSlash: S.chatInput.startsWith('/'),
       slashCmds: this.CMDS.filter(c => c.cmd.startsWith(S.chatInput.split(' ')[0]) || S.chatInput === '/').map(c => ({ ...c, pick: () => this.setState({ chatInput: c.cmd + ' ' }) })),
-      voiceCards: this.VOICES.map((v, i) => { const sel = S.voiceSel === v.id; const noKey = v.premium && !(S.providers.Gemini || {}).hasKey; return { ...v, desc: noKey ? v.desc.replace('premium', 'premium · con clave gratis') : v.premium && !(S.gemini || {}).tts ? v.desc.replace('premium', 'premium · usa cupo Gemini') : v.desc, selected: sel, state: S.preview === v.id ? (S.previewLoading ? 'thinking' : 'speaking') : 'idle',
+      voiceCards: this.VOICES.map((v, i) => { const sel = S.voiceSel === v.id; const noKey = v.premium && !(S.providers.Gemini || {}).hasKey; return { ...v, desc: noKey ? v.desc.replace('premium', 'premium · con clave gratis') : v.premium && !(S.gemini || {}).tts ? v.desc.replace('premium', 'premium · usa cupo Gemini') : v.premium && S.premiumPaused ? 'Cupo de hoy agotado · suena con voz normal hasta las 9:00' : v.desc, selected: sel, state: S.preview === v.id ? (S.previewLoading ? 'thinking' : 'speaking') : 'idle',
         bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.1)', delay: (140 + i * 40) + 'ms',
         previewLabel: S.preview === v.id ? (S.previewLoading ? '··· CARGANDO' : '■ SONANDO…') : '▶ ESCUCHAR',
         select: () => this.selectVoice(v.id), preview: e => { e.stopPropagation(); this.previewVoice(v.id); },

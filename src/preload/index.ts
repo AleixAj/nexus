@@ -27,5 +27,6 @@ contextBridge.exposeInMainWorld('nexus', {
   onProgress: (fn: (id: number, label: string) => void) => on('brain:progress', fn),
   onConfirm: (fn: (id: number, cid: number, req: { title: string; detail: string }) => void) => on('brain:confirm', fn),
   confirmReply: (cid: number, ok: boolean) => ipcRenderer.invoke('brain:confirm-reply', cid, ok),
+  onTtsQuota: (fn: () => void) => on('tts:quota', fn),
   onHotkey: (fn: () => void) => on('hotkey:talk', fn)
 })
