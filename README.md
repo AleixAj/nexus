@@ -13,6 +13,9 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   carpetas, mira estadísticas del equipo y procesos, crea o modifica archivos y ejecuta comandos de PowerShell.
   Todo lo que cambia el equipo pide permiso antes, y lo que borra va a la papelera.
 - **Acciones rápidas.** Abre aplicaciones y webs y controla la música y el volumen.
+- **Tus listas de Spotify por nombre** (Premium). «Pon mi lista Gym», «pon mis Me gusta en aleatorio». Se conecta una
+  vez desde Ajustes → Spotify con una app gratuita de developer.spotify.com (Redirect URI `http://127.0.0.1:8737/callback`).
+  El inicio de sesión es en la web de Spotify (PKCE): NEXUS nunca ve tu contraseña.
 - **Resumen del día.** La primera vez que abres NEXUS cada día te cuenta el tiempo, tus recordatorios de hoy y las
   noticias más interesantes (se puede apagar en Ajustes). También con «buenos días» o «¿qué tengo hoy?».
 - **Dictado en cualquier app.** `Ctrl + Alt + D`, hablas, y el texto se escribe donde tengas el cursor (Word, WhatsApp,
@@ -168,6 +171,7 @@ src/
     memory.ts               memoria cifrada: datos sobre ti y conversaciones
     reminders.ts            recordatorios y alarmas
     media.ts                lo que suena en Spotify, carátula y letra
+    spotifyApi.ts           cuenta de Spotify: tus listas por nombre
     news.ts                 noticias por RSS, por temas y sin política
     vision.ts               captura de pantalla e imágenes para un modelo que ve
     stt.ts / tts.ts         voz a texto y texto a voz
@@ -216,6 +220,7 @@ Open-Meteo (tiempo), Wikipedia (efemérides), ipapi.co (ciudad aproximada), iTun
 
 - Palabra de activación «Hey Nexus» siempre escuchando.
 - Rutinas editables.
+- Probar la conexión con la cuenta de Spotify (hecha, falta probarla con una cuenta real).
 - Temperatura de la CPU (Windows solo la da con permisos de administrador; se muestra la de la GPU).
 - Mini overlay flotante sobre otras apps y fondo de escritorio en varios monitores a la vez.
 - Instalador (`electron-builder`).

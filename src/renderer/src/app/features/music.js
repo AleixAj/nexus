@@ -46,6 +46,25 @@ export const music = {
     const p = m.pos + (m.playing ? (Date.now() - this.state.mediaAt) / 1000 : 0);
     return m.dur ? Math.min(p, m.dur) : p;
   },
+  // ---------- Spotify account (playlists by name) ----------
+  async loadSpotify() {
+    if (!api) return;
+    try { this.setState({ spotify: await api.spotifyStatus() }); } catch { /* keep */ }
+  },
+  async connectSpotify() {
+    const id = (this.state.spotifyIdInput ?? this.state.spotifyClientId ?? '').trim();
+    if (id !== this.state.spotifyClientId) { await api.setSettings({ spotifyClientId: id }); this.setState({ spotifyClientId: id }); }
+    this.setState({ spotifyBusy: true, spotifyError: '' });
+    try {
+      const s = await api.spotifyConnect();
+      this.setState(st => ({ spotify: { ...st.spotify, ...s } }));
+      this.say(`Listo, ${this.name()}. Ya puedo poner tus listas de Spotify por su nombre.`);
+    } catch (e) {
+      this.setState({ spotifyError: String((e && e.message) || e).replace(/^Error invoking remote method '[^']+': (Error: )?/, '') });
+    }
+    this.setState({ spotifyBusy: false });
+  },
+  async disconnectSpotify() { await api.spotifyDisconnect(); this.loadSpotify(); },
   async musicCtl(action) {
     if (!api) return;
     const m = this.state.media;

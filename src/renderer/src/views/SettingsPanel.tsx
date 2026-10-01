@@ -198,6 +198,27 @@ export default function SettingsPanel({ v }: { v: any }) {
               </div>
             </Fragment>))}
             <span data-scramble="1" style={{ marginTop: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
+              SPOTIFY · TUS LISTAS POR NOMBRE
+            </span>
+            {v.spotifyConnected ? (
+              <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+                <span style={{ flex: "1", fontSize: "14px", color: "rgba(241,234,248,.88)" }}>● Conectado como <b style={{ fontWeight: 500 }}>{v.spotifyUser}</b></span>
+                <button onClick={v.spotifyDisconnect} style={{ height: "32px", padding: "0 12px", borderRadius: "8px", border: "1px solid rgba(196,181,253,.2)", background: "transparent", color: "rgba(226,218,240,.7)", fontSize: "12.5px", cursor: "pointer" }}>Desconectar</button>
+              </div>
+            ) : (
+              <>
+                <span style={{ fontSize: "12.5px", lineHeight: "1.55", color: "rgba(226,218,240,.5)" }}>
+                  1 · Crea una app gratis en <a onClick={v.openSpotifyDev} style={{ color: "rgb(var(--acc2))", cursor: "pointer" }}>developer.spotify.com</a> (Web API) con esta Redirect URI: <code style={{ color: "#FFF6E9" }}>{v.spotifyRedirect}</code><br />
+                  2 · Pega aquí su Client ID y pulsa Conectar.
+                </span>
+                <div style={{ display: "flex", gap: "8px" }}>
+                  <input value={v.spotifyIdInput} onChange={v.onSpotifyId} placeholder="Client ID (32 caracteres)" style={{ flex: "1", minWidth: "0", height: "36px", padding: "0 12px", borderRadius: "9px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.16)", outline: "none", color: "#FFF6E9", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px" }} />
+                  <button onClick={v.spotifyConnect} disabled={v.spotifyBusy} style={{ height: "36px", padding: "0 14px", borderRadius: "9px", border: "1px solid rgba(255,255,255,.18)", background: "linear-gradient(180deg, #1DB954, #158a3e)", color: "#fff", fontSize: "13px", cursor: "pointer", opacity: v.spotifyBusy ? .6 : 1 }}>{v.spotifyBusy ? 'Esperando…' : 'Conectar'}</button>
+                </div>
+                {v.spotifyError && <span style={{ fontSize: "12.5px", color: "#FB7185" }}>{v.spotifyError}</span>}
+              </>
+            )}
+            <span data-scramble="1" style={{ marginTop: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
               AGENTE
             </span>
             {(v.agentToggles || []).map((t, tIndex) => (<Fragment key={t?.label ?? tIndex}>

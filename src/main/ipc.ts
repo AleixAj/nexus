@@ -16,6 +16,7 @@ import { addFact, clearMemory, deleteExchange, deleteFact, getMemory } from './m
 import { currentExtra, currentMedia, mediaControl } from './media'
 import { HOTKEY, isDev, switchMode } from './window'
 import { typeText } from './dictation'
+import { REDIRECT, connectSpotify, disconnectSpotify, spotifyStatus } from './spotifyApi'
 
 const trusted = (e: IpcMainInvokeEvent) => {
   const url = e.senderFrame?.url || ''
@@ -119,6 +120,9 @@ export function registerIpc() {
   handle('memory:delete-fact', (_e, id) => deleteFact(Number(id)))
   handle('memory:delete-chat', (_e, id) => deleteExchange(Number(id)))
   handle('memory:clear', (_e, what) => { clearMemory(what === 'chats' ? 'chats' : 'all'); resetHistory() })
+  handle('spotify:status', () => ({ ...spotifyStatus(), redirect: REDIRECT }))
+  handle('spotify:connect', () => connectSpotify())
+  handle('spotify:disconnect', () => disconnectSpotify())
   handle('media:get', () => ({ state: currentMedia(), extra: currentExtra() }))
   handle('media:control', (_e, action) => {
     const a = str(action, 20)

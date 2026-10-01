@@ -5,7 +5,8 @@ import { existsSync } from 'fs'
 import { join } from 'path'
 import { currentMedia, mediaControl } from '../media'
 import { KEYS, sendKey } from '../lib/powershell'
-import { num, oneOf, said, str, type Tool } from './define'
+import { bool, num, oneOf, said, str, type Tool } from './define'
+import { myPlaylists, playByName, spotifyStatus } from '../spotifyApi'
 
 async function openSpotify(uri?: string) {
   const exe = join(process.env.APPDATA || '', 'Spotify', 'Spotify.exe')
@@ -47,6 +48,26 @@ export const musicTools: Tool[] = [
     params: { action: oneOf(['open', 'liked', 'search', 'now_playing', 'play_pause', 'next', 'previous']), query: str('Qué buscar') },
     required: ['action'],
     run: async a => said(await spotify(String(a.action || ''), String(a.query || '')))
+  },
+  {
+    name: 'spotify_play',
+    description: 'Pone en Spotify una lista del usuario por su nombre, sus Me gusta, o una canción/artista/álbum. Mejor que spotify search cuando hay que reproducir algo concreto.',
+    params: { query: str('Nombre de la lista, canción, artista o álbum'), kind: oneOf(['playlist', 'liked', 'track', 'artist', 'album']), shuffle: bool('Aleatorio') },
+    required: ['kind'],
+    progress: a => 'Spotify · ' + (a.kind === 'liked' ? 'Me gusta' : String(a.query || '')).slice(0, 40),
+    run: async a => {
+      if (!spotifyStatus().connected) return said('Para poner listas por nombre conecta tu Spotify en Ajustes → Spotify. Mientras, puedo buscarla con spotify search.')
+      return said(await playByName(String(a.query || ''), String(a.kind || 'playlist'), typeof a.shuffle === 'boolean' ? a.shuffle : undefined))
+    }
+  },
+  {
+    name: 'spotify_playlists',
+    description: 'Lista las playlists del usuario en Spotify.',
+    run: async () => {
+      if (!spotifyStatus().connected) return said('Spotify no está conectado (Ajustes → Spotify).')
+      const l = await myPlaylists()
+      return { result: l.map(p => `- ${p.name} (${p.tracks} canciones)`).join('\n') || 'No tiene listas.', label: `Tus listas · ${l.length}` }
+    }
   },
   {
     name: 'media',

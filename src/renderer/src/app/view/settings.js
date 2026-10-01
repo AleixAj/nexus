@@ -51,6 +51,14 @@ export function settingsView(app, c) {
     ].map(t => ({ ...t, ...toggleT(t.on) })),
     micName: app.micLabel(), cycleMic: () => app.cycleMic(),
 
+    // Spotify account
+    spotifyConnected: !!(S.spotify && S.spotify.connected), spotifyUser: (S.spotify && S.spotify.user) || '',
+    spotifyRedirect: (S.spotify && S.spotify.redirect) || 'http://127.0.0.1:8737/callback',
+    spotifyIdInput: S.spotifyIdInput ?? S.spotifyClientId ?? '', onSpotifyId: e => app.setState({ spotifyIdInput: e.target.value.trim() }),
+    spotifyBusy: !!S.spotifyBusy, spotifyError: S.spotifyError || '',
+    spotifyConnect: () => app.connectSpotify(), spotifyDisconnect: () => app.disconnectSpotify(),
+    openSpotifyDev: () => window.open('https://developer.spotify.com/dashboard'),
+
     // look
     themeCards: Object.entries(THEMES).map(([id, t]) => ({ name: t.name, c1: t.c1, c2: t.c2, bg: S.theme === id ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.02)', border: S.theme === id ? t.c2 : 'rgba(196,181,253,.1)', pick: () => app.setTheme(id) })),
     qualityOpts: QUALITY.map(([id, label]) => ({ label, ...seg(S.quality === id), pick: () => app.setQuality(id) })), qualityNote: QUALITY_NOTE[S.quality],

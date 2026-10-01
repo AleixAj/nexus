@@ -33,6 +33,7 @@ export type Settings = {
   subtitles: boolean
   newsTopics: string
   briefing: boolean
+  spotifyClientId: string
   lastBriefing: string
   newsAvoid: string
   memoryLearn: boolean
@@ -87,6 +88,8 @@ const DEFAULTS: Settings = {
   newsTopics: 'tech,science,curious',
   // spoken summary the first time NEXUS starts each day
   briefing: true,
+  // the user's own app at developer.spotify.com (for playlists by name)
+  spotifyClientId: '',
   lastBriefing: '',
   newsAvoid: 'política',
   // the agent saves what it learns about the user (Memory panel)
