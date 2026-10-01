@@ -142,3 +142,16 @@ export function chime(alarm = false, times = alarm ? 4 : 1) {
   }
   return times * 1.6
 }
+
+/** Short blip: rising when dictation starts, falling when it stops. */
+export function blip(up: boolean) {
+  const { ac, out } = sfxBus()
+  const t = ac.currentTime + .02
+  const o = ac.createOscillator(), g = ac.createGain()
+  o.type = 'sine'
+  o.frequency.setValueAtTime(up ? 660 : 880, t)
+  o.frequency.exponentialRampToValueAtTime(up ? 990 : 520, t + .12)
+  env(g.gain, t, .12, .01, .16)
+  o.connect(g).connect(out)
+  o.start(t); o.stop(t + .25)
+}

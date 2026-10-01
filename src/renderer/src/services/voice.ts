@@ -377,7 +377,8 @@ export async function testMic(ms = 4000) {
 }
 let listenGen = 0
 
-export async function listen(h: ListenHandlers) {
+/** Records until the user stops talking (dictation waits longer between sentences). */
+export async function listen(h: ListenHandlers, opts = { silenceMs: 1200, maxMs: 25000 }) {
   cancelListening()
   const gen = ++listenGen
   const alive = () => gen === listenGen
@@ -418,7 +419,7 @@ export async function listen(h: ListenHandlers) {
   recorder.ondataavailable = e => e.data.size && chunks.push(e.data)
 
   // voice activity detection with an adaptive noise floor:
-  // stop after ~1.2 s of silence once speech started
+  // stop after a pause (1.2 s by default) once speech started
   const data = new Uint8Array(an.fftSize)
   let heard = false, quietSince = 0, cancelled = false, floor = 0.01, samples = 0
   const started = performance.now()
@@ -436,10 +437,10 @@ export async function listen(h: ListenHandlers) {
       quietSince = 0
     } else if (heard) {
       quietSince ||= now
-      if (now - quietSince > 1200) finish()
+      if (now - quietSince > opts.silenceMs) finish()
     }
     if (!heard && now - started > 8000) cancel()
-    if (now - started > 25000) finish()
+    if (now - started > opts.maxMs) finish()
   }, 50)
 
   const cleanup = () => {

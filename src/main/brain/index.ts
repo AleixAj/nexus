@@ -67,8 +67,9 @@ export function ask(text: string, h: Handlers): Promise<string> {
 async function useTool(name: string, args: any, h: Handlers, signal: AbortSignal): Promise<ToolResult> {
   const t = findTool(name)
   if (!t) return { result: 'Herramienta desconocida', label: name }
-  if (t.confirm) {
-    const ok = await h.confirm(t.confirm(args))
+  const req = t.confirm?.(args)
+  if (req) {
+    const ok = await h.confirm(req)
     if (signal.aborted) throw aborted()
     if (!ok) return { result: 'El usuario ha denegado el permiso para esta acción.', label: 'Acción denegada' }
   }

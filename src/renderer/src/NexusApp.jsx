@@ -8,6 +8,7 @@ import { CORE_LAYOUT } from './app/constants';
 import { QUIET, api } from './app/util';
 import { buildView } from './app/view';
 import { conversation } from './app/features/conversation';
+import { dictation } from './app/features/dictation';
 import { memory } from './app/features/memory';
 import { music } from './app/features/music';
 import { news } from './app/features/news';
@@ -85,6 +86,7 @@ export default class NexusApp extends Component {
     if (!api) return;
     const on = (sub, fn) => this.offs.push(sub(fn));
     on(api.onHotkey, () => this.talk());
+    on(api.onDictate, () => this.toggleDictation());
     on(api.onDelta, (id, t) => this.onDelta(id, t));
     on(api.onAction, (id, label) => this.onAction(id, label));
     on(api.onProgress, (id, label) => { if (id === this.reqId) this.setState({ actionLabel: label.toUpperCase() }); });
@@ -175,4 +177,4 @@ export default class NexusApp extends Component {
   }
 }
 
-Object.assign(NexusApp.prototype, conversation, memory, music, news, routines, settings, startup, voices);
+Object.assign(NexusApp.prototype, conversation, dictation, memory, music, news, routines, settings, startup, voices);

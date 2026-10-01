@@ -15,6 +15,7 @@ import { cancelReminders, listReminders } from './reminders'
 import { addFact, clearMemory, deleteExchange, deleteFact, getMemory } from './memory'
 import { currentExtra, currentMedia, mediaControl } from './media'
 import { HOTKEY, isDev, switchMode } from './window'
+import { typeText } from './dictation'
 
 const trusted = (e: IpcMainInvokeEvent) => {
   const url = e.senderFrame?.url || ''
@@ -75,6 +76,7 @@ export function registerIpc() {
     return audio
   })
   handle('tts:warm', () => warmVoices(loadSettings().lang))
+  handle('dictation:type', (_e, text) => typeText(str(text, 20000)))
   handle('stt:transcribe', (_e, audio) => {
     if (!(audio instanceof ArrayBuffer) || audio.byteLength > 25e6) throw new Error('Audio no válido')
     return transcribe(audio, loadSettings().lang)

@@ -32,6 +32,8 @@ export type Settings = {
   azureRegion: string
   subtitles: boolean
   newsTopics: string
+  briefing: boolean
+  lastBriefing: string
   newsAvoid: string
   memoryLearn: boolean
   theme: string
@@ -83,6 +85,9 @@ const DEFAULTS: Settings = {
   subtitles: false,
   // News panel: topic ids (news.ts) and words to leave out ("política" = a whole list)
   newsTopics: 'tech,science,curious',
+  // spoken summary the first time NEXUS starts each day
+  briefing: true,
+  lastBriefing: '',
   newsAvoid: 'política',
   // the agent saves what it learns about the user (Memory panel)
   memoryLearn: true,

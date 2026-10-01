@@ -45,6 +45,7 @@ export function settingsView(app, c) {
       { label: 'Fondo de escritorio', note: 'Nexus se pone detrás de sus iconos · hable con ' + hotkey + ' y vuelva desde la bandeja', on: false, toggle: () => api && api.setMode('wallpaper') },
       { label: 'Iniciar con Windows', note: 'Se abre sola al encender el PC', on: S.autostart, toggle: () => app.setAutostart(!S.autostart) },
       { label: `Escuchar «${S.wakeWord}» siempre`, note: 'Próximamente · de momento use el micro o ' + hotkey, on: false, toggle: () => {} },
+      { label: 'Resumen al encender', note: 'La primera vez que me abres cada día: tiempo, recordatorios y noticias', on: !!S.briefing, toggle: () => app.flip('briefing') },
       { label: 'Subtítulos', note: 'Muestra bajo el núcleo lo que dice Nexus', on: !!S.subtitles, toggle: () => app.flip('subtitles') },
       { label: 'Reducir movimiento', note: 'Sin parallax, estelas ni partículas extra', on: S.reduced, toggle: () => app.setReduced(!S.reduced) },
     ].map(t => ({ ...t, ...toggleT(t.on) })),

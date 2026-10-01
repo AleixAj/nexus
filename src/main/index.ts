@@ -5,6 +5,7 @@ import { onAzureQuotaOut, onGeminiQuota } from './tts'
 import { listReminders, startReminders, when } from './reminders'
 import { watchMedia } from './media'
 import { registerIpc } from './ipc'
+import { DICTATE_HOTKEY } from './dictation'
 import { HOTKEY, beforeQuit, broadcast, createTray, createWindow, mainWindow, notify, showWindow, talk } from './window'
 
 // the greeting plays on start, before any click
@@ -42,6 +43,8 @@ if (!app.requestSingleInstanceLock()) {
     createTray()
     createWindow(loadSettings().mode === 'wallpaper' ? 'wallpaper' : 'window')
     if (!globalShortcut.register(HOTKEY, talk)) console.warn(`[hotkey] ${HOTKEY} está ocupado por otra aplicación`)
+    // dictation does not bring the window up: the text goes to the app in front
+    if (!globalShortcut.register(DICTATE_HOTKEY, () => broadcast('hotkey:dictate'))) console.warn(`[hotkey] ${DICTATE_HOTKEY} está ocupado por otra aplicación`)
   })
 }
 

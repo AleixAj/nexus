@@ -16,11 +16,21 @@ export const startup = {
     this.setState({ uiIn: false, panel: null, overlay: false, onb: false, words: [], actionLabel: '' });
     E.setState('idle'); E.snapCore(CORE_LAYOUT.home);
     E.boot({ onUI: () => this.setState({ uiIn: true }), onDone: () => {
-      if (!QUIET) this.say(`${greeting()}, ${this.name()}. Todos los sistemas operativos.`);
+      if (!QUIET) this.greetOrBrief();
       if (NOTICE === 'wallpaper-failed') this.notify('FONDO DE ESCRITORIO', 'No he podido ponerme de fondo', 'Windows no lo ha permitido · sigo en modo ventana', '#FB7185');
       const p = this.state.providers[this.state.provider];
       if (p && p.needsKey && !p.hasKey) this.later(() => this.notify('CONFIGURACIÓN', 'Falta la clave de la IA', 'Gratis en console.groq.com · pégala en Ajustes', '#F5B971'), 4000);
     } });
+  },
+  // the first start of the day: the summary of the day; otherwise the usual greeting
+  greetOrBrief() {
+    const today = new Date().toDateString();
+    if (this.state.briefing && this.state.lastBriefing !== today && api) {
+      this.setState({ lastBriefing: today }); this.save({ lastBriefing: today });
+      this.ask(`${greeting()}. Dame el resumen del día.`);
+      return;
+    }
+    this.say(`${greeting()}, ${this.name()}. Todos los sistemas operativos.`);
   },
   startOnboarding() {
     this.interrupt(); const E = this.E(); if (!E) return;

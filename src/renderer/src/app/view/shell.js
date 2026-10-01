@@ -9,7 +9,7 @@ export function shellView(app, c) {
   const wide = ['voice', 'routines', 'memory', 'news', 'settings'].includes(P);
   const wk = S.wordsKind;
   const stateColor = core === 'error' ? '#FB7185' : core === 'thinking' || core === 'action' ? '#F5B971' : core === 'speaking' ? '#FFE4C4' : core === 'music' ? '#FDBA74' : 'rgb(var(--acc2) / .75)';
-  const pillText = core === 'error' ? 'SIN CONEXIÓN · TOCA PARA REINTENTAR' : live ? 'EN VIVO · TOCA PARA PARAR' : core === 'music' ? 'MÚSICA · TOCA PARA PAUSAR' : WALLPAPER ? 'EN ESPERA · ' + app.hotkeyLabel() + ' PARA HABLAR' : 'EN ESPERA · TOCA EL NÚCLEO PARA HABLAR';
+  const pillText = S.dictating ? 'DICTANDO · HABLA Y SE ESCRIBE DONDE ESTÉ EL CURSOR' : core === 'error' ? 'SIN CONEXIÓN · TOCA PARA REINTENTAR' : live ? 'EN VIVO · TOCA PARA PARAR' : core === 'music' ? 'MÚSICA · TOCA PARA PAUSAR' : WALLPAPER ? 'EN ESPERA · ' + app.hotkeyLabel() + ' PARA HABLAR' : 'EN ESPERA · TOCA EL NÚCLEO PARA HABLAR';
   const talkOrStop = () => core === 'listening' ? app.talk() : live ? app.stopAll() : app.talk();
   const on = id => P === id && !S.overlay;
 
@@ -30,7 +30,7 @@ export function shellView(app, c) {
 
     // under the core
     capLeft: L.x + 'px', capTop: (P === 'system' ? 905 : L.y + 150 * L.s * 2.3 + 12) + 'px', capWidth: (wide ? 640 : P === 'chat' ? 760 : 1000) + 'px',
-    stateLabel: CORE_LABELS[core] || '', stateColor, showWave: core === 'listening',
+    stateLabel: S.dictating ? (core === 'thinking' ? 'ESCRIBIENDO' : 'DICTANDO') : CORE_LABELS[core] || '', stateColor, showWave: core === 'listening',
     words: S.subtitles ? S.words : [], wordsColor: wk === 'nexus' ? '#FFE9D2' : 'rgba(255,246,233,.95)', wordsOpacity: wk === 'userDim' ? .45 : 1, wordsSize: wide ? '22px' : '30px',
     hasAction: !!S.actionLabel, actionLabel: S.actionLabel, hasError: core === 'error', errorTitle: S.errorTitle || 'No puedo conectar con el modelo', errorDetail: S.errorDetail || '',
     // invisible button over the core (only where the core is on screen and clickable)

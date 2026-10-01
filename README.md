@@ -13,6 +13,14 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   carpetas, mira estadísticas del equipo y procesos, crea o modifica archivos y ejecuta comandos de PowerShell.
   Todo lo que cambia el equipo pide permiso antes, y lo que borra va a la papelera.
 - **Acciones rápidas.** Abre aplicaciones y webs y controla la música y el volumen.
+- **Resumen del día.** La primera vez que abres NEXUS cada día te cuenta el tiempo, tus recordatorios de hoy y las
+  noticias más interesantes (se puede apagar en Ajustes). También con «buenos días» o «¿qué tengo hoy?».
+- **Dictado en cualquier app.** `Ctrl + Alt + D`, hablas, y el texto se escribe donde tengas el cursor (Word, WhatsApp,
+  el navegador…). Para solo con una pausa o pulsando el atajo otra vez. Tu portapapeles queda como estaba.
+- **Control del PC por voz.** Bloquear, apagar la pantalla, suspender, apagar o reiniciar en X minutos (estos tres
+  piden permiso), cancelar el apagado y brillo (en portátiles).
+- **Portapapeles.** «Traduce lo que he copiado», «resúmelo», «corrige la ortografía»: lo lee (texto o imagen) y te deja
+  el resultado copiado para pegarlo.
 - **Ve tu pantalla y tus archivos.** «¿Qué hay en mi pantalla?», «explícame este error»: hace una captura (apartando
   su ventana) y la analiza. Arrastra imágenes, PDF o documentos al chat y te los explica o resume. Los PDF se leen en tu
   PC; las imágenes las mira Gemini (clave gratuita, solo cuando lo pides) u Ollama si tienes un modelo de visión.
@@ -155,7 +163,7 @@ src/
     tools/                  herramientas del agente, una lista por tema
       define.ts             formato común: descripción para la IA + lo que se ejecuta
       index.ts              registro: qué herramientas están activas según los ajustes
-      apps.ts music.ts news.ts vision.ts web.ts files.ts system.ts memory.ts reminders.ts
+      apps.ts briefing.ts music.ts news.ts pc.ts vision.ts web.ts files.ts system.ts memory.ts reminders.ts
     lib/                    piezas comunes: PowerShell, archivos de datos y texto
     memory.ts               memoria cifrada: datos sobre ti y conversaciones
     reminders.ts            recordatorios y alarmas
@@ -163,6 +171,7 @@ src/
     news.ts                 noticias por RSS, por temas y sin política
     vision.ts               captura de pantalla e imágenes para un modelo que ve
     stt.ts / tts.ts         voz a texto y texto a voz
+    dictation.ts            dictado: pega el texto en la app que tengas delante
     settings.ts             ajustes y claves cifradas
     sysinfo.ts world.ts wallpaper.ts
   preload/index.ts          puente seguro entre la interfaz y el proceso principal

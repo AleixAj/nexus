@@ -13,8 +13,8 @@ export type Tool = {
   params?: Record<string, unknown>
   required?: string[]
   group?: Group
-  /** If present the user must approve each call; returns what the approval card shows. */
-  confirm?: (a: any) => { title: string; detail: string }
+  /** If present the user must approve the call; returns what the approval card shows (null = no need this time). */
+  confirm?: (a: any) => { title: string; detail: string } | null
   /** Label on the core while it runs. */
   progress?: (a: any) => string
   run: (a: any) => Promise<ToolResult> | ToolResult

@@ -45,5 +45,7 @@ contextBridge.exposeInMainWorld('nexus', {
   mediaControl: (action: string) => ipcRenderer.invoke('media:control', action),
   onMedia: (fn: (m: any) => void) => on('media:state', fn),
   onMediaExtra: (fn: (x: any) => void) => on('media:extra', fn),
-  onHotkey: (fn: () => void) => on('hotkey:talk', fn)
+  onHotkey: (fn: () => void) => on('hotkey:talk', fn),
+  onDictate: (fn: () => void) => on('hotkey:dictate', fn),
+  typeText: (text: string) => ipcRenderer.invoke('dictation:type', text)
 })

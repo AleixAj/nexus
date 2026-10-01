@@ -3,16 +3,18 @@
 import type { Settings } from '../settings'
 import type { Group, Tool, ToolResult } from './define'
 import { appTools } from './apps'
+import { briefingTools } from './briefing'
 import { fileTools } from './files'
 import { memoryTools } from './memory'
 import { musicTools } from './music'
 import { newsTools } from './news'
+import { pcTools } from './pc'
 import { reminderTools } from './reminders'
 import { systemTools } from './system'
 import { visionTools } from './vision'
 import { webTools } from './web'
 
-const ALL: Tool[] = [...appTools, ...musicTools, ...memoryTools, ...reminderTools, ...newsTools, ...visionTools, ...systemTools, ...webTools, ...fileTools]
+const ALL: Tool[] = [...appTools, ...musicTools, ...memoryTools, ...reminderTools, ...newsTools, ...briefingTools, ...visionTools, ...pcTools, ...systemTools, ...webTools, ...fileTools]
 const BY_NAME = new Map(ALL.map(t => [t.name, t]))
 
 /** The switches in Settings → Agent. */
