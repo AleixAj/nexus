@@ -197,6 +197,7 @@ export default function SettingsPanel({ v }: { v: any }) {
                 </button>
               </div>
             </Fragment>))}
+            <button onClick={v.runDiagnostics} disabled={v.diagRunning} style={{ marginTop: "4px", height: "42px", borderRadius: "10px", border: "1px solid rgb(var(--acc2) / .35)", background: "rgb(var(--acc) / .14)", color: "#FFF6E9", fontSize: "14px", cursor: "pointer", opacity: v.diagRunning ? .6 : 1 }}>{v.diagRunning ? 'Comprobando… (unos segundos)' : '✓ Comprobar que todo funciona'}</button>
             <span data-scramble="1" style={{ marginTop: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
               CALENDARIO · GOOGLE, OUTLOOK O ICLOUD
             </span>

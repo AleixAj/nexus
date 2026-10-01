@@ -53,6 +53,9 @@ export function settingsView(app, c) {
     ].map(t => ({ ...t, ...toggleT(t.on) })),
     micName: app.micLabel(), cycleMic: () => app.cycleMic(),
 
+    // self-test
+    runDiagnostics: () => app.runDiagnostics(), diagRunning: !!S.diagRunning, diag: S.diag, closeDiag: () => app.setState({ diag: null }),
+
     // calendar (secret iCal address)
     calConnected: !!S.calConnected, calInput: S.calInput || '', onCalInput: e => app.setState({ calInput: e.target.value }),
     calSave: () => app.saveCalendar(false), calRemove: () => app.saveCalendar(true), calBusy: !!S.calBusy, calError: S.calError || '',

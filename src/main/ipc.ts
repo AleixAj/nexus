@@ -19,6 +19,7 @@ import { typeText } from './dictation'
 import { ensureModel, feedWakeWord, modelReady, startWakeWord, stopWakeWord } from './wakeword'
 import { broadcast } from './window'
 import { listApprovals, revoke } from './approvals'
+import { runDiagnostics } from './diagnostics'
 import { calendarConnected, events, setCalendarUrl } from './calendar'
 import { deleteRoutine, listRoutines, setRoutineEnabled, triggerText } from './routines'
 import { REDIRECT, connectSpotify, disconnectSpotify, spotifyStatus } from './spotifyApi'
@@ -123,6 +124,7 @@ export function registerIpc() {
   handle('brain:confirm-reply', (_e, cid, ok) => answerConfirm(Number(cid), ok === 'always' ? 'always' : ok === true))
   handle('calendar:set', (_e, url) => setCalendarUrl(str(url, 1000)))
   handle('calendar:events', async (_e, days) => (calendarConnected() ? events(Math.max(1, Math.min(31, Number(days) || 1))).catch(() => []) : null))
+  handle('diagnostics:run', () => runDiagnostics())
   handle('approvals:list', () => listApprovals())
   handle('routines:list', () => listRoutines().map(r => ({ ...r, trigger: triggerText(r) })))
   handle('routines:delete', (_e, id) => deleteRoutine(Number(id)))

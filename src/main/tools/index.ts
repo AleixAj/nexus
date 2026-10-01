@@ -6,6 +6,7 @@ import { appTools } from './apps'
 import { briefingTools } from './briefing'
 import { calendarTools } from './calendar'
 import { fileTools } from './files'
+import { gameTools } from './games'
 import { memoryTools } from './memory'
 import { musicTools } from './music'
 import { newsTools } from './news'
@@ -13,11 +14,12 @@ import { pcTools } from './pc'
 import { reminderTools } from './reminders'
 import { researchTools } from './research'
 import { routineTools } from './routines'
+import { slideTools } from './slides'
 import { systemTools } from './system'
 import { visionTools } from './vision'
 import { webTools } from './web'
 
-const ALL: Tool[] = [...appTools, ...musicTools, ...memoryTools, ...reminderTools, ...calendarTools, ...routineTools, ...newsTools, ...briefingTools, ...visionTools, ...pcTools, ...systemTools, ...webTools, ...researchTools, ...fileTools]
+const ALL: Tool[] = [...appTools, ...musicTools, ...gameTools, ...memoryTools, ...reminderTools, ...calendarTools, ...routineTools, ...newsTools, ...briefingTools, ...visionTools, ...pcTools, ...systemTools, ...webTools, ...researchTools, ...slideTools, ...fileTools]
 const BY_NAME = new Map(ALL.map(t => [t.name, t]))
 
 /** The switches in Settings → Agent. */

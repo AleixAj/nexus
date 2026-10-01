@@ -22,6 +22,8 @@ export const mainWindow = () => win
 // "--display=secondary": open on the other monitor without taking the focus (tests and updates,
 // so a game or work on the main screen is not interrupted)
 const SECONDARY = process.argv.includes('--display=secondary')
+// opened by a scheduled reminder: stay in the tray (the reminder speaks and notifies)
+let BACKGROUND = process.argv.includes('--background')
 function secondaryArea() {
   const primary = screen.getPrimaryDisplay()
   return SECONDARY ? screen.getAllDisplays().find(d => d.id !== primary.id)?.workArea || null : null
@@ -73,7 +75,7 @@ export function createWindow(m: Mode, query: Record<string, string> = {}) {
   win = w
 
   w.once('ready-to-show', async () => {
-    if (!wall) { if (SECONDARY) w.showInactive(); else w.show(); return }
+    if (!wall) { if (BACKGROUND) { BACKGROUND = false; return } if (SECONDARY) w.showInactive(); else w.show(); return }
     w.showInactive()
     try {
       await attachToDesktop(w)
@@ -108,7 +110,7 @@ export function createWindow(m: Mode, query: Record<string, string> = {}) {
   // already stops drawing hidden or covered windows, and focus changes are seen in the page)
   if (wall) w.webContents.once('did-finish-load', () => watchCovered(w, state => { if (!w.isDestroyed()) w.webContents.send('app:covered', state) }))
 
-  const q = { mode: m, ...query }
+  const q = { mode: m, ...(BACKGROUND ? { quiet: '1' } : {}), ...query }
   if (isDev) w.loadURL(process.env.ELECTRON_RENDERER_URL! + '?' + new URLSearchParams(q))
   else w.loadFile(join(__dirname, '../renderer/index.html'), { query: q })
   updateTray()

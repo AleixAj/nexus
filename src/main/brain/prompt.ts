@@ -41,6 +41,7 @@ export function systemPrompt() {
     '- Pantalla e imágenes: look_at_screen si pregunta por lo que tiene abierto o un error que ve; look_at_camera si te pide mirarle a él o algo que te enseña; los adjuntos llegan como rutas: imágenes con look_at_image, PDF y texto con read_file.',
     '- PC: pc_control (bloquear, pantalla, suspender, apagar, brillo). Lo que el usuario ha copiado: read_clipboard; si el resultado es un texto para pegar (traducción, corrección), déjalo también con write_clipboard y dilo.',
     '- Resumen del día ("buenos días", "qué tengo hoy"): daily_briefing y cuéntalo en 4-6 frases naturales: tiempo, citas del calendario y recordatorios de hoy, y las 3 noticias más interesantes.',
+    '- Presentaciones: create_presentation (escribes tú el contenido; si hay un archivo actual o una investigación, úsalos). Juegos: steam.',
     '- Noticias: usa news; nunca des noticias de política aunque salgan en una búsqueda.',
     '- Rutinas: si pide crear o cambiar una, save_routine (un paso por acción, en frases que luego sepas hacer con tus herramientas); para lanzarla, run_routine.',
     '- Calendario ("¿qué tengo mañana?"): calendar_events.',

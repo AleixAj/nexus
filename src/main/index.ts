@@ -6,6 +6,7 @@ import { listReminders, startReminders, when } from './reminders'
 import { listRoutines, startRoutines } from './routines'
 import { watchMedia } from './media'
 import { registerIpc } from './ipc'
+import { pickQualityOnce } from './hardware'
 import { DICTATE_HOTKEY } from './dictation'
 import { HOTKEY, beforeQuit, broadcast, createTray, createWindow, mainWindow, notify, showWindow, talk } from './window'
 
@@ -32,9 +33,10 @@ function startWatchers() {
 if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
-  app.on('second-instance', showWindow)
+  // a scheduled reminder starting a second copy: this one already handles it
+  app.on('second-instance', (_e, argv) => { if (!argv.includes('--background')) showWindow() })
 
-  app.whenReady().then(() => {
+  app.whenReady().then(async () => {
     // microphone only for our own window
     session.defaultSession.setPermissionRequestHandler((wc, permission, cb) => cb(permission === 'media' && wc === mainWindow()?.webContents))
     // the halo can follow the PC's audio (music): system loopback, no picker
@@ -43,6 +45,7 @@ if (!app.requestSingleInstanceLock()) {
     })
 
     registerIpc()
+    await pickQualityOnce()
     startWatchers()
     createTray()
     createWindow(loadSettings().mode === 'wallpaper' ? 'wallpaper' : 'window')

@@ -15,6 +15,7 @@ import BootIntro from './BootIntro'
 import ConfirmCard from './ConfirmCard'
 import KeyCard from './KeyCard'
 import VisionPreview from './VisionPreview'
+import DiagnosticsCard from './DiagnosticsCard'
 
 export default function Stage({ v }: { v: any }) {
   return (
@@ -37,6 +38,7 @@ export default function Stage({ v }: { v: any }) {
         <ConfirmCard v={v} />
         <KeyCard v={v} />
         <VisionPreview v={v} />
+        <DiagnosticsCard v={v} />
       </div>
       {v.intro && <BootIntro v={v} />}
       {v.dragOver && (

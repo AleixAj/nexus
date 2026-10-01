@@ -11,7 +11,14 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   la personalidad, el color, la calidad gráfica, la clave de la IA, el micrófono y cómo quieres tenerla.
 - **Agente.** Responde cualquier pregunta buscando en internet si hace falta, analiza y busca archivos y
   carpetas, mira estadísticas del equipo y procesos, crea o modifica archivos y ejecuta comandos de PowerShell.
-  Todo lo que cambia el equipo pide permiso antes, y lo que borra va a la papelera.
+  Todo lo que cambia el equipo pide permiso antes, y lo que borra va a la papelera. Si pides varias consultas a la
+  vez (tiempo, noticias, sistema…) las hace en paralelo.
+- **Investigación a fondo.** «Investiga a fondo qué portátil comprar»: busca desde varios ángulos, lee las mejores
+  fuentes y te da un informe con citas numeradas y un apartado de qué no está claro.
+- **Presentaciones.** «Hazme una presentación sobre el sistema solar»: crea un PowerPoint con diseño (con los colores
+  de tu tema) en `DocumentosNEXUSPresentaciones` y lo abre.
+- **Juegos de Steam.** «Abre Elden Ring», «instala Hades», «actualiza Cyberpunk», «¿qué juegos tengo?». Lee tus
+  bibliotecas de Steam (en cualquier disco) y usa la tienda para lo que no tienes.
 - **Acciones rápidas.** Abre aplicaciones y webs y controla la música y el volumen.
 - **Tu frase de activación, sin internet.** «Hey Nexus», «Oye Jarvis», «Hola Viernes»… la que escribas en Voz y
   personalidad. Con el interruptor de Ajustes, NEXUS se despierta al oírla. Un reconocedor de voz en español funciona en
@@ -37,12 +44,15 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 - **Ve tu pantalla y tus archivos.** «¿Qué hay en mi pantalla?», «explícame este error»: hace una captura (apartando
   su ventana) y la analiza. Arrastra imágenes, PDF o documentos al chat y te los explica o resume. Los PDF se leen en tu
   PC; las imágenes las mira Gemini (clave gratuita, solo cuando lo pides) u Ollama si tienes un modelo de visión.
+  También puede mirar por la webcam si se lo pides (con permiso). Lo que está viendo sale en una tarjeta en pantalla, y
+  el último archivo que le pasas queda «en uso» una hora para que puedas decir «resúmelo» o «tradúcelo» sin repetirlo.
 - **Noticias del día sin política.** Panel con lo más reciente de tecnología, ciencia y curiosidades (y, si quieres,
   videojuegos, cine, motor, cocina o salud), de medios en español por RSS, gratis y sin clave. Filtra la política por
   defecto y puedes añadir otros temas a evitar. «¿Qué noticias hay hoy?» o *Resumen en voz* te las cuenta.
 - **Recordatorios y alarmas por voz.** «Avísame en 20 minutos», «mañana a las 9 recuérdame…», «pon una alarma de
   lunes a viernes a las 7». Suena un aviso, lo dice en voz alta y sale una notificación de Windows. Los próximos aparecen
-  a la derecha del escritorio. Si el PC estaba apagado, te avisa al abrir de lo que se pasó.
+  a la derecha del escritorio. Si cierras NEXUS, el Programador de tareas de Windows lo abre en silencio un minuto antes
+  para avisarte; si el PC estaba apagado, te avisa al encenderlo.
 - **Memoria que busca.** «¿Qué te conté de mis vacaciones?» encuentra conversaciones pasadas por palabras y por
   significado (embeddings gratuitos de Gemini u Ollama). Lo que aprende mientras lee una web o un archivo queda
   «pendiente» hasta que tú lo confirmas, para que una página no pueda colarle datos falsos.
@@ -57,7 +67,11 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 - **Datos reales en el escritorio.** Hora, tiempo de tu ciudad y efeméride del día, a la derecha para no chocar con los iconos.
 - **Estado del equipo real.** CPU (con cada hilo), GPU NVIDIA (uso, VRAM, temperatura y ventilador), RAM, disco, red y
   procesos que más consumen. Se mide solo al abrir el panel (unos 2 s) o al pulsar *Actualizar*; nada en segundo plano.
-- **Temas y calidad gráfica.** Cinco temas de color y tres niveles de calidad para PCs potentes o portátiles.
+- **Temas y calidad gráfica.** Cinco temas de color y tres niveles de calidad; la primera vez elige el nivel solo según
+  tu tarjeta gráfica, memoria y procesador.
+- **Autodiagnóstico.** Ajustes → *Comprobar que todo funciona*: revisa internet, cada clave, las voces, el micrófono, que
+  entienda lo que dices, búsqueda, noticias, tiempo, calendario, Spotify y disco, sin cambiar nada, y dice cómo arreglar
+  lo que falle.
 - **Fondo de escritorio.** NEXUS puede ponerse detrás de los iconos del escritorio y quedarse ahí en segundo plano.
 
 ## Requisitos
@@ -253,12 +267,15 @@ Otros detalles:
 
 ### Seguridad
 
-Varias de estas ideas vienen de [OpenJarvis](https://github.com/open-jarvis/OpenJarvis) (Stanford, Apache-2.0).
+Varias de estas ideas vienen de [OpenJarvis](https://github.com/open-jarvis/OpenJarvis) (Stanford, Apache-2.0) y de
+[JARVIS-OS](https://github.com/MAL19INDUSTRIES/JARVIS-OS-V.2).
 
 - **Privacidad:** antes de enviar a la IA lo que sale de un archivo, el portapapeles o la pantalla, se ocultan claves,
   contraseñas, tarjetas e IBAN. Los archivos de claves (`.env`, `.ssh`, `.pem`…) no se pueden leer.
 - **Permisos:** lo que cambia el equipo pide permiso; con «Permitir siempre» deja de preguntar para ese tipo de acción
   (se quita en Rutinas → Permisos). Borrar y PowerShell preguntan siempre.
+- **Solo lo que pides tú:** apagar, reiniciar o borrar solo se hacen si lo has dicho con tus palabras; si la orden sale
+  de una web o un archivo, se bloquea.
 - **Freno de bucles:** si el agente repite la misma acción tres veces, se para (ahorra cupo gratis).
 - **Modelo según la pregunta:** la charla corta va al modelo pequeño y rápido; lo que necesita herramientas, al grande.
 - **Voz de respaldo:** sin internet, NEXUS habla con las voces de Windows en vez de quedarse callado.
@@ -274,4 +291,3 @@ Varias de estas ideas vienen de [OpenJarvis](https://github.com/open-jarvis/Open
 - Probar la conexión con la cuenta de Spotify (hecha, falta probarla con una cuenta real).
 - Temperatura de la CPU (Windows solo la da con permisos de administrador; se muestra la de la GPU).
 - Mini overlay flotante sobre otras apps y fondo de escritorio en varios monitores a la vez.
-- Instalador (`electron-builder`).

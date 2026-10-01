@@ -94,6 +94,18 @@ export const settings = {
     return m ? m.label : 'Predeterminado de Windows';
   },
 
+  // ---------- self-test ----------
+  async runDiagnostics() {
+    if (!api || this.state.diagRunning) return;
+    this.setState({ diagRunning: true, diag: null });
+    let list = [];
+    try { list = await api.runDiagnostics(); } catch (e) { list = [{ group: 'NEXUS', name: 'Diagnóstico', status: 'fail', detail: String(e) }]; }
+    const mics = await voice.listMics().catch(() => []);
+    list.splice(list.findIndex(c => c.group === 'Voz'), 0, { group: 'Voz', name: 'Micrófono', status: mics.length ? 'ok' : 'fail', detail: mics.length ? this.micLabel() : 'No hay ningún micrófono conectado o Windows lo bloquea (Privacidad → Micrófono)' });
+    this.setState({ diag: list, diagRunning: false });
+    const bad = list.filter(c => c.status === 'fail').length;
+    this.say(bad ? `He encontrado ${bad} problema${bad > 1 ? 's' : ''}. Te los muestro en pantalla.` : `Todo funciona, ${this.name()}.`);
+  },
   // ---------- calendar ----------
   async loadCalendar() {
     if (!api) return;

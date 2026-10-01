@@ -1,6 +1,7 @@
 // Reminders and alarms: saved to disk and checked every 5 s. When one is due the
 // app shows a Windows notification and says it aloud. Repeating ones move to their next date.
 import { readJson, writeJson } from './lib/store'
+import { cancelWakeup, scheduleWakeup } from './wakeup'
 
 export type Repeat = 'none' | 'daily' | 'weekdays'
 export type Reminder = { id: number; at: number; text: string; alarm: boolean; repeat: Repeat }
@@ -37,6 +38,7 @@ function check() {
     if (r.repeat === 'none') return []
     let at = nextOf(r)
     while (at <= now) at = nextOf({ ...r, at })
+    scheduleWakeup(r.id, at) // the next time, even if NEXUS is closed by then
     return [{ ...r, at }]
   }))
 }
@@ -54,10 +56,12 @@ export const listReminders = () => [...load()].sort((a, b) => a.at - b.at)
 export function addReminder(text: string, at: number, alarm = false, repeat: Repeat = 'none') {
   const r: Reminder = { id: Date.now() * 10 + Math.floor(Math.random() * 10), at, text: text.trim().slice(0, 200), alarm, repeat }
   save([...load(), r])
+  scheduleWakeup(r.id, r.at)
   return r
 }
 
 export function cancelReminders(ids: number[]) {
+  ids.forEach(cancelWakeup)
   save(load().filter(r => !ids.includes(r.id)))
 }
 
