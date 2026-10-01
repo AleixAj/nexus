@@ -17,10 +17,16 @@ function audio() {
     outAnalyser.connect(outGain).connect(ctx.destination)
     engine()?.attachSource('speaking', outAnalyser)
     buildFx(ctx, outAnalyser)
+    // a running audio graph costs CPU even in silence: suspend it after a quiet while
+    setInterval(() => {
+      if (ctx && ctx.state === 'running' && !playing && queue.length === 0 && !rec && Date.now() - lastSound > 8000) ctx.suspend()
+    }, 4000)
   }
+  lastSound = Date.now()
   if (ctx.state === 'suspended') ctx.resume()
   return ctx
 }
+let lastSound = 0
 
 export function setVolume(pct: number) {
   audio()
@@ -553,7 +559,24 @@ export async function startWakeMic(onChunk: (samples: Float32Array) => void) {
   const c = new AudioContext({ sampleRate: 16000 })
   const src = c.createMediaStreamSource(stream)
   const node = c.createScriptProcessor(2048, 1, 1)
-  node.onaudioprocess = e => onChunk(new Float32Array(e.inputBuffer.getChannelData(0)))
+  // Only sound that may be speech goes to the recogniser: silence and room noise cost nothing.
+  // A short pre-roll keeps the start of the phrase; the gate stays open 1.5 s after the voice.
+  let floor = 0.01, openUntil = 0
+  const preroll: Float32Array[] = []
+  node.onaudioprocess = e => {
+    const x = new Float32Array(e.inputBuffer.getChannelData(0))
+    let sum = 0
+    for (let i = 0; i < x.length; i++) sum += x[i] * x[i]
+    const rms = Math.sqrt(sum / x.length), now = performance.now()
+    // the noise floor follows the room slowly (faster downwards)
+    floor = rms < floor ? floor * 0.9 + rms * 0.1 : floor * 0.995 + rms * 0.005
+    if (rms > Math.max(0.012, floor * 2.5)) {
+      if (now > openUntil) preroll.splice(0).forEach(onChunk)
+      openUntil = now + 1500
+    }
+    if (now <= openUntil) onChunk(x)
+    else { preroll.push(x); if (preroll.length > 3) preroll.shift() }
+  }
   src.connect(node)
   node.connect(c.destination) // needed for the processor to run; it outputs silence
   wake = { stream, ctx: c, node }

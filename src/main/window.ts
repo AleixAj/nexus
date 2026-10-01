@@ -51,6 +51,7 @@ export function createWindow(m: Mode, query: Record<string, string> = {}) {
     webPreferences: {
       preload: join(__dirname, '../preload/index.js'),
       sandbox: true,
+      spellcheck: false, // no dictionaries in memory: the chat is short
       // behind the icons Chromium would think it is hidden and freeze the animation
       backgroundThrottling: !wall
     }
@@ -89,8 +90,9 @@ export function createWindow(m: Mode, query: Record<string, string> = {}) {
   // dropping a file or link on the window must not navigate away from the app
   w.webContents.on('will-navigate', e => e.preventDefault())
 
-  // pause the animation while a fullscreen app covers it
-  w.webContents.once('did-finish-load', () => watchCovered(w, covered => { if (!w.isDestroyed()) w.webContents.send('app:covered', covered) }))
+  // the wallpaper rests while you use other apps; a normal window does not need it (Chromium
+  // already stops drawing hidden or covered windows, and focus changes are seen in the page)
+  if (wall) w.webContents.once('did-finish-load', () => watchCovered(w, state => { if (!w.isDestroyed()) w.webContents.send('app:covered', state) }))
 
   const q = { mode: m, ...query }
   if (isDev) w.loadURL(process.env.ELECTRON_RENDERER_URL! + '?' + new URLSearchParams(q))

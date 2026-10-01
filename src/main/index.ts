@@ -13,6 +13,8 @@ import { HOTKEY, beforeQuit, broadcast, createTray, createWindow, mainWindow, no
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
 // laptops with two GPUs: use the dedicated one for the animated core
 app.commandLine.appendSwitch('force_high_performance_gpu')
+// NEXUS's voice is not "media": no entry in the Windows media flyout and no media-key handling
+app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService')
 
 process.on('unhandledRejection', err => console.warn('[unhandled]', err))
 

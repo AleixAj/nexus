@@ -23,14 +23,18 @@ function Pick { @($mgr.GetSessions()) | Where-Object { $_.SourceAppUserModelId -
 // Watches every ~1.5 s and prints a JSON line only when something changed
 // (track, play state, a seek); the app interpolates the progress in between.
 const WATCH = COMMON + String.raw`
-$last = ''; $lastPos = 0; $lastT = [DateTime]::UtcNow
+$last = ''; $lastPos = 0; $lastT = [DateTime]::UtcNow; $lastTrack = ''; $p = $null
 while ($true) {
   if ($env:NX_PARENT -and -not (Get-Process -Id $env:NX_PARENT -ErrorAction SilentlyContinue)) { exit }
+  $wait = 2000
   try {
-    $s = Pick
+    # Spotify closed: no Windows media calls, and look again in 5 s
+    if (-not (Get-Process Spotify -ErrorAction SilentlyContinue)) { $s = $null; $wait = 5000 } else { $s = Pick }
     if ($s) {
-      $p = Await ($s.TryGetMediaPropertiesAsync()) ($PropT)
       $tl = $s.GetTimelineProperties(); $pb = $s.GetPlaybackInfo()
+      # the song's details are the expensive call: only when the track (its timeline) changes
+      $trackKey = "$($tl.EndTime)|$($tl.LastUpdatedTime)|$($s.SourceAppUserModelId)" # changes on a new song, a seek or play/pause
+      if ($trackKey -ne $lastTrack -or -not $p) { $p = Await ($s.TryGetMediaPropertiesAsync()) ($PropT); $lastTrack = $trackKey }
       $playing = "$($pb.PlaybackStatus)" -eq 'Playing'
       $pos = $tl.Position.TotalSeconds; $dur = $tl.EndTime.TotalSeconds
       $now = [DateTime]::UtcNow
@@ -46,9 +50,10 @@ while ($true) {
         $last = $key
       }
       $lastPos = $pos; $lastT = $now
+      if (-not $playing) { $wait = 3000 } # paused: nothing moves
     } elseif ($last -ne 'none') { '{"none":true}'; [Console]::Out.Flush(); $last = 'none' }
   } catch { }
-  Start-Sleep -Milliseconds 1500
+  Start-Sleep -Milliseconds $wait
 }
 `
 

@@ -1,5 +1,4 @@
 // Spotify (desktop app): what is playing, its controls and the halo tinted with the cover.
-import * as voice from '../../services/voice';
 import { api } from '../util';
 
 const DEFAULT_TINT = [251, 146, 60];
@@ -22,9 +21,8 @@ function coverColour(img) {
 export const music = {
   onMedia(m) {
     const playing = !!(m && m.playing);
-    this.setState({ media: m, mediaAt: Date.now(), music: playing });
-    // the halo follows the PC's sound while music plays
-    if (playing) voice.startLoopback(); else voice.stopLoopback();
+    // the halo follows the PC's sound while music plays and it can be seen (features/power.js)
+    this.setState({ media: m, mediaAt: Date.now(), music: playing }, () => this.updatePower());
     const core = this.state.core;
     if (playing && core === 'idle') this.setCore('music');
     else if (!playing && core === 'music') this.setCore('idle');

@@ -11,6 +11,7 @@ import { conversation } from './app/features/conversation';
 import { dictation } from './app/features/dictation';
 import { memory } from './app/features/memory';
 import { music } from './app/features/music';
+import { power } from './app/features/power';
 import { news } from './app/features/news';
 import { routines } from './app/features/routines';
 import { settings } from './app/features/settings';
@@ -51,7 +52,7 @@ export default class NexusApp extends Component {
   E() { return window.NexusEngine; }
   later(fn, ms) { const id = setTimeout(fn, ms); this.T.push(id); return id; }
   clearFlow() { this.T.forEach(clearTimeout); this.T = []; clearInterval(this.wordIv); clearInterval(this.runIv); }
-  setCore(s) { this.setState({ core: s, error: s === 'error' }); const E = this.E(); E && E.setState(s); }
+  setCore(s) { this.setState({ core: s, error: s === 'error' }, () => this.updatePower()); const E = this.E(); E && E.setState(s); }
   name() { return this.state.userName || 'señor'; }
 
   componentDidMount() {
@@ -59,6 +60,13 @@ export default class NexusApp extends Component {
     this.onResize(); addEventListener('resize', this.onResize);
     this.iv = setInterval(() => this.tick(), 1000);
     addEventListener('keydown', this.onKey);
+    // focus and visibility decide how much is drawn (features/power.js)
+    this.onPowerEvent = () => this.updatePower();
+    this.onActivity = () => this.noteActivity();
+    ['pointermove', 'pointerdown', 'keydown', 'wheel'].forEach(ev => addEventListener(ev, this.onActivity, { passive: true }));
+    this.noteActivity();
+    ['focus', 'blur'].forEach(ev => addEventListener(ev, this.onPowerEvent));
+    document.addEventListener('visibilitychange', this.onPowerEvent);
     this.listen();
     const go = async () => {
       const E = this.E(); if (!E) return setTimeout(go, 50);
@@ -94,7 +102,7 @@ export default class NexusApp extends Component {
     on(api.onAction, (id, label) => this.onAction(id, label));
     on(api.onProgress, (id, label) => { if (id === this.reqId) this.setState({ actionLabel: label.toUpperCase() }); });
     on(api.onConfirm, (id, cid, req) => this.onConfirm(id, cid, req));
-    on(api.onCovered, covered => { const E = this.E(); E && E.setPaused(covered); });
+    on(api.onCovered, state => this.onScreenState(state));
     on(api.onTtsQuota, engine => this.onVoiceQuota(engine));
     on(api.onMedia, m => this.onMedia(m));
     on(api.onMediaExtra, x => this.onMediaExtra(x));
@@ -136,7 +144,7 @@ export default class NexusApp extends Component {
   }
 
   componentWillUnmount() {
-    removeEventListener('resize', this.onResize); removeEventListener('keydown', this.onKey);
+    removeEventListener('resize', this.onResize); removeEventListener('keydown', this.onKey); ['focus', 'blur'].forEach(ev => removeEventListener(ev, this.onPowerEvent)); ['pointermove', 'pointerdown', 'keydown', 'wheel'].forEach(ev => removeEventListener(ev, this.onActivity)); clearTimeout(this.restT); document.removeEventListener('visibilitychange', this.onPowerEvent);
     clearInterval(this.iv); clearInterval(this.worldIv); clearInterval(this.calIv); this.clearFlow();
     (this.offs || []).forEach(off => off());
     voice.cancelListening(); voice.stopSpeech(); voice.stopLoopback(); voice.stopWakeMic();
@@ -158,7 +166,7 @@ export default class NexusApp extends Component {
   tick() {
     const S = this.state, minute = Math.floor(Date.now() / 60000);
     // every second only while a song plays on screen (panel or mini card); otherwise once a minute
-    const songOnScreen = S.music && (S.panel === 'music' || !S.panel);
+    const songOnScreen = S.music && !document.hidden && (S.panel === 'music' || !S.panel);
     if (!songOnScreen && minute === this.lastMinute) return;
     this.lastMinute = minute;
     this.setState({ now: Date.now() });
@@ -187,4 +195,4 @@ export default class NexusApp extends Component {
   }
 }
 
-Object.assign(NexusApp.prototype, conversation, dictation, memory, music, news, routines, settings, startup, voices, wakeword);
+Object.assign(NexusApp.prototype, conversation, dictation, memory, music, news, power, routines, settings, startup, voices, wakeword);

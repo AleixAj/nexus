@@ -627,19 +627,34 @@
       orbits: OD.map((_, i) => expo(clamp((bt - 1.55 - i * .13) / .75, 0, 1))), gal: sstep(2.1, 3.6, bt) };
   }
 
-  let rafId = 0, bgSkip = 0, bgDt = 0, paused = false;
+  // Power levels, so NEXUS can stay on all day without using the PC:
+  //   full  — talking, listening, booting: the quality's own frame rate (60 fps)
+  //   idle  — on screen with nothing happening: 30 fps, slower galaxy, grain and telemetry
+  //   calm  — on screen but you are using something else: 15 fps
+  //   pause — not drawn at all (hidden, covered, or the user wants a still wallpaper)
+  const POWER = { full: { dt: 0, bg: 1, grain: .07, tele: .12 }, idle: { dt: 33, bg: 2, grain: .25, tele: .5 }, calm: { dt: 66, bg: 3, grain: 0, tele: 1 } };
+  let rafId = 0, bgSkip = 0, bgDt = 0, paused = false, power = 'idle';
+  const P = () => POWER[power] || POWER.idle;
   function schedule() { if (!rafId && !document.hidden && !paused) rafId = requestAnimationFrame(onRaf); }
   function onRaf(now) {
     rafId = 0; schedule();
-    if (last && now - last < QF[QUALITY].minDt - 1.5) return;
+    // the boot animation always runs at full speed
+    const minDt = M.boot ? QF[QUALITY].minDt : Math.max(QF[QUALITY].minDt, P().dt);
+    if (last && now - last < minDt - 1.5) return;
     frame(now);
   }
-  document.addEventListener('visibilitychange', () => { if (!document.hidden) { last = 0; schedule(); } });
+  let shrinkT = 0;
+  document.addEventListener('visibilitychange', () => {
+    clearTimeout(shrinkT);
+    if (!document.hidden) { last = 0; schedule(); return; }
+    // hidden for a minute: shrink the big canvases so the GPU frees their memory; fit() restores them
+    shrinkT = setTimeout(() => { [M.bg, M.core].forEach(c => { if (c) { c.width = 1; c.height = 1; } }); minis.forEach((_, c) => { c.width = 1; c.height = 1; }); }, 60000);
+  });
   function frame(now) {
     const dt = Math.min(.05, (now - (last || now)) / 1000); last = now; T += dt;
     if (now - scanT > 400 || (needScan && now - scanT > 60)) { scanT = now; needScan = false; scan(); }
     if (dt > 0) fpsS = lerp(fpsS, Math.min(120, 1 / dt), .05);
-    scrTick(now); if (now - teleT > 120) { teleT = now; teleTick(now); }
+    scrTick(now); if (now - teleT > P().tele * 1000) { teleT = now; teleTick(now); }
     mouse.sx = lerp(mouse.sx, mouse.x, 1 - Math.exp(-dt * 2)); mouse.sy = lerp(mouse.sy, mouse.y, 1 - Math.exp(-dt * 2));
     // theme lerp
     const kt = 1 - Math.exp(-dt * 2.5);
@@ -657,7 +672,7 @@
     if (M.bg) {
       // the galaxy moves slowly: redraw it less often, even less while a panel blurs it
       bgDt += dt;
-      const every = M.bgSlow ? 3 : B ? 1 : QF[QUALITY].bgEvery;
+      const every = B ? 1 : Math.max(M.bgSlow ? 3 : QF[QUALITY].bgEvery, P().bg);
       if (++bgSkip >= every) {
         bgSkip = 0;
         const k = fit(M.bg, W, H, true);
@@ -711,7 +726,10 @@
     });
     const lvl = clamp(au.mid * gn * 1.1 + au.bass * .3, 0, 1);
     meters.forEach(m => m.style.transform = 'scaleX(' + lvl.toFixed(3) + ')');
-    tAcc += dt; if (tAcc > .07) { tAcc = 0; grains.forEach(g => { g.style.display = QF[QUALITY].grain ? '' : 'none'; g.style.transform = 'translate(' + ((Math.random() * 180) | 0) + 'px,' + ((Math.random() * 180) | 0) + 'px)'; }); }
+    // moving the film grain repaints the whole window: less often when calm, still when idle in the background
+    tAcc += dt; const gEvery = P().grain; if (gEvery && tAcc > gEvery) { tAcc = 0; grains.forEach(g => { g.style.display = QF[QUALITY].grain ? '' : 'none'; g.style.transform = 'translate(' + ((Math.random() * 180) | 0) + 'px,' + ((Math.random() * 180) | 0) + 'px)'; }); }
+    // calm: no grain at all (it is a layer bigger than the screen, blended over everything)
+    if (!gEvery) grains.forEach(g => { if (g.style.display !== 'none') g.style.display = 'none'; });
   }
 
   buildNebula();
@@ -727,7 +745,10 @@
     // a panel is open and the background is blurred behind it
     setBgSlow(b) { M.bgSlow = !!b; },
     // stop drawing while a fullscreen app covers the desktop
-    setPaused(b) { b = !!b; if (b === paused) return; paused = b; if (!b) { last = 0; schedule(); } },
+    setPaused(b) { b = !!b; if (b === paused) return; paused = b; grains.forEach(g => { g.style.display = b || !QF[QUALITY].grain ? 'none' : ''; }); if (!b) { last = 0; schedule(); } },
+    // full | idle | calm (see POWER)
+    setPower(p) { if (POWER[p]) power = p; },
+    getPower() { return paused ? 'pause' : power; },
     setTheme(n) { THEME_T = THEMES[n] || THEMES.nexus; },
     setQuality(q) { if (!QF[q] || q === QUALITY) return; QUALITY = q; if (M.S) { const st = M.S.state; M.S = makeSim(QF[q].parts, 42, false); M.S.state = st; } },
     setReduced(b) { REDUCED = !!b; },

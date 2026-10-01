@@ -78,7 +78,8 @@ public static class NxDesk {
     return "ok";
   }
 
-  // 1 when a maximized or fullscreen window hides the monitor our window is on
+  // 0 = the desktop is in front, 1 = another app is in front, 2 = a maximized or fullscreen
+  // window hides the monitor our window is on
   public static int Covered(long ours) {
     IntPtr fg = GetForegroundWindow();
     if (fg == IntPtr.Zero || fg == new IntPtr(ours) || IsIconic(fg)) return 0;
@@ -87,11 +88,11 @@ public static class NxDesk {
     string cls = c.ToString();
     if (cls == "Progman" || cls == "WorkerW" || cls == "Shell_TrayWnd") return 0;
     IntPtr mon = MonitorFromWindow(fg, 2);
-    if (mon != MonitorFromWindow(new IntPtr(ours), 2)) return 0;
-    if (IsZoomed(fg)) return 1;
+    if (mon != MonitorFromWindow(new IntPtr(ours), 2)) return 1;
+    if (IsZoomed(fg)) return 2;
     RECT r; GetWindowRect(fg, out r);
     MONITORINFO mi = Info(mon);
-    return (r.L <= mi.rcMonitor.L && r.T <= mi.rcMonitor.T && r.R >= mi.rcMonitor.R && r.B >= mi.rcMonitor.B) ? 1 : 0;
+    return (r.L <= mi.rcMonitor.L && r.T <= mi.rcMonitor.T && r.R >= mi.rcMonitor.R && r.B >= mi.rcMonitor.B) ? 2 : 1;
   }
 
   // re-apply the current wallpaper so the desktop does not keep our last frame
@@ -111,7 +112,7 @@ elseif ($Action -eq 'watch') {
     if ($ParentPid -and -not (Get-Process -Id $ParentPid -ErrorAction SilentlyContinue)) { exit }
     $c = [NxDesk]::Covered([long]$Hwnd)
     if ($c -ne $last) { [Console]::Out.WriteLine("covered $c"); [Console]::Out.Flush(); $last = $c }
-    Start-Sleep -Milliseconds 1500
+    Start-Sleep -Milliseconds 1000
   }
 }
 `
@@ -149,7 +150,8 @@ export function refreshWallpaper() {
 let watcher: ChildProcess | null = null
 
 /** Reports when a maximized/fullscreen app hides our window, so drawing can pause. */
-export function watchCovered(win: BrowserWindow, onChange: (covered: boolean) => void) {
+/** What is in front of the wallpaper: 'desktop', 'app' or 'covered' (maximized or fullscreen). */
+export function watchCovered(win: BrowserWindow, onChange: (state: 'desktop' | 'app' | 'covered') => void) {
   stopWatching()
   const p = spawn('powershell', args('watch', handleOf(win)), { windowsHide: true })
   let buf = ''
@@ -157,7 +159,7 @@ export function watchCovered(win: BrowserWindow, onChange: (covered: boolean) =>
     buf += d
     const lines = buf.split(/\r?\n/)
     buf = lines.pop() || ''
-    for (const l of lines) if (l.startsWith('covered ')) onChange(l.endsWith('1'))
+    for (const l of lines) if (l.startsWith('covered ')) onChange(l.endsWith('2') ? 'covered' : l.endsWith('1') ? 'app' : 'desktop')
   })
   p.on('error', () => {})
   watcher = p

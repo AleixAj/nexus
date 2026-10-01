@@ -220,12 +220,36 @@ scripts/                    conversor del diseño e icono
 **Servicios externos, todos gratuitos:** Cerebras, Groq o Gemini (IA y voz a texto), DuckDuckGo (búsqueda sin clave), Microsoft Edge TTS (voz),
 Open-Meteo (tiempo), Wikipedia (efemérides), ipapi.co (ciudad aproximada), iTunes (carátulas) y LRCLIB (letras).
 
-### Rendimiento
+### Rendimiento (pensado para estar siempre encendida)
 
-- El motor gráfico se limita a unos 60-72 fps aunque el monitor sea de 120-144 Hz, y se pausa con la ventana minimizada.
-- La galaxia se redibuja menos a menudo (se mueve muy despacio), sobre todo cuando está desenfocada detrás de un panel.
-- El texto de la IA se pinta una vez por fotograma, no con cada palabra que llega.
-- En calidad **Ahorro** se reducen las partículas, la resolución, los fps y los desenfoques de cristal.
+NEXUS dibuja según lo que pasa (`src/renderer/src/app/features/power.js`):
+
+| Situación | Animación |
+|---|---|
+| Habla, escucha, piensa o arranca | completa (60 fps) |
+| En pantalla, en reposo | 30 fps, galaxia, grano y telemetría más lentos |
+| Sin foco, o 45 s sin tocarla | 15 fps y sin grano |
+| Oculta en la bandeja, tapada o, como fondo, mientras usas otra app | parada (no dibuja nada) |
+
+Medido en un PC de 20 hilos (CPU de un núcleo; la app instalada):
+
+- **En la bandeja o como fondo mientras trabajas en otra app:** 0,1-0,5 % de un núcleo. Tras un minuto oculta suelta
+  la memoria gráfica de sus lienzos.
+- **En pantalla, en reposo:** unos 40 % de un núcleo (un 2 % del PC); con música, el halo baila y sube.
+- **Antes de estos cambios:** 56 % de un núcleo en reposo, también con la ventana sin foco.
+
+Otros detalles:
+
+- Como fondo de escritorio solo se anima cuando miras el escritorio o NEXUS te habla (Ajustes → «Fondo quieto mientras
+  usas otras apps»).
+- El audio se suspende tras 8 s de silencio; la captura del sonido del PC para el halo solo funciona si se ve.
+- La frase de activación solo analiza el sonido que puede ser voz: el silencio y el ruido de la habitación no gastan.
+- El vigilante de Spotify consulta cada 2 s si suena, cada 3 s en pausa y cada 5 s si Spotify está cerrado; solo pide
+  los datos de la canción a Windows cuando cambia algo. El de ventanas solo existe en modo fondo de escritorio.
+- Sin animaciones CSS infinitas en reposo: una sola (el «:» del reloj) obligaba a recomponer la ventana 60 veces por
+  segundo.
+- El motor gráfico se limita a 60-72 fps aunque el monitor sea de 120-144 Hz, y el texto de la IA se pinta una vez por
+  fotograma. En calidad **Ahorro** se reducen además las partículas y la resolución.
 
 ### Seguridad
 

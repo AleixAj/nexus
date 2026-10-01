@@ -51,6 +51,7 @@ let phrase = ''
 let onWake: () => void = () => {}
 let cooldownUntil = 0
 let lastChecked = ''
+let lastFeed = 0
 
 /** Starts listening for `p` (the model must be ready). Changing the phrase needs no restart. */
 export function startWakeWord(p: string, cb: () => void) {
@@ -77,6 +78,9 @@ export function stopWakeWord() {
 /** A piece of microphone audio (mono, 16 kHz). */
 export function feedWakeWord(samples: Float32Array) {
   if (!recognizer || !stream) return
+  // the window only sends sound that may be speech: after a gap, start a fresh sentence
+  if (Date.now() - lastFeed > 1500) { recognizer.reset(stream); lastChecked = '' }
+  lastFeed = Date.now()
   stream.acceptWaveform({ samples, sampleRate: 16000 })
   while (recognizer.isReady(stream)) recognizer.decode(stream)
   const text: string = recognizer.getResult(stream).text || ''

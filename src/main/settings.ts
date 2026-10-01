@@ -35,6 +35,7 @@ export type Settings = {
   newsTopics: string
   briefing: boolean
   wakeListen: boolean
+  bgMotion: string
   wakeWord: string
   spotifyClientId: string
   lastBriefing: string
@@ -95,6 +96,8 @@ const DEFAULTS: Settings = {
   briefing: true,
   // "Hey Nexus" always listening (on the PC, nothing is sent): off until the user turns it on
   wakeListen: false,
+  // the wallpaper animates only while you look at the desktop ('desktop'), always, or never
+  bgMotion: 'desktop',
   // the phrase that wakes it: whatever the user likes ("Oye Jarvis", "Hola Viernes"…)
   wakeWord: 'Hey Nexus',
   // the user's own app at developer.spotify.com (for playlists by name)
