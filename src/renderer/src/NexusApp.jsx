@@ -106,21 +106,7 @@ export default class NexusApp extends Component {
     perms: { apps: true, music: true, files: true, home: true, power: true, msg: false, cam: false },
     sys: { cpu: 34, gpu: 58, ram: 38, net: 48, disk: 61, temp: 61 }, cpuHist: Array.from({ length: 40 }, (_, i) => 30 + Math.sin(i / 3) * 8 + Math.random() * 6),
     memQuery: '', memFilter: 'Todo', learn: true,
-    mem: [
-      { id: 1, group: 'HOY', time: '21:12', cat: 'Conversaciones', title: 'Música para concentrarse', sum: 'Puso «Horizonte de sucesos» y silenció las notificaciones durante dos horas.' },
-      { id: 2, group: 'HOY', time: '18:40', cat: 'Conversaciones', title: 'Preparar la revisión de diseño', sum: 'Resumió los comentarios de Laura sobre el halo y creó tres tareas.' },
-      { id: 3, group: 'AYER', time: '22:05', cat: 'Conversaciones', title: 'Rutina «Buenas noches»', sum: 'Cambió la hora de apagado de las 00:00 a las 23:30.' },
-      { id: 4, group: 'AYER', time: '10:15', cat: 'Lugares', title: 'Viaje a Lisboa', sum: 'Buscó vuelos del 14 al 17 de noviembre. Prefiere ventanilla.' },
-      { id: 5, group: 'SEMANA PASADA', time: 'JUE', cat: 'Personas', title: 'Cumpleaños de Marta', sum: 'Recordatorio el 14 de noviembre e ideas de regalo: libros de fotografía.' },
-      { id: 6, group: 'SEMANA PASADA', time: 'LUN', cat: 'Preferencias', title: 'Configuración inicial', sum: 'Eligió la voz Orión y el tratamiento «señor».' },
-    ],
-    facts: [
-      { id: 1, cat: 'PREFERENCIAS', t: 'Toma el café solo y sin azúcar por la mañana.' },
-      { id: 2, cat: 'PERSONAS', t: 'Su hermana Marta cumple años el 14 de noviembre.' },
-      { id: 3, cat: 'TRABAJO', t: 'Trabaja en nexus-core con TypeScript y Three.js.' },
-      { id: 4, cat: 'LUGARES', t: 'Vive en Madrid, en el barrio de Chamberí.' },
-      { id: 5, cat: 'PREFERENCIAS', t: 'No quiere interrupciones entre las 9:00 y las 11:00.' },
-    ],
+    memChats: [], facts: [], factInput: '', forgetArmed: false,
     provider: 'Groq', model: 'openai/gpt-oss-120b', providers: {}, keyInput: '', showKey: false, autostart: false, alwaysListen: false, hotkey: 'Control+Alt+Space', micIdx: 0, outIdx: 0,
     dirOpen: true, showDirector: false, hoverDock: null, volOpen: false,
     ovInput: '', ovState: 'idle', ovLabel: 'NEXUS', ovReply: '',
@@ -183,6 +169,7 @@ export default class NexusApp extends Component {
       E.snapCore(this.layout());
       this.loadWorld();
       this.countMics();
+      this.loadMemory(true);
       // cinematic intro on a real start; straight to the core after a mode switch
       this.onboarded = !s || s.onboarded;
       if (QUIET || this.state.reduced) this.firstScreen();
@@ -194,6 +181,35 @@ export default class NexusApp extends Component {
     go();
     this.worldIv = setInterval(() => this.loadWorld(), 20 * 60e3);
   }
+  // facts and past conversations; on start the last ones also fill the chat
+  async loadMemory(restoreChat) {
+    if (!api) return;
+    let m;
+    try { m = await api.getMemory(); } catch (e) { console.warn(e); return; }
+    this.setState({ memChats: m.chats, facts: m.facts });
+    if (restoreChat && !this.state.chat.length) {
+      const chat = m.chats.slice(-20).flatMap(c => [{ id: c.id * 10, role: 'user', text: c.q }, { id: c.id * 10 + 2, role: 'nexus', text: c.a }]);
+      this.setState({ chat });
+    }
+  }
+  addFact() {
+    const t = this.state.factInput.trim(); if (!t || !api) return;
+    const cat = this.state.memFilter !== 'Todo' ? this.state.memFilter : 'Otros';
+    this.setState({ factInput: '' });
+    api.addFact(t, cat).then(() => this.loadMemory());
+  }
+  forgetAll() {
+    // two clicks: the first one only arms the button for a few seconds
+    if (!this.state.forgetArmed) {
+      this.setState({ forgetArmed: true });
+      clearTimeout(this.forgetT); this.forgetT = setTimeout(() => this.setState({ forgetArmed: false }), 4000);
+      return;
+    }
+    clearTimeout(this.forgetT);
+    this.setState({ forgetArmed: false, memChats: [], facts: [], chat: [] });
+    api && api.clearMemory('all');
+    this.say(`Hecho, ${this.name()}. He olvidado todo lo que sabía.`);
+  }
   async loadSettings() {
     if (!api) return null;
     let s;
@@ -201,7 +217,7 @@ export default class NexusApp extends Component {
     this.setState(st => ({
       provider: s.provider, model: s.model, providers: s.providers, voiceSel: s.voice, userName: s.userName, persona: s.persona,
       theme: s.theme, quality: s.quality, reduced: s.reduced, autostart: !!s.autostart, hotkey: s.hotkey || st.hotkey,
-      subtitles: !!s.subtitles,
+      subtitles: !!s.subtitles, learn: s.memoryLearn !== false,
       premiumPaused: !!s.premiumPaused, azurePaused: !!s.azurePaused, hasAzure: !!s.hasAzure, azureRegion: s.azureRegion,
       agent: { web: s.agentWeb, files: s.agentFiles, write: s.agentWrite, shell: s.agentShell }, micId: s.micId || '',
       gemini: { tts: s.geminiTts, search: s.geminiSearch, stt: s.geminiStt, fallback: s.geminiFallback },
@@ -454,7 +470,7 @@ export default class NexusApp extends Component {
     this.setState(s => ({ chat: s.chat.flatMap(m => m.id !== id + 2 ? [m] : m.text ? [{ ...m, streaming: false }] : []) }));
     if (this.reqId !== id) return;
     this.setState({ ovLabel: 'NEXUS · ' + this.hm() });
-    if (res.ok) { voice.endSpeech(); return; }
+    if (res.ok) { voice.endSpeech(); this.loadMemory(); return; }
     this.setState({ ovState: 'idle' });
     if (res.error === 'ABORTED') return;
     if (res.error === 'NO_KEY') {
@@ -580,6 +596,7 @@ export default class NexusApp extends Component {
   openPanel(p, keepOpen) {
     if (p === 'system' && this.state.panel !== 'system') this.loadSystem();
     if (p === 'voice') this.prepareSamples();
+    if (p === 'memory') this.loadMemory();
     const opening = !!p && (keepOpen || this.state.panel !== p);
     this.setState({ panel: opening ? p : null, volOpen: false });
   }
@@ -826,10 +843,18 @@ export default class NexusApp extends Component {
     const capTop = S.panel === 'system' ? 905 : L.y + 150 * L.s * 2.3 + 12;
     const wk = S.wordsKind;
     const P = S.panel, wide = ['voice', 'routines', 'memory', 'settings'].includes(P);
-    const mem = S.mem.filter(m => (S.memFilter === 'Todo' || m.cat === S.memFilter) && (!S.memQuery || (m.title + ' ' + m.sum).toLowerCase().includes(S.memQuery.toLowerCase())));
-    const facts = S.facts.filter(f => !S.memQuery || f.t.toLowerCase().includes(S.memQuery.toLowerCase()));
+    const mq = S.memQuery.trim().toLowerCase();
+    const plain = t => t.replace(/[#*_`>|[\]()-]+/g, ' ').replace(/\s+/g, ' ').trim();
+    const dayOf = at => { const d0 = new Date(at), today = new Date(); today.setHours(0, 0, 0, 0); const diff = Math.round((today - new Date(d0).setHours(0, 0, 0, 0)) / 864e5); return diff <= 0 ? 'HOY' : diff === 1 ? 'AYER' : d0.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' }).replace('.', '').toUpperCase(); };
+    const chats = S.memChats.filter(c => !mq || (c.q + ' ' + c.a).toLowerCase().includes(mq)).slice().reverse().slice(0, 150);
+    const facts = S.facts.filter(f => (S.memFilter === 'Todo' || f.cat === S.memFilter) && (!mq || f.text.toLowerCase().includes(mq)));
     let lastG = null;
-    const memItems = mem.map((m, i) => { const head = m.group !== lastG; lastG = m.group; return { ...m, head, delay: (i * 40 + 120) + 'ms', del: () => this.setState(s => ({ mem: s.mem.filter(x => x.id !== m.id) })) }; });
+    const memItems = chats.map((c, i) => {
+      const group = dayOf(c.at), head = group !== lastG; lastG = group;
+      const t = new Date(c.at), sum = plain(c.a);
+      return { id: c.id, group, head, time: String(t.getHours()).padStart(2, '0') + ':' + String(t.getMinutes()).padStart(2, '0'), title: c.q.length > 110 ? c.q.slice(0, 110) + '…' : c.q, sum: sum.length > 220 ? sum.slice(0, 220) + '…' : sum, delay: Math.min(i, 12) * 40 + 120 + 'ms',
+        del: () => { this.setState(s => ({ memChats: s.memChats.filter(x => x.id !== c.id) })); api && api.deleteChat(c.id); } };
+    });
     const r = this.ROUT.find(x => x.id === S.routineSel);
     const sl = k => { const c = this.SL[k], v = S.sliders[k]; return { key: k, label: c.label, val: c.fmt(v), pct: ((v - c.min) / (c.max - c.min) * 100).toFixed(1) + '%' }; };
     const si = S.sysInfo, fmt = (n, dec = 1) => n == null ? '—' : Number(n).toFixed(dec).replace('.', ',');
@@ -962,12 +987,15 @@ export default class NexusApp extends Component {
       gauges, coreBars, coreTitle: si ? 'CPU · ' + per.length + ' HILOS' : 'CPU', coreNote: si ? 'EL MÁS CARGADO ' + busiest + ' %' : '',
       sysHeader: si ? ('SISTEMA · ' + si.host + ' · ' + si.os).toUpperCase() : 'SISTEMA', sysLoading: !!S.sysLoading, refreshSystem: () => this.loadSystem(),
       sysTaken: si ? 'MEDIDO A LAS ' + this.hm() : '', procs, agenda, dateShort: d.toLocaleDateString('es-ES', { day: 'numeric', month: 'long' }).toUpperCase(),
-      memQuery: S.memQuery, onMemQuery: e => this.setState({ memQuery: e.target.value }), memCount: 122 + S.mem.length + S.facts.length - 5,
-      memFilters: ['Todo', 'Conversaciones', 'Preferencias', 'Personas', 'Lugares'].map(f => ({ label: f, bg: S.memFilter === f ? 'rgb(var(--acc) / .22)' : 'rgba(255,255,255,.03)', border: S.memFilter === f ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.16)', pick: () => this.setState({ memFilter: f }) })),
-      memItems, memEmpty: memItems.length === 0,
-      factItems: facts.map((f, i) => ({ ...f, delay: (160 + i * 40) + 'ms', del: () => this.setState(s => ({ facts: s.facts.filter(x => x.id !== f.id) })) })),
-      learnT: { bg: this.toggleT(S.learn).tBg, border: this.toggleT(S.learn).tBorder, left: this.toggleT(S.learn).tLeft }, toggleLearn: () => this.setState(s => ({ learn: !s.learn })),
-      forgetAll: () => { this.setState({ mem: [], facts: [] }); this.say(`Hecho, ${this.name()}. He olvidado todo lo que sabía de usted.`); },
+      memQuery: S.memQuery, onMemQuery: e => this.setState({ memQuery: e.target.value }), memCount: S.memChats.length + S.facts.length,
+      memFilters: ['Todo', 'Preferencias', 'Personas', 'Lugares', 'Trabajo', 'Otros'].map(f => ({ label: f, bg: S.memFilter === f ? 'rgb(var(--acc) / .22)' : 'rgba(255,255,255,.03)', border: S.memFilter === f ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.16)', pick: () => this.setState({ memFilter: f }) })),
+      memItems, memEmpty: memItems.length === 0, memEmptyText: mq ? `Nada coincide con «${S.memQuery}».` : 'Aún no hay conversaciones. Lo que hables con Nexus aparecerá aquí, guardado y cifrado solo en este equipo.',
+      factsEmpty: facts.length === 0, factsEmptyText: S.facts.length ? 'Nada en esta categoría.' : 'Todavía no sé nada de ti. Cuéntamelo hablando o escríbelo aquí abajo.',
+      factInput: S.factInput, onFactInput: e => this.setState({ factInput: e.target.value }), onFactKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.addFact(); } }, addFact: () => this.addFact(),
+      forgetLabel: S.forgetArmed ? 'Pulsa otra vez para borrarlo todo' : 'Borrar toda la memoria',
+      factItems: facts.map((f, i) => ({ id: f.id, cat: f.cat.toUpperCase(), t: f.text, delay: (160 + Math.min(i, 12) * 40) + 'ms', del: () => { this.setState(s => ({ facts: s.facts.filter(x => x.id !== f.id) })); api && api.deleteFact(f.id); } })),
+      learnT: { bg: this.toggleT(S.learn).tBg, border: this.toggleT(S.learn).tBorder, left: this.toggleT(S.learn).tLeft }, toggleLearn: () => { this.setState({ learn: !S.learn }); this.save({ memoryLearn: !S.learn }); },
+      forgetAll: () => this.forgetAll(),
       providerOpts: ['Auto', ...Object.keys(S.providers)].map(p => ({ label: p === 'Auto' ? 'Auto' : p, ...this.seg(S.provider === p), pick: () => this.pickProvider(p) })),
       cycleModel: () => this.cycleModel(),
       keyInput: S.keyInput, keyType: S.showKey ? 'text' : 'password', keyDisabled: !(S.providers[kp] || {}).needsKey,

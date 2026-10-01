@@ -1,4 +1,4 @@
-// Generated from design/NEXUS.dc.html by scripts/convert-design.mjs
+// Memory: past conversations (left) and what Nexus knows about the user (right)
 import { Fragment } from 'react'
 
 export default function MemoryPanel({ v }: { v: any }) {
@@ -64,13 +64,13 @@ export default function MemoryPanel({ v }: { v: any }) {
             </Fragment>))}
             {v.memEmpty && (<>
               <span style={{ padding: "40px 64px", fontSize: "15px", color: "rgba(226,218,240,.5)" }}>
-                Nada coincide con «{v.memQuery}».
+                {v.memEmptyText}
               </span>
             </>)}
           </div>
           <div style={{ display: "flex", flexDirection: "column", gap: "10px", minHeight: "0" }}>
             <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
-              LO QUE SÉ DE USTED
+              LO QUE SÉ DE TI
             </span>
             <div style={{ flex: "1", overflow: "auto", display: "flex", flexDirection: "column", gap: "8px" }}>
               {(v.factItems || []).map((f, fIndex) => (<Fragment key={f?.id ?? fIndex}>
@@ -90,6 +90,13 @@ export default function MemoryPanel({ v }: { v: any }) {
                   </button>
                 </div>
               </Fragment>))}
+              {v.factsEmpty && <span style={{ padding: "18px 4px", fontSize: "13.5px", lineHeight: "1.5", color: "rgba(226,218,240,.5)" }}>{v.factsEmptyText}</span>}
+            </div>
+            <div style={{ display: "flex", gap: "8px" }}>
+              <input value={v.factInput} onChange={v.onFactInput} onKeyDown={v.onFactKey} placeholder="Añadir algo que deba recordar" style={{ flex: "1", minWidth: "0", height: "40px", padding: "0 12px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.16)", outline: "none", color: "#FFF6E9", fontSize: "13.5px" }} />
+              <button onClick={v.addFact} title="Guardar" style={{ width: "40px", height: "40px", borderRadius: "10px", border: "1px solid rgb(var(--acc2) / .35)", background: "rgb(var(--acc) / .18)", color: "#FFF6E9", display: "grid", placeItems: "center", cursor: "pointer" }}>
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
+              </button>
             </div>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 2px", borderTop: "1px solid rgba(196,181,253,.08)" }}>
               <span style={{ fontSize: "14px", color: "rgba(241,234,248,.85)" }}>
@@ -100,7 +107,7 @@ export default function MemoryPanel({ v }: { v: any }) {
               </button>
             </div>
             <button onClick={v.forgetAll} style={{ height: "42px", borderRadius: "10px", border: "1px solid rgba(251,113,133,.35)", background: "rgba(251,113,133,.06)", color: "#FDA4AF", fontSize: "14px", cursor: "pointer", transition: "background 250ms" }} className="dc48">
-              Borrar toda la memoria
+              {v.forgetLabel}
             </button>
           </div>
         </div>

@@ -29,6 +29,7 @@ export type Settings = {
   geminiFallback: boolean
   azureRegion: string
   subtitles: boolean
+  memoryLearn: boolean
   theme: string
   quality: string
   reduced: boolean
@@ -74,6 +75,8 @@ const DEFAULTS: Settings = {
   azureRegion: 'westeurope',
   // text of what Nexus says under the core: off by default
   subtitles: false,
+  // the agent saves what it learns about the user (Memory panel)
+  memoryLearn: true,
   theme: 'nexus',
   quality: 'ultra',
   reduced: false

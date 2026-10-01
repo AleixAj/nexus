@@ -4,10 +4,11 @@ import { PROVIDERS, getKey, loadSettings, saveSettings, setKey } from './setting
 import { azureVoicesPaused, geminiVoicesPaused, isPremium, onAzureQuotaOut, onGeminiQuota, speak, speakDetailed, warmVoices } from './tts'
 import { createHash } from 'crypto'
 import { mkdir, readFile, writeFile } from 'fs/promises'
-import { ask, abort, transcribe } from './brain'
+import { ask, abort, resetHistory, transcribe } from './brain'
 import { spotify, systemStatus } from './tools'
 import { getWorld } from './world'
 import { systemSnapshot } from './sysinfo'
+import { addFact, clearMemory, deleteExchange, deleteFact, getMemory } from './memory'
 import { coverFor, currentMedia, lyricsFor, mediaControl, watchMedia, type MediaState } from './media'
 import { attachToDesktop, refreshWallpaper, stopWatching, watchCovered } from './wallpaper'
 
@@ -246,6 +247,11 @@ function registerIpc() {
 
   handle('system:status', () => systemStatus())
   handle('system:snapshot', () => systemSnapshot())
+  handle('memory:get', () => getMemory())
+  handle('memory:add', (_e, text, cat) => addFact(str(text, 300), str(cat, 30)))
+  handle('memory:delete-fact', (_e, id) => deleteFact(Number(id)))
+  handle('memory:delete-chat', (_e, id) => deleteExchange(Number(id)))
+  handle('memory:clear', (_e, what) => { clearMemory(what === 'chats' ? 'chats' : 'all'); resetHistory() })
   handle('media:get', () => ({ state: currentMedia(), extra: mediaExtra }))
   handle('media:control', (_e, action) => {
     const a = str(action, 20)

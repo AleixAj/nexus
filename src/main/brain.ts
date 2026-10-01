@@ -2,6 +2,7 @@ import { PROVIDERS, getKey, loadSettings } from './settings'
 import { TOOL_DEFS, runTool } from './tools'
 import { AGENT_TOOLS, describe, needsConfirm, progressLabel, runAgentTool, userFolders } from './agent'
 import { worldSummary } from './world'
+import { MEMORY_TOOLS, factsForPrompt, getMemory, logExchange, runMemoryTool } from './memory'
 
 type Msg = { role: string; content?: string | null; tool_calls?: any[]; tool_call_id?: string }
 
@@ -36,6 +37,10 @@ function systemPrompt() {
     s.agentFiles ? `- Carpetas del usuario: ${userFolders()}. Lee un archivo antes de modificarlo.` : '- No puedes ver los archivos del usuario.',
     s.agentWrite || s.agentShell ? '- Lo que modifica el equipo pide permiso al usuario; si lo deniega, no insistas. Nunca borres nada que no te pidan.' : '',
     '- Música: usa la herramienta spotify (app de escritorio), nunca la web de Spotify.',
+    s.memoryLearn
+      ? '- Memoria: si el usuario cuenta algo duradero de sí mismo (gustos, personas, lugares, trabajo, rutinas), guárdalo con remember sin anunciarlo; si pide olvidar algo, forget.'
+      : '- Memoria: guarda con remember solo lo que el usuario te pida recordar expresamente; si pide olvidar algo, forget.',
+    ...(factsForPrompt() ? ['', 'LO QUE SABES DEL USUARIO (úsalo con naturalidad, no lo recites)', factsForPrompt()] : []),
     '',
     'CÓMO RESPONDES',
     '- Se lee en voz alta y se muestra en un chat. Charla: 1-3 frases, sin formato.',
@@ -54,6 +59,7 @@ function toolsFor() {
   const s = loadSettings()
   return [
     ...TOOL_DEFS.filter(t => t.function.name !== 'system_status'),
+    ...MEMORY_TOOLS,
     ...AGENT_TOOLS.system,
     ...(s.agentWeb ? AGENT_TOOLS.web : []),
     ...(s.agentFiles ? AGENT_TOOLS.files : []),
@@ -66,8 +72,20 @@ let history: Msg[] = []
 let current: AbortController | null = null
 let chain: Promise<unknown> = Promise.resolve()
 
+let restored = false
+
 export function resetHistory() {
   history = []
+  restored = true
+}
+
+// After a restart, the last exchanges of a recent conversation come back as context
+function restoreHistory() {
+  if (restored) return
+  restored = true
+  const chats = getMemory().chats.slice(-3)
+  if (!chats.length || Date.now() - chats[chats.length - 1].at > 12 * 3600e3) return
+  history = trim(chats.flatMap(c => [{ role: 'user', content: c.q }, { role: 'assistant', content: c.a }]))
 }
 
 export function abort() {
@@ -161,6 +179,7 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
   const all = await targets(s)
   if (!all.length) throw new Error('NO_KEY')
 
+  restoreHistory()
   // work on a copy; history only changes if the whole turn succeeds
   const turn: Msg[] = [...history, { role: 'user', content: `${text}\n\n${contextNote()}` }]
   let full = ''
@@ -255,7 +274,7 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
         if (!r) {
           const label = progressLabel(tool, args)
           if (label) h.onProgress(label)
-          r = (await runAgentTool(tool, args)) || (await runTool(tool, args))
+          r = runMemoryTool(tool, args) || (await runAgentTool(tool, args)) || (await runTool(tool, args))
         }
       } catch (e: any) {
         if (e?.name === 'AbortError') throw e
@@ -269,6 +288,7 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
 
   if (ctl.signal.aborted) throw aborted()
   history = trim(turn)
+  if (full.trim()) logExchange(text, full)
   return full
 }
 

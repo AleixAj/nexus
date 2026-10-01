@@ -13,6 +13,10 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   carpetas, mira estadísticas del equipo y procesos, crea o modifica archivos y ejecuta comandos de PowerShell.
   Todo lo que cambia el equipo pide permiso antes, y lo que borra va a la papelera.
 - **Acciones rápidas.** Abre aplicaciones y webs y controla la música y el volumen.
+- **Memoria real.** Nexus aprende datos tuyos de lo que hablas (gustos, personas, lugares, trabajo) y los usa
+  después; puedes añadirlos, borrarlos o desactivar el aprendizaje en el panel Memoria. Las conversaciones se guardan y
+  el chat se recupera al reiniciar. Todo va cifrado con Windows (DPAPI) en `%APPDATA%
+exus\memory.bin`.
 - **Música de Spotify real.** Lee lo que suena en la app de escritorio de Spotify (no el navegador): carátula,
   progreso, aleatorio, repetir, anterior/siguiente y letra sincronizada (LRCLIB, gratis). El halo toma el color de
   la carátula y se mueve con el audio real del PC.
@@ -175,7 +179,7 @@ Open-Meteo (tiempo), Wikipedia (efemérides) e ipapi.co (ciudad aproximada).
 ## Pendiente
 
 - Palabra de activación «Hey Nexus» siempre escuchando.
-- Memoria y rutinas editables.
+- Rutinas editables.
 - Temperatura de la CPU (Windows solo la da con permisos de administrador; se muestra la de la GPU).
 - Mini overlay flotante sobre otras apps y fondo de escritorio en varios monitores a la vez.
 - Instalador (`electron-builder`).
