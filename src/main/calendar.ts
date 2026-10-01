@@ -6,10 +6,12 @@ import { readSecretJson, writeSecretJson } from './lib/store'
 export type CalEvent = { title: string; start: number; end: number; allDay: boolean; place: string }
 
 const FILE = 'calendar.bin'
-let url: string = readSecretJson<{ url?: string }>(FILE, {}).url || ''
+// read on first use: the system keychain only works once the app is ready
+let saved: string | undefined
+const calUrl = () => (saved ??= readSecretJson<{ url?: string }>(FILE, {}).url || '')
 let cache: { at: number; ics: string } | null = null
 
-export const calendarConnected = () => !!url
+export const calendarConnected = () => !!calUrl()
 
 export async function setCalendarUrl(next: string) {
   const u = next.trim().replace(/^webcal:/i, 'https:')
@@ -20,8 +22,8 @@ export async function setCalendarUrl(next: string) {
     if (!text.includes('BEGIN:VCALENDAR')) throw new Error('Esa dirección no devuelve un calendario')
     cache = { at: Date.now(), ics: text }
   } else cache = null
-  url = u
-  writeSecretJson(FILE, { url })
+  saved = u
+  writeSecretJson(FILE, { url: u })
 }
 
 async function download(u: string) {
@@ -32,6 +34,7 @@ async function download(u: string) {
 
 /** Events from now (start of today) to `days` days ahead, recurring ones expanded. */
 export async function events(days = 1): Promise<CalEvent[]> {
+  const url = calUrl()
   if (!url) return []
   if (!cache || Date.now() - cache.at > 15 * 60e3) {
     try { cache = { at: Date.now(), ics: await download(url) } } catch (e) { if (!cache) throw e } // offline: the last copy

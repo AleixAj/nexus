@@ -1,7 +1,7 @@
 // Settings: load and save, look (theme, quality), the AI service and its keys, microphone,
 // and the data the panels show (weather, system snapshot).
 import * as voice from '../../services/voice';
-import { GEMINI_SETTING } from '../constants';
+import { GEMINI_SETTING, KEY_ORDER } from '../constants';
 import { api } from '../util';
 
 export const settings = {
@@ -59,7 +59,7 @@ export const settings = {
   keyProv() {
     const S = this.state;
     if (S.provider !== 'Auto') return S.provider;
-    return S.keyTarget || ['Cerebras', 'Groq'].find(p => !(S.providers[p] || {}).hasKey) || 'Cerebras';
+    return S.keyTarget || KEY_ORDER.find(p => !(S.providers[p] || {}).hasKey) || 'Groq';
   },
   cycleModel() {
     const models = (this.state.providers[this.state.provider] || {}).models || [];
@@ -72,6 +72,7 @@ export const settings = {
     try { await api.setKey(this.keyProv(), key); } catch { this.fail('No he podido guardar la clave'); return; }
     this.setState({ keyInput: '', showKey: false });
     await this.loadSettings();
+    this.loadQuota();
     this.say(`Clave guardada, ${this.name()}. Ya puedo pensar.`);
   },
 
@@ -92,6 +93,12 @@ export const settings = {
   micLabel() {
     const m = (this.state.micList || []).find(x => x.id === this.state.micId);
     return m ? m.label : 'Predeterminado de Windows';
+  },
+
+  // how much of today's free AI quota is used (counted by NEXUS itself)
+  async loadQuota() {
+    if (!api) return;
+    try { this.setState({ quota: await api.getQuota() }); } catch { /* keep the last one */ }
   },
 
   // ---------- self-test ----------

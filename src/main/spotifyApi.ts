@@ -14,12 +14,14 @@ const SCOPES = 'playlist-read-private playlist-read-collaborative user-library-r
 const FILE = 'spotify.bin'
 
 type Tokens = { access: string; refresh: string; expires: number; user?: string }
-let tokens: Tokens | null = readSecretJson<Tokens | null>(FILE, null)
+// read on first use: the system keychain only works once the app is ready
+let tokens: Tokens | null | undefined
+const tok = () => (tokens === undefined ? (tokens = readSecretJson<Tokens | null>(FILE, null)) : tokens)
 
 const b64url = (b: Buffer) => b.toString('base64').replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '')
 const clientId = () => loadSettings().spotifyClientId.trim()
 
-export const spotifyStatus = () => ({ connected: !!tokens, user: tokens?.user || '' })
+export const spotifyStatus = () => ({ connected: !!tok(), user: tok()?.user || '' })
 
 export function disconnectSpotify() {
   tokens = null
@@ -34,7 +36,7 @@ async function tokenRequest(body: Record<string, string>) {
   })
   const j: any = await res.json()
   if (!res.ok) throw new Error(j.error_description || j.error || 'Spotify no acepta la conexión')
-  tokens = { access: j.access_token, refresh: j.refresh_token || tokens?.refresh || '', expires: Date.now() + (j.expires_in - 60) * 1000, user: tokens?.user }
+  tokens = { access: j.access_token, refresh: j.refresh_token || tok()?.refresh || '', expires: Date.now() + (j.expires_in - 60) * 1000, user: tok()?.user }
   writeSecretJson(FILE, tokens)
 }
 
@@ -74,9 +76,10 @@ export function connectSpotify(): Promise<{ connected: boolean; user: string }> 
 }
 
 async function api(path: string, init: RequestInit = {}): Promise<any> {
-  if (!tokens) throw new Error('NOT_CONNECTED')
-  if (Date.now() > tokens.expires) await tokenRequest({ grant_type: 'refresh_token', refresh_token: tokens.refresh })
-  const res = await fetch('https://api.spotify.com/v1' + path, { ...init, headers: { Authorization: `Bearer ${tokens.access}`, 'Content-Type': 'application/json', ...(init.headers || {}) } })
+  const t = tok()
+  if (!t) throw new Error('NOT_CONNECTED')
+  if (Date.now() > t.expires) await tokenRequest({ grant_type: 'refresh_token', refresh_token: t.refresh })
+  const res = await fetch('https://api.spotify.com/v1' + path, { ...init, headers: { Authorization: `Bearer ${tok()!.access}`, 'Content-Type': 'application/json', ...(init.headers || {}) } })
   if (res.status === 204) return null
   const text = await res.text()
   const j = text ? JSON.parse(text) : null

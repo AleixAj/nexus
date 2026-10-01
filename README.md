@@ -69,6 +69,8 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   procesos que más consumen. Se mide solo al abrir el panel (unos 2 s) o al pulsar *Actualizar*; nada en segundo plano.
 - **Temas y calidad gráfica.** Cinco temas de color y tres niveles de calidad; la primera vez elige el nivel solo según
   tu tarjeta gráfica, memoria y procesador.
+- **Cupo que no se acaba.** Órdenes sencillas sin IA, solo las herramientas necesarias en cada pregunta, cinco
+  servicios gratis en rotación y un medidor de lo que queda hoy (más abajo, en Requisitos).
 - **Autodiagnóstico.** Ajustes → *Comprobar que todo funciona*: revisa internet, cada clave, las voces, el micrófono, que
   entienda lo que dices, búsqueda, noticias, tiempo, calendario, Spotify y disco, sin cambiar nada, y dice cómo arreglar
   lo que falle.
@@ -82,14 +84,24 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 
 | Opción | Clave | Notas |
 | --- | --- | --- |
-| **Automático** (recomendada) | Las de Cerebras y/o Groq | Reparte las preguntas entre todas las IA con clave y cambia sola si una llega a su límite. Con las dos: unos 1,4 millones de tokens al día. |
-| **Cerebras** | Gratis en [cloud.cerebras.ai](https://cloud.cerebras.ai) | 1 millón de tokens al día con `gpt-oss-120b`. |
-| **Groq** | Gratis en [console.groq.com](https://console.groq.com/keys) | 200.000 tokens al día por modelo; también entiende la voz. |
+| **Automático** (recomendada) | Groq y, mejor aún, también Mistral | Reparte las preguntas entre todas las IA con clave y cambia sola si una llega a su límite. Con Groq y Mistral prácticamente no se acaba. |
+| **Groq** | Gratis en [console.groq.com](https://console.groq.com/keys) | Tres modelos (GPT-OSS 120B, Qwen y GPT-OSS 20B) con 200.000 tokens al día cada uno; también entiende la voz. |
+| **Mistral** | Gratis en [console.mistral.ai](https://console.mistral.ai/api-keys) | Plan *Experiment*: unos 1.000 millones de tokens al mes. Sin tarjeta, solo verificar el móvil por SMS. |
+| **OpenRouter** | Gratis en [openrouter.ai](https://openrouter.ai/keys) | 50 preguntas al día con el modelo gratis que esté libre: último recurso. |
+| **Cerebras** | [cloud.cerebras.ai](https://cloud.cerebras.ai) | 1 millón de tokens al día con las claves gratuitas antiguas; las cuentas nuevas ya piden tarjeta. |
 | **Gemini Flash-Lite** | Gratis en [Google AI Studio](https://aistudio.google.com/apikey) | 500 preguntas al día. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos. |
 | **Local con [Ollama](https://ollama.com)** | Sin clave | Sin límites; en Automático se usa como último recurso si está instalado. |
 
-Cada pregunta envía solo unos 1.800 tokens y la parte fija es siempre igual, así que Groq la reutiliza de su caché
-sin contarla en el límite.
+**Cómo ahorra cupo** (ideas de [Open.Jarvis](https://github.com/dmrr35/Open.Jarvis) y
+[Jarvis-AI](https://github.com/sharmakrishna1010/Jarvis-AI)):
+
+- **Órdenes directas sin IA:** «pausa», «siguiente», «sube el volumen», «abre Discord», «qué hora es», «qué tiempo
+  hace», «avísame en 20 minutos de…», «pon una alarma a las 7», «bloquea el PC»… se resuelven al instante, sin
+  internet y sin gastar nada. Lo que no entiende con seguridad pasa a la IA.
+- **Solo las herramientas que tocan:** una pregunta de música manda las de música y unas pocas básicas, no las 44.
+  Cada petición pasa de unos 5.000 tokens a unos 1.900.
+- **Contador de cupo:** Ajustes → *Cupo gratis de hoy* muestra cuánto lleva gastado cada IA. Cuando una dice que
+  ha agotado el día, NEXUS no la vuelve a intentar durante unas horas, aunque se reinicie, y avisa antes de quedarse sin nada.
 
 Sin ninguna clave, las búsquedas en internet siguen funcionando (DuckDuckGo).
 
@@ -231,7 +243,7 @@ scripts/                    conversor del diseño e icono
 `tools/index.ts`. Si cambia algo del equipo, se le pone `confirm` y la app pedirá permiso antes de cada uso.
 
 **Tecnologías:** Electron, React, TypeScript, Vite (electron-vite) y Canvas 2D.
-**Servicios externos, todos gratuitos:** Cerebras, Groq o Gemini (IA y voz a texto), DuckDuckGo (búsqueda sin clave), Microsoft Edge TTS (voz),
+**Servicios externos, todos gratuitos:** Groq, Mistral, OpenRouter, Cerebras o Gemini (IA y voz a texto), DuckDuckGo (búsqueda sin clave), Microsoft Edge TTS (voz),
 Open-Meteo (tiempo), Wikipedia (efemérides), ipapi.co (ciudad aproximada), iTunes (carátulas) y LRCLIB (letras).
 
 ### Rendimiento (pensado para estar siempre encendida)

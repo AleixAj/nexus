@@ -13,7 +13,7 @@ const PERSONAS: Record<string, string> = {
 }
 
 /** The name inside the wake phrase, if it is not Nexus ("Oye Jarvis" → "Jarvis"). */
-const callName = (wake: string) => {
+export const callName = (wake: string) => {
   const name = wake.replace(/^\s*(hey|hola|oye|ey|eh|ok|okay|vamos|buenas)[\s,]+/i, '').trim()
   return name && !/^nexus$/i.test(name) ? name : ''
 }

@@ -33,6 +33,7 @@ contextBridge.exposeInMainWorld('nexus', {
   setCalendar: (url: string) => ipcRenderer.invoke('calendar:set', url),
   calendarEvents: (days: number) => ipcRenderer.invoke('calendar:events', days),
   runDiagnostics: () => ipcRenderer.invoke('diagnostics:run'),
+  getQuota: () => ipcRenderer.invoke('quota:get'),
   listApprovals: () => ipcRenderer.invoke('approvals:list'),
   listRoutines: () => ipcRenderer.invoke('routines:list'),
   deleteRoutine: (id: number) => ipcRenderer.invoke('routines:delete', id),

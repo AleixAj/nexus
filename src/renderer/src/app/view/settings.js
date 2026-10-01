@@ -1,5 +1,5 @@
 // Settings panel: AI service and keys, agent permissions, Gemini switches, system and look.
-import { THEMES, providerInfo } from '../constants';
+import { KEY_ORDER, THEMES, providerInfo } from '../constants';
 import { api, seg, toggleT } from '../util';
 
 const QUALITY = [['ultra', 'Ultra'], ['equilibrado', 'Equilibrado'], ['ahorro', 'Ahorro']];
@@ -32,8 +32,10 @@ export function settingsView(app, c) {
     keyPlaceholder: !prov.needsKey ? 'No necesaria · Ollama en http://localhost:11434' : prov.hasKey ? '•••••••••••• guardada · pegue otra para cambiarla' : 'Pegue aquí su clave de ' + kp,
     keyStatus: !prov.needsKey ? 'LOCAL' : prov.hasKey ? 'GUARDADA' : 'FALTA', keyColor: !prov.needsKey || prov.hasKey ? '#34D399' : '#F5B971',
     keyHelp: providerInfo(S.provider === 'Auto' ? kp : S.provider).help,
-    keyTargets: S.provider === 'Auto' ? ['Cerebras', 'Groq', 'Gemini'].map(p => ({ label: ((S.providers[p] || {}).hasKey ? '✓ ' : '') + p, on: kp === p, pick: () => app.setState({ keyTarget: p, keyInput: '' }) })) : null,
+    keyTargets: S.provider === 'Auto' ? KEY_ORDER.map(p => ({ label: ((S.providers[p] || {}).hasKey ? '✓ ' : '') + p, on: kp === p, pick: () => app.setState({ keyTarget: p, keyInput: '' }) })) : null,
     onKeyInput: e => app.setState({ keyInput: e.target.value }), onKeyEnter: e => { if (e.key === 'Enter') app.saveKey(); }, saveKey: () => app.saveKey(),
+    // today's free quota, as NEXUS counts it
+    quota: (S.quota || []).map(q => ({ label: q.label, text: q.used == null ? (q.requests ? q.requests + ' preguntas' : 'sin límite diario') : q.used >= 1 ? 'agotado' : Math.round(q.used * 100) + ' %', w: q.used == null ? 0 : Math.max(2, Math.round(q.used * 100)), color: q.used >= .85 ? '#FB7185' : q.used >= .6 ? '#F5B971' : 'rgb(var(--acc2))' })),
     keyBtn: S.showKey ? 'Ocultar' : 'Mostrar', toggleKey: () => app.setState(s => ({ showKey: !s.showKey })),
 
     // what the agent may do, and what the Gemini key is used for

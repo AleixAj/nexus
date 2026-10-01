@@ -6,6 +6,8 @@ export async function readStream(body: ReadableStream<Uint8Array>, onDelta: (t: 
   const reader = body.getReader()
   const dec = new TextDecoder()
   let buf = '', content = ''
+  // tokens that count towards the free limit (the last chunk carries them; cached ones are free)
+  let usage: number | null = null
   const calls: ToolCall[] = []
 
   const handle = (line: string) => {
@@ -15,6 +17,8 @@ export async function readStream(body: ReadableStream<Uint8Array>, onDelta: (t: 
     let json
     try { json = JSON.parse(data) } catch { return }
     if (json.error) throw new Error(json.error.message || 'Error del modelo')
+    const u = json.usage || json.x_groq?.usage
+    if (u?.total_tokens != null) usage = u.total_tokens - (u.prompt_tokens_details?.cached_tokens || 0)
     const delta = json.choices?.[0]?.delta
     if (!delta) return
     // zero-width characters some models emit would be read aloud as silence or garbage
@@ -40,5 +44,5 @@ export async function readStream(body: ReadableStream<Uint8Array>, onDelta: (t: 
   if (buf) handle(buf)
 
   const toolCalls = calls.filter(Boolean).map((c, i) => ({ ...c, id: c.id || `call_${i}` }))
-  return { content, toolCalls }
+  return { content, toolCalls, usage }
 }

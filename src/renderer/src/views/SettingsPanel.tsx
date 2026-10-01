@@ -30,9 +30,9 @@ export default function SettingsPanel({ v }: { v: any }) {
               <span style={{ fontSize: "14.5px", color: "rgba(241,234,248,.85)" }}>
                 Proveedor
               </span>
-              <div style={{ display: "flex", padding: "3px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.12)" }}>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "2px", padding: "3px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.12)" }}>
                 {(v.providerOpts || []).map((o, oIndex) => (<Fragment key={o?.id ?? oIndex}>
-                  <button onClick={o.pick} style={{ flex: "1", height: "34px", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "13px", background: o.bg, color: o.color, transition: "background 250ms, color 250ms" }}>
+                  <button onClick={o.pick} style={{ flex: "1 0 22%", height: "34px", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "13px", background: o.bg, color: o.color, transition: "background 250ms, color 250ms" }}>
                     {o.label}
                   </button>
                 </Fragment>))}
@@ -62,7 +62,7 @@ export default function SettingsPanel({ v }: { v: any }) {
                 </span>
               </div>
               {v.keyTargets && (
-                <div style={{ display: "flex", gap: "6px" }}>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
                   {v.keyTargets.map(o => (
                     <button key={o.label} onClick={o.pick} style={{ height: "28px", padding: "0 12px", borderRadius: "999px", cursor: "pointer", fontSize: "12.5px", border: `1px solid ${o.on ? "rgb(var(--acc2) / .6)" : "rgba(196,181,253,.18)"}`, background: o.on ? "rgb(var(--acc) / .26)" : "rgba(255,255,255,.03)", color: "rgba(241,234,248,.9)" }}>{o.label}</button>
                   ))}
@@ -81,6 +81,21 @@ export default function SettingsPanel({ v }: { v: any }) {
                 {v.keyHelp}
               </span>
             </div>
+            {v.quota.length > 0 && (
+              <div style={{ display: "flex", flexDirection: "column", gap: "7px" }}>
+                <span style={{ fontSize: "14.5px", color: "rgba(241,234,248,.85)" }}>Cupo gratis de hoy</span>
+                {v.quota.map(q => (
+                  <div key={q.label} style={{ display: "grid", gridTemplateColumns: "150px minmax(0,1fr) 92px", alignItems: "center", gap: "10px" }}>
+                    <span style={{ fontSize: "12.5px", color: "rgba(226,218,240,.7)" }}>{q.label}</span>
+                    <span style={{ height: "4px", borderRadius: "2px", background: "rgba(196,181,253,.12)", overflow: "hidden" }}>
+                      <span style={{ display: "block", height: "100%", width: q.w + "%", background: q.color, borderRadius: "2px" }} />
+                    </span>
+                    <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", color: "rgba(226,218,240,.6)", textAlign: "right" }}>{q.text}</span>
+                  </div>
+                ))}
+                <span style={{ fontSize: "12px", color: "rgba(226,218,240,.42)" }}>Las órdenes sencillas (música, volumen, abrir apps, alarmas, la hora) no gastan cupo.</span>
+              </div>
+            )}
             <span style={{ marginTop: "10px", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
               SISTEMA
             </span>

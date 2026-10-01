@@ -17,6 +17,7 @@ import { modelReady } from './wakeword'
 import { getMemory } from './memory'
 import { listReminders } from './reminders'
 import { ddgResults } from './tools/web'
+import { quotaToday } from './brain/providers'
 
 export type Check = { group: string; name: string; status: 'ok' | 'warn' | 'fail' | 'off'; detail: string }
 
@@ -25,6 +26,12 @@ const timed = <T>(p: Promise<T>, ms: number) => Promise.race([p, new Promise<T>(
 async function check(group: string, name: string, fn: () => Promise<Omit<Check, 'group' | 'name'>>): Promise<Check> {
   try { return { group, name, ...(await timed(fn(), 25000)) } }
   catch (e: any) { return { group, name, status: 'fail', detail: String(e?.message || e).slice(0, 140) } }
+}
+
+const NO_KEY: Record<string, string> = {
+  Groq: 'Sin clave · gratis y sin tarjeta en console.groq.com (también entiende tu voz)',
+  Mistral: 'Sin clave · la reserva grande: gratis en console.mistral.ai (solo verificar el móvil)',
+  Cerebras: 'Sin clave (opcional; las cuentas nuevas piden tarjeta)',
 }
 
 export async function runDiagnostics(): Promise<Check[]> {
@@ -37,12 +44,20 @@ export async function runDiagnostics(): Promise<Check[]> {
     }),
     ...keyed.map(p => check('Inteligencia', `Clave de ${p}`, async () => {
       const key = getKey(p)
-      if (!key) return { status: 'off', detail: p === 'Cerebras' ? 'Sin clave · gratis en cloud.cerebras.ai (1 millón de tokens/día)' : 'Sin clave (opcional)' }
+      if (!key) return { status: 'off', detail: NO_KEY[p] || 'Sin clave (opcional)' }
       return (await testKey(p, key)) ? { status: 'ok', detail: 'Válida' } : { status: 'fail', detail: 'La clave no funciona: pega una nueva en Ajustes' }
     })),
     check('Inteligencia', 'Al menos una IA', async () => {
       const any = keyed.some(p => getKey(p))
       return any ? { status: 'ok', detail: s.provider === 'Auto' ? 'Modo automático' : s.provider } : { status: 'fail', detail: 'Sin ninguna clave no puedo pensar: la de Groq es gratis (console.groq.com)' }
+    }),
+    check('Inteligencia', 'Cupo gratis de hoy', async () => {
+      const q = (await quotaToday(s)).filter(l => l.used != null)
+      if (!q.length) return { status: 'off', detail: 'Sin IA con límite diario' }
+      const spent = q.filter(l => l.used! >= 1).map(l => l.label)
+      const avg = Math.round(q.reduce((a, l) => a + l.used!, 0) / q.length * 100)
+      if (spent.length === q.length) return { status: 'fail', detail: 'Agotado hasta mañana: añade la clave de Mistral para no quedarte sin IA' }
+      return { status: spent.length ? 'warn' : 'ok', detail: `${avg} % usado hoy${spent.length ? ' · agotado: ' + spent.join(', ') : ''} · las órdenes sencillas no gastan` }
     }),
     check('Voz', 'Voz neuronal (Microsoft)', async () => {
       const r = await speakDetailed('Prueba.', { voice: s.voice, lang: s.lang, speed: 1, pitch: 0 })

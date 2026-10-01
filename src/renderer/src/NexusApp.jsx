@@ -182,6 +182,7 @@ export default class NexusApp extends Component {
     if (opening && p === 'memory') this.loadMemory();
     if (opening && p === 'news') this.loadNews();
     if (opening && p === 'routines') this.loadRoutines();
+    if (opening && p === 'settings') this.loadQuota();
     if (opening && p === 'settings') this.loadSpotify();
     this.setState({ panel: opening ? p : null, volOpen: false });
   }

@@ -2,12 +2,15 @@
 // for: when one hits a limit (even the per-minute one) the next takes over at once, and the
 // tired one rests for a while.
 import { PROVIDERS, getKey, type Settings } from '../settings'
+import { isSpent, noteSpent, quotaReport } from './quota'
 
 export type Target = { name: string; url: string; key: string; model: string }
+export const targetId = (t: Target) => t.name + '/' + t.model
 
 const resting = new Map<string, number>() // "provider/model" -> rest until (ms)
-const restKey = (t: Target) => t.name + '/' + t.model
-const isResting = (t: Target) => (resting.get(restKey(t)) || 0) > Date.now()
+const restKey = targetId
+// a model that used up its day stays out even after NEXUS restarts
+const isResting = (t: Target) => (resting.get(restKey(t)) || 0) > Date.now() || isSpent(targetId(t))
 const rest = (t: Target, ms: number) => resting.set(restKey(t), Date.now() + ms)
 
 let ollamaUp = { at: 0, up: false, model: '' }
@@ -32,24 +35,35 @@ export async function targets(s: Settings, simple = false): Promise<Target[]> {
   }
   let list: (Target | null)[]
   if (s.provider === 'Auto') {
-    const small = t('Groq', 'openai/gpt-oss-20b') // its own 200K/day and the fastest
+    // every Groq model has its own 200K tokens a day with the same key
+    const small = t('Groq', 'openai/gpt-oss-20b') // the fastest
     list = [
       simple ? small : null,
-      t('Cerebras', 'gpt-oss-120b'), // 1M tokens/day free
-      t('Groq', 'openai/gpt-oss-120b'), // 200K/day
+      t('Cerebras', 'gpt-oss-120b'), // 1M/day on keys made before the card requirement
+      t('Groq', 'openai/gpt-oss-120b'), // fast; the repeated prompt prefix is cached and free
+      t('Mistral', 'mistral-medium-latest'), // ~1,000M/month: the big reserve
+      t('Groq', 'qwen/qwen3.8-27b'),
       simple ? null : small,
+      t('Mistral', 'mistral-small-latest'),
       s.geminiFallback ? t('Gemini', 'gemini-3.5-flash-lite') : null,
+      t('OpenRouter', 'openrouter/free'), // 50 a day, whatever free model is up
       await ollama() // local: no limits at all
     ]
   } else if (s.provider === 'Ollama') {
     list = [{ name: 'Ollama', url: PROVIDERS.Ollama.url, key: '', model: s.model }]
   } else {
     const name = Object.hasOwn(PROVIDERS, s.provider) ? s.provider : 'Groq'
-    const small = PROVIDERS[name].models.find(m => m !== s.model && /20b|8b|mini|lite/i.test(m))
+    const small = PROVIDERS[name].models.find(m => m !== s.model && /20b|8b|mini|lite|small/i.test(m))
     list = simple && small ? [t(name, small), t(name, s.model)] : [t(name, s.model), small ? t(name, small) : null]
     list.push(s.geminiFallback && name !== 'Gemini' ? t('Gemini', 'gemini-3.5-flash-lite') : null)
   }
   return list.filter((x): x is Target => !!x)
+}
+
+/** Today's use of every free model with a key, for Settings and the self-test. */
+export async function quotaToday(s: Settings) {
+  const ids = (await targets({ ...s, provider: 'Auto' })).filter(t => t.name !== 'Ollama').map(targetId)
+  return quotaReport([...new Set(ids)])
 }
 
 // Reads a 429: is it the daily quota, and how long to wait (Groq: "Please try again in 1m2.5s")
@@ -74,26 +88,29 @@ const sleep = (ms: number, signal: AbortSignal) => new Promise<void>((res, rej) 
  * Sends one chat request to the first service that is not resting and accepts it,
  * moving on to the next on limits or errors. Returns a streaming response.
  */
-export async function callModel(all: Target[], body: (model: string) => string, signal: AbortSignal, onProgress: (label: string) => void): Promise<Response> {
+export async function callModel(all: Target[], body: (t: Target) => string, signal: AbortSignal, onProgress: (label: string) => void): Promise<{ res: Response; target: Target }> {
   let res: Response | null = null
+  let used = all[0]
   let lastLimit = { daily: false, wait: 0 }
   for (let pass = 0; pass < 3 && !res?.ok; pass++) {
     const ready = all.filter(t => !isResting(t))
     if (!ready.length) {
+      if (all.every(t => isSpent(targetId(t)))) { lastLimit = { daily: true, wait: 0 }; break }
       // everyone is resting: wait for the first one to come back if it is soon
-      const soonest = Math.min(...all.map(t => resting.get(restKey(t)) || 0)) - Date.now()
+      const soonest = Math.min(...all.filter(t => !isSpent(targetId(t))).map(t => resting.get(restKey(t)) || 0)) - Date.now()
       if (soonest > 45e3) break
       onProgress(`Límite por minuto · espero ${Math.ceil(soonest / 1000)} s`)
       await sleep(soonest + 300, signal)
       continue
     }
     for (const t of ready) {
+      used = t
       try {
         res = await fetch(t.url + '/chat/completions', {
           method: 'POST',
           signal: AbortSignal.any([signal, AbortSignal.timeout(60000)]),
           headers: { 'Content-Type': 'application/json', ...(t.key ? { Authorization: `Bearer ${t.key}` } : {}) },
-          body: body(t.model)
+          body: body(t)
         })
       } catch (err: any) {
         if (signal.aborted) throw aborted()
@@ -112,6 +129,7 @@ export async function callModel(all: Target[], body: (model: string) => string, 
         const limit = res.status === 429 ? await rateLimit(res) : { daily: false, wait: 30 }
         lastLimit = limit
         rest(t, limit.daily ? 3 * 3600e3 : limit.wait * 1000 + 300)
+        if (limit.daily) noteSpent(targetId(t))
         if (all.length > 1) onProgress(limit.daily ? `Cupo de ${t.name} agotado · cambio de IA` : `${t.name} ocupada · cambio de IA`)
         continue
       }
@@ -120,12 +138,12 @@ export async function callModel(all: Target[], body: (model: string) => string, 
       break // reported below
     }
   }
-  if (!res) throw new Error('No se pudo conectar con ninguna IA; revise las claves en Ajustes')
-  if (res.status === 429 || (!res.ok && res.status >= 500)) {
+  if ((!res && lastLimit.daily) || (res && (res.status === 429 || (!res.ok && res.status >= 500)))) {
     throw new Error(lastLimit.daily
-      ? 'Se ha agotado el cupo gratuito de hoy de sus IA. Añada otra clave gratuita en Ajustes (Cerebras da 1 millón de tokens al día) o pruebe más tarde'
+      ? 'Se ha agotado el cupo gratuito de hoy de sus IA. Añada la clave gratuita de Mistral en Ajustes (unos 1.000 millones de tokens al mes) o pruebe más tarde'
       : 'Las IA gratuitas están saturadas ahora mismo; pruebe en un minuto')
   }
+  if (!res) throw new Error('No se pudo conectar con ninguna IA; revise las claves en Ajustes')
   if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`)
-  return res
+  return { res, target: used }
 }

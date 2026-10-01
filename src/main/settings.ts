@@ -49,15 +49,20 @@ export type Settings = {
 export const PROVIDERS: Record<string, { url: string; models: string[]; needsKey: boolean }> = {
   // best free tier (Google AI Studio key, no card): smart, generous and it also understands audio
   Gemini: { url: 'https://generativelanguage.googleapis.com/v1beta/openai', models: ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'], needsKey: true },
-  Groq: { url: 'https://api.groq.com/openai/v1', models: ['openai/gpt-oss-120b', 'llama-3.3-70b-versatile', 'openai/gpt-oss-20b'], needsKey: true },
-  // free tier with a bigger per-minute budget than Groq (5 requests/min, 30K tokens/min)
+  // very fast; each model has its own 200K tokens a day with the same key
+  Groq: { url: 'https://api.groq.com/openai/v1', models: ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'], needsKey: true },
+  // the biggest free pool (about 1,000 million tokens a month, 1 request/s): only an SMS check, no card
+  Mistral: { url: 'https://api.mistral.ai/v1', models: ['mistral-medium-latest', 'mistral-small-latest'], needsKey: true },
+  // free models chosen by OpenRouter itself (50 requests a day): the last net
+  OpenRouter: { url: 'https://openrouter.ai/api/v1', models: ['openrouter/free'], needsKey: true },
+  // new accounts now need a card for trial credits; old free keys keep working
   Cerebras: { url: 'https://api.cerebras.ai/v1', models: ['gpt-oss-120b'], needsKey: true },
   // local, no key: runs on the PC with Ollama installed
   Ollama: { url: 'http://localhost:11434/v1', models: ['qwen2.5:7b', 'llama3.1:8b', 'qwen2.5:14b'], needsKey: false }
 }
 
 const DEFAULTS: Settings = {
-  // Auto: Cerebras + Groq (+ Gemini/Ollama if allowed), switching when one hits a limit
+  // Auto: every free service with a key (Groq, Mistral, Cerebras, OpenRouter, Gemini/Ollama if allowed), switching when one hits a limit
   provider: 'Auto',
   model: 'openai/gpt-oss-120b',
   voice: 'lyra',
@@ -114,7 +119,13 @@ const DEFAULTS: Settings = {
 const FILE = 'settings.json'
 const keyFile = (provider: string) => dataPath(`key-${provider.toLowerCase()}.bin`)
 
-export const loadSettings = (): Settings => ({ ...DEFAULTS, ...readJson<Partial<Settings>>(FILE, {}) })
+export function loadSettings(): Settings {
+  const s = { ...DEFAULTS, ...readJson<Partial<Settings>>(FILE, {}) }
+  // a model a service no longer gives for free (e.g. Llama on Groq) falls back to its first one
+  const p = PROVIDERS[s.provider]
+  if (p && s.provider !== 'Ollama' && !p.models.includes(s.model)) s.model = p.models[0]
+  return s
+}
 
 // Only known keys with the right type are stored
 function clean(patch: Record<string, unknown>) {
@@ -170,7 +181,9 @@ export async function testKey(provider: string, key: string, region = '') {
   }
   const url = provider === 'Gemini' ? 'https://generativelanguage.googleapis.com/v1beta/models?pageSize=1'
     : provider === 'Groq' ? 'https://api.groq.com/openai/v1/models'
-    : provider === 'Cerebras' ? 'https://api.cerebras.ai/v1/models' : ''
+    : provider === 'Cerebras' ? 'https://api.cerebras.ai/v1/models'
+    : provider === 'Mistral' ? 'https://api.mistral.ai/v1/models'
+    : provider === 'OpenRouter' ? 'https://openrouter.ai/api/v1/key' : ''
   if (!url) return true
   try {
     const res = await fetch(url, { signal: AbortSignal.timeout(10000), headers: provider === 'Gemini' ? { 'x-goog-api-key': key } : { Authorization: `Bearer ${key}` } })

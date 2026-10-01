@@ -1,9 +1,12 @@
 // The agent loop: question → model → tools → model … → answer, streamed to the window.
 import { loadSettings } from '../settings'
 import { getMemory, logExchange } from '../memory'
-import { findTool, runTool, toolDefs, type ToolResult } from '../tools'
+import { findTool, hasTopic, pickTools, runTool, toolDefs, type ToolResult } from '../tools'
 import { contextNote, systemPrompt } from './prompt'
-import { aborted, callModel, targets } from './providers'
+import { aborted, callModel, targetId, targets, type Target } from './providers'
+import { leftToday, noteUsage } from './quota'
+import { quickCommand, type Quick } from './quick'
+import { callName } from './prompt'
 import { readStream } from './stream'
 import { LoopGuard } from './guard'
 import { isSimple } from './complexity'
@@ -12,7 +15,7 @@ import { noteTool, resetTaint } from '../lib/taint'
 import { approvalKey, approve, isApproved } from '../approvals'
 import { markRun, routineFor, routinePrompt } from '../routines'
 
-type Msg = { role: string; content?: string | null; tool_calls?: any[]; tool_call_id?: string }
+type Msg = { role: string; content?: string | null; tool_calls?: any[]; tool_call_id?: string; name?: string }
 
 export type Handlers = {
   onDelta: (t: string) => void
@@ -110,10 +113,47 @@ async function useTool(name: string, args: any, turn: Turn): Promise<ToolResult>
   return { ...r, result: redact(r.result) }
 }
 
+// ---------- orders answered without the AI ----------
+async function runQuick(q: Quick, text: string, h: Handlers, ctl: AbortController): Promise<string | null> {
+  let reply: string
+  if ('answer' in q) reply = q.answer
+  else {
+    const r = await useTool(q.tool, q.args, { said: text, h, signal: ctl.signal, guard: new LoopGuard() })
+    if (q.ok && !q.ok(r.result)) return null // not something it can do alone: the AI tries
+    reply = r.label === 'Acción denegada' ? 'De acuerdo, no lo hago.' : q.reply(r.result)
+    if (r.label !== reply.replace(/\.$/, '')) h.onAction(r.label)
+  }
+  if (ctl.signal.aborted) throw aborted()
+  h.onDelta(reply)
+  restoreHistory()
+  history = trim([...history, { role: 'user', content: text }, { role: 'assistant', content: reply }])
+  logExchange(text, reply)
+  return reply
+}
+
+// Mistral only takes tool call ids of 9 letters/digits; a turn may have started on another AI
+function forMistral(msgs: Msg[]): Msg[] {
+  const ids = new Map<string, string>()
+  const id = (x = '') => { if (!ids.has(x)) ids.set(x, 'c' + String(ids.size).padStart(8, '0')); return ids.get(x)! }
+  const names = new Map<string, string>()
+  return msgs.map(m => {
+    if (m.tool_calls) return { ...m, tool_calls: m.tool_calls.map(c => { names.set(c.id, c.function.name); return { ...c, id: id(c.id) } }) }
+    if (m.role === 'tool') return { ...m, name: names.get(m.tool_call_id || ''), tool_call_id: id(m.tool_call_id) }
+    return m
+  })
+}
+
+let warnedDay = ''
+
 async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise<string> {
   if (ctl.signal.aborted) throw aborted()
   const s = loadSettings()
-  const simple = isSimple(text) && !routineFor(text)
+  if (!routineFor(text)) {
+    const q = await quickCommand(text, callName(s.wakeWord))
+    const done = q && (await runQuick(q, text, h, ctl))
+    if (done) return done
+  }
+  const simple = isSimple(text) && !routineFor(text) && !hasTopic(text)
   const all = await targets(s, simple)
   if (!all.length) throw new Error('NO_KEY')
   const guard = new LoopGuard()
@@ -131,26 +171,31 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
   // work on a copy; history only changes if the whole turn succeeds
   const turn: Msg[] = [...history, { role: 'user', content: `${asked}${working}\n\n${contextNote()}` }]
   const ctx: Turn = { said: asked, h, signal: ctl.signal, guard }
-  const tools = toolDefs(s)
+  // only the tools this question can need (the previous question counts too: "y ahora más alto")
+  const before = [...history].reverse().find(m => m.role === 'user')?.content?.split('\n\n[Contexto')[0] || ''
+  const only = routine ? null : pickTools(`${asked} ${before}${working || files ? ' archivo actual adjuntos' : ''}`, simple)
+  const tools = toolDefs(s, only)
   let full = ''
   let report = false
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
     const last = round === MAX_ROUNDS - 1
-    const body = (model: string) => JSON.stringify({
-      model,
+    const body = (t: Target) => JSON.stringify({
+      model: t.model,
       stream: true,
       temperature: 0.5,
       max_tokens: report ? REPORT_TOKENS : simple ? SIMPLE_ANSWER_TOKENS : MAX_ANSWER_TOKENS,
       // keep thinking short: faster answers and fewer free-tier tokens
-      ...(/gpt-oss|gemini/.test(model) ? { reasoning_effort: 'low' } : {}),
+      ...(/gpt-oss|gemini/.test(t.model) ? { reasoning_effort: 'low' } : /qwen/.test(t.model) ? { reasoning_effort: 'none' } : {}),
       // on the last round force an answer instead of more tool calls
-      ...(last ? {} : { tools }),
-      messages: [{ role: 'system', content: systemPrompt() }, ...turn]
+      ...(last || !tools.length ? {} : { tools }),
+      messages: [{ role: 'system', content: systemPrompt() }, ...(t.name === 'Mistral' ? forMistral(turn) : turn)]
     })
 
-    const res = await callModel(all, body, ctl.signal, h.onProgress)
-    const { content, toolCalls } = await readStream(res.body!, h.onDelta)
+    const { res, target } = await callModel(all, body, ctl.signal, h.onProgress)
+    const { content, toolCalls, usage } = await readStream(res.body!, h.onDelta)
+    // the service's own count; if it gives none, a rough one (4 characters ≈ 1 token)
+    noteUsage(targetId(target), usage ?? (body(target).length + content.length) / 4)
     full += content
     if (!toolCalls.length) {
       turn.push({ role: 'assistant', content })
@@ -179,6 +224,12 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
   }
 
   if (ctl.signal.aborted) throw aborted()
+  // one warning a day when the free quota is nearly gone and there is no big reserve (Mistral)
+  const ids = all.filter(t => t.name !== 'Ollama').map(targetId)
+  if (warnedDay !== new Date().toDateString() && ids.length && leftToday(ids) < 0.2) {
+    warnedDay = new Date().toDateString()
+    h.onAction('Queda poco cupo gratis hoy · con la clave de Mistral no se acaba')
+  }
   history = trim(turn)
   if (full.trim()) logExchange(text, full)
   return full
