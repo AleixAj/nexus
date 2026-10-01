@@ -18,31 +18,32 @@ const fn = (name: string, description: string, properties: Record<string, unknow
 const S = (description: string) => ({ type: 'string', description })
 const N = (description: string) => ({ type: 'number', description })
 
+// Descriptions are short on purpose: they travel with every request (free-tier tokens)
 export const AGENT_TOOLS = {
   web: [
-    fn('web_search', 'Busca en internet información actual o que no sepas con seguridad (noticias, precios, resultados, tiempo, lanzamientos, personas, datos recientes). Devuelve un resumen con fuentes.', { query: S('Qué buscar, bien concreto') }, ['query']),
-    fn('read_webpage', 'Lee el texto de una página web concreta.', { url: S('URL http(s)') }, ['url']),
-    fn('wikipedia', 'Resumen de un artículo de Wikipedia en español.', { topic: S('Tema o título del artículo') }, ['topic'])
+    fn('web_search', 'Busca en internet datos actuales (noticias, precios, resultados…). Devuelve resumen y fuentes.', { query: S('Consulta concreta') }, ['query']),
+    fn('read_webpage', 'Lee el texto de una web.', { url: S('URL') }, ['url']),
+    fn('wikipedia', 'Resumen de Wikipedia.', { topic: S('Tema') }, ['topic'])
   ],
   files: [
-    fn('list_directory', 'Lista el contenido de una carpeta (nombre, tipo, tamaño, fecha).', { path: S('Ruta absoluta o nombre de carpeta conocida: escritorio, documentos, descargas, imagenes, musica, videos, usuario') }, ['path']),
-    fn('find_files', 'Busca archivos o carpetas por nombre (texto parcial o extensión) dentro de una carpeta y sus subcarpetas.', { query: S('Parte del nombre, p. ej. "factura" o ".pdf"'), folder: S('Dónde buscar; por defecto la carpeta del usuario') }, ['query']),
-    fn('read_file', 'Lee un archivo de texto (txt, md, csv, json, código, logs…). Para archivos largos usa offset para seguir leyendo.', { path: S('Ruta del archivo'), offset: N('Carácter desde el que leer') }, ['path']),
-    fn('folder_size', 'Analiza cuánto ocupa una carpeta y cuáles son sus archivos y subcarpetas más grandes.', { path: S('Carpeta a analizar') }, ['path'])
+    fn('list_directory', 'Lista una carpeta.', { path: S('Ruta o escritorio/documentos/descargas/imagenes/musica/videos/usuario') }, ['path']),
+    fn('find_files', 'Busca archivos por nombre o extensión (recursivo).', { query: S('Texto o .ext'), folder: S('Carpeta; por defecto la del usuario') }, ['query']),
+    fn('read_file', 'Lee un archivo de texto.', { path: S('Ruta'), offset: N('Desde el carácter') }, ['path']),
+    fn('folder_size', 'Qué ocupa una carpeta y sus elementos más grandes.', { path: S('Carpeta') }, ['path'])
   ],
   write: [
-    fn('write_file', 'Crea o sobrescribe un archivo de texto con el contenido indicado. Pide permiso al usuario.', { path: S('Ruta del archivo'), content: S('Contenido completo'), append: { type: 'boolean', description: 'Añadir al final en vez de sobrescribir' } }, ['path', 'content']),
-    fn('edit_file', 'Reemplaza un fragmento exacto de texto dentro de un archivo. Pide permiso al usuario.', { path: S('Ruta del archivo'), find: S('Texto exacto a buscar'), replace: S('Texto nuevo') }, ['path', 'find', 'replace']),
-    fn('move_path', 'Mueve o renombra un archivo o carpeta. Pide permiso al usuario.', { from: S('Ruta actual'), to: S('Ruta nueva') }, ['from', 'to']),
-    fn('delete_path', 'Envía un archivo o carpeta a la papelera de reciclaje. Pide permiso al usuario. Solo si el usuario lo pide expresamente.', { path: S('Ruta') }, ['path']),
-    fn('create_folder', 'Crea una carpeta (y las intermedias).', { path: S('Ruta de la carpeta') }, ['path'])
+    fn('write_file', 'Crea o sobrescribe un archivo de texto.', { path: S('Ruta'), content: S('Contenido'), append: { type: 'boolean' } }, ['path', 'content']),
+    fn('edit_file', 'Reemplaza un texto exacto en un archivo.', { path: S('Ruta'), find: S('Texto actual'), replace: S('Texto nuevo') }, ['path', 'find', 'replace']),
+    fn('move_path', 'Mueve o renombra.', { from: S('Ruta'), to: S('Ruta nueva') }, ['from', 'to']),
+    fn('delete_path', 'Envía a la papelera (solo si lo piden).', { path: S('Ruta') }, ['path']),
+    fn('create_folder', 'Crea una carpeta.', { path: S('Ruta') }, ['path'])
   ],
   system: [
-    fn('system_status', 'Estado del equipo: CPU, memoria, discos, GPU, batería, sistema operativo y tiempo encendido.'),
-    fn('top_processes', 'Procesos que más CPU o memoria consumen.', { sort: { type: 'string', enum: ['cpu', 'memory'] }, count: N('Cuántos, por defecto 10') })
+    fn('system_status', 'Estado del PC: CPU, RAM, discos, GPU, batería.'),
+    fn('top_processes', 'Procesos que más consumen.', { sort: { type: 'string', enum: ['cpu', 'memory'] }, count: N('Cuántos') })
   ],
   shell: [
-    fn('run_powershell', 'Ejecuta un comando de PowerShell en el equipo y devuelve la salida. Útil para estadísticas, configuración o tareas que no cubren otras herramientas. Pide permiso al usuario.', { command: S('Comando de PowerShell'), reason: S('Para qué sirve, en una frase, para mostrárselo al usuario') }, ['command', 'reason'])
+    fn('run_powershell', 'Ejecuta PowerShell (estadísticas, configuración, tareas avanzadas).', { command: S('Comando'), reason: S('Para qué, en una frase') }, ['command', 'reason'])
   ]
 }
 

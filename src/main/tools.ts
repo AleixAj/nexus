@@ -10,7 +10,7 @@ export const TOOL_DEFS = [
     type: 'function',
     function: {
       name: 'open_app',
-      description: 'Abre una aplicación instalada en el PC por su nombre (p. ej. Spotify, Visual Studio Code, Chrome, Discord, Calculadora).',
+      description: 'Abre una app instalada por su nombre.',
       parameters: { type: 'object', properties: { name: { type: 'string' } }, required: ['name'] }
     }
   },
@@ -18,18 +18,30 @@ export const TOOL_DEFS = [
     type: 'function',
     function: {
       name: 'open_url',
-      description: 'Abre una web en el navegador. Para buscar algo usa https://www.google.com/search?q=... o https://www.youtube.com/results?search_query=...',
+      description: 'Abre una web (para buscar: google.com/search?q= o youtube.com/results?search_query=).',
       parameters: { type: 'object', properties: { url: { type: 'string' } }, required: ['url'] }
     }
   },
   {
     type: 'function',
     function: {
-      name: 'media',
-      description: 'Controla la música y el volumen del sistema.',
+      name: 'spotify',
+      description: 'Spotify de escritorio: abrir, Me gusta, buscar canción/artista/lista, reproducir/pausar, siguiente, anterior.',
       parameters: {
         type: 'object',
-        properties: { action: { type: 'string', enum: ['play_pause', 'next', 'previous', 'volume_up', 'volume_down', 'mute'] }, times: { type: 'number', description: 'Repeticiones para volumen (cada una = 2 %)' } },
+        properties: { action: { type: 'string', enum: ['open', 'liked', 'search', 'play_pause', 'next', 'previous'] }, query: { type: 'string' } },
+        required: ['action']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'media',
+      description: 'Volumen del sistema.',
+      parameters: {
+        type: 'object',
+        properties: { action: { type: 'string', enum: ['volume_up', 'volume_down', 'mute', 'play_pause', 'next', 'previous'] }, times: { type: 'number', description: 'Pasos de 2 %' } },
         required: ['action']
       }
     }
@@ -38,11 +50,42 @@ export const TOOL_DEFS = [
     type: 'function',
     function: {
       name: 'system_status',
-      description: 'Devuelve uso de CPU, memoria RAM, tiempo encendido y nombre del equipo.',
+      description: 'CPU, RAM y tiempo encendido.',
       parameters: { type: 'object', properties: {} }
     }
   }
 ]
+
+// ---------- Spotify (desktop app, never the web player) ----------
+function spotifyExe() {
+  const p = join(process.env.APPDATA || '', 'Spotify', 'Spotify.exe')
+  try { readdirSync(join(process.env.APPDATA || '', 'Spotify')); return p } catch { return '' }
+}
+
+async function openSpotify(uri?: string) {
+  const exe = spotifyExe()
+  if (exe) {
+    // the installed app takes a URI on the command line and opens it inside the app
+    execFile(exe, uri ? [`--uri=${uri}`] : [], () => {})
+    return true
+  }
+  try { await shell.openExternal(uri || 'spotify:'); return true } catch { return false } // Microsoft Store version
+}
+
+async function spotify(action: string, query: string) {
+  switch (action) {
+    case 'open': return (await openSpotify()) ? 'Spotify abierto' : 'No encuentro Spotify instalado'
+    case 'liked': return (await openSpotify('spotify:collection:tracks')) ? 'Abiertas tus canciones que te gustan en Spotify' : 'No encuentro Spotify instalado'
+    case 'search': {
+      if (!query.trim()) return 'Falta qué buscar'
+      return (await openSpotify('spotify:search:' + encodeURIComponent(query.trim()))) ? `Buscando «${query}» en Spotify` : 'No encuentro Spotify instalado'
+    }
+    case 'play_pause': case 'next': case 'previous':
+      await sendKey(KEYS[action])
+      return { play_pause: 'Reproducir / pausar', next: 'Siguiente canción', previous: 'Canción anterior' }[action]
+    default: return 'Acción desconocida'
+  }
+}
 
 // ---------- apps ----------
 type AppEntry = { name: string; path: string }
@@ -171,6 +214,10 @@ export async function runTool(name: string, args: any): Promise<{ result: string
       await sendKey(code, times)
       const L: Record<string, string> = { play_pause: 'Reproducir / pausar', next: 'Siguiente canción', previous: 'Canción anterior', volume_up: 'Volumen subido', volume_down: 'Volumen bajado', mute: 'Silencio' }
       return { result: 'Hecho', label: L[action] }
+    }
+    case 'spotify': {
+      const r = await spotify(String(args.action || ''), String(args.query || ''))
+      return { result: r, label: r }
     }
     case 'system_status': {
       const s = await systemStatus()

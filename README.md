@@ -23,13 +23,18 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 
 - Windows 10 u 11.
 - [Node.js](https://nodejs.org) 20 o superior.
-- Una IA, a elegir en la configuración inicial (todas gratis):
+- Una IA, a elegir en la configuración inicial (todas gratis y sin tarjeta):
 
 | Opción | Clave | Notas |
 | --- | --- | --- |
-| **Gemini Flash-Lite** (500 preguntas/día) | Gratis y sin tarjeta en [Google AI Studio](https://aistudio.google.com/apikey) | La más capaz del plan gratuito, busca con Google y también entiende la voz. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos. |
-| **Groq** (recomendada) | Gratis y sin tarjeta en [console.groq.com](https://console.groq.com/keys) | Muy rápida, unas 1.000 preguntas al día; también entiende la voz. |
-| **Local con [Ollama](https://ollama.com)** | Sin clave | Funciona en tu PC y sin internet (modelo de unos 5 GB). Para entender la voz hace falta la clave de Gemini o Groq. |
+| **Automático** (recomendada) | Las de Cerebras y/o Groq | Reparte las preguntas entre todas las IA con clave y cambia sola si una llega a su límite. Con las dos: unos 1,4 millones de tokens al día. |
+| **Cerebras** | Gratis en [cloud.cerebras.ai](https://cloud.cerebras.ai) | 1 millón de tokens al día con `gpt-oss-120b`. |
+| **Groq** | Gratis en [console.groq.com](https://console.groq.com/keys) | 200.000 tokens al día por modelo; también entiende la voz. |
+| **Gemini Flash-Lite** | Gratis en [Google AI Studio](https://aistudio.google.com/apikey) | 500 preguntas al día. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos. |
+| **Local con [Ollama](https://ollama.com)** | Sin clave | Sin límites; en Automático se usa como último recurso si está instalado. |
+
+Cada pregunta envía solo unos 1.800 tokens y la parte fija es siempre igual, así que Groq la reutiliza de su caché
+sin contarla en el límite.
 
 Sin ninguna clave, las búsquedas en internet siguen funcionando (DuckDuckGo).
 
@@ -67,7 +72,8 @@ npm run dist
 
 Ejemplos: *«¿cómo quedó el Madrid ayer?»*, *«¿qué me ocupa más espacio en Descargas?»*,
 *«busca mis facturas en PDF»*, *«resume el archivo notas.txt del escritorio»*, *«¿qué proceso consume más RAM?»*,
-*«crea una carpeta Viaje en Documentos con una lista de equipaje»*, *«abre Spotify»*, *«sube el volumen»*.
+*«crea una carpeta Viaje en Documentos con una lista de equipaje»*, *«pon mis canciones que me gustan en Spotify»*,
+*«busca Coldplay en Spotify»*, *«siguiente canción»*, *«sube el volumen»*. La música siempre usa la app de escritorio de Spotify.
 
 Los permisos del agente (internet, ver archivos, modificarlos y ejecutar comandos) se activan o desactivan en **Ajustes → Agente**.
 El micrófono se elige en la configuración inicial o en **Ajustes → Micrófono**.
@@ -103,11 +109,16 @@ quedarse la última imagen en el escritorio hasta que vuelvas a abrir NEXUS o ca
 | Orión | Masculina | Española, grave, estilo Jarvis |
 | Kairo | Masculina | Natural y cercana (Microsoft Andrew, acento neutro) |
 | Atlas | Masculina | Natural y joven (Microsoft Brian, acento neutro) |
+| Ximena HD ◆ | Femenina | Azure: española, calidad HD |
+| Tristán HD ◆ | Masculina | Azure: español, calidad HD |
+| Isidora ◆ | Femenina | Azure: española y expresiva |
+| Darío ◆ | Masculina | Azure: español y cercano |
 | Zenit ✦ | Masculina | Premium: voz de Gemini, española y profunda |
 | Selene ✦ | Femenina | Premium: voz de Gemini, española y suave |
 | Draco ✦ | Masculina | Premium: voz de Gemini, española y serena |
 
-Las voces de Microsoft son gratis y sin clave; en español de España solo hay tres (Ximena, Elvira y Álvaro). Las premium de Gemini hablan con acento de España. Las premium necesitan la clave de Gemini (sin ella no se pueden elegir); si se agota
+Las voces de Microsoft son gratis y sin clave; en español de España solo hay tres (Ximena, Elvira y Álvaro). Las premium de Gemini hablan con acento de España. Las de Azure (◆) necesitan una clave gratuita de Azure Speech: 500.000 caracteres al mes (al crear la cuenta piden
+tarjeta para verificar, pero el plan gratuito no cobra). Las premium de Gemini (✦) necesitan la clave de Gemini (sin ella no se pueden elegir); si se agota
 su cupo gratuito, suenan con una voz de Microsoft. *Efecto IA* añade un toque de voz de película
 (presencia, un leve timbre metálico y una sala muy corta); en las voces naturales es casi imperceptible.
 

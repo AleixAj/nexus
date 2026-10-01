@@ -10,7 +10,7 @@ contextBridge.exposeInMainWorld('nexus', {
   getSettings: () => ipcRenderer.invoke('settings:get'),
   setSettings: (patch: object) => ipcRenderer.invoke('settings:set', patch),
   setKey: (provider: string, key: string) => ipcRenderer.invoke('key:set', provider, key),
-  testKey: (provider: string, key: string) => ipcRenderer.invoke('key:test', provider, key),
+  testKey: (provider: string, key: string, region?: string) => ipcRenderer.invoke('key:test', provider, key, region),
   speak: (text: string) => ipcRenderer.invoke('tts:speak', text),
   previewVoice: (text: string, voice: string) => ipcRenderer.invoke('tts:preview', text, voice),
   warmVoices: () => ipcRenderer.invoke('tts:warm'),
@@ -27,6 +27,6 @@ contextBridge.exposeInMainWorld('nexus', {
   onProgress: (fn: (id: number, label: string) => void) => on('brain:progress', fn),
   onConfirm: (fn: (id: number, cid: number, req: { title: string; detail: string }) => void) => on('brain:confirm', fn),
   confirmReply: (cid: number, ok: boolean) => ipcRenderer.invoke('brain:confirm-reply', cid, ok),
-  onTtsQuota: (fn: () => void) => on('tts:quota', fn),
+  onTtsQuota: (fn: (engine: string) => void) => on('tts:quota', fn),
   onHotkey: (fn: () => void) => on('hotkey:talk', fn)
 })

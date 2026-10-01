@@ -5,7 +5,8 @@ import { getKey, loadSettings } from './settings'
 // The "Multilingual" ones are the most natural (the voices of Copilot); they speak
 // Spanish with a neutral accent. `gemini` marks the premium voices (Gemini TTS),
 // which fall back to the Microsoft voice when there is no Gemini key or its free quota runs out.
-type Voice = { es: string; mx: string; en: string; rate: number; pitch: number; gemini?: string }
+// `azure` marks voices of Azure Speech (free 500K characters/month): an HD voice when the plan allows it, otherwise its regular version
+type Voice = { es: string; mx: string; en: string; rate: number; pitch: number; gemini?: string; azure?: { hd?: string; std: string } }
 
 const VOICES: Record<string, Voice> = {
   lyra: { es: 'es-ES-XimenaNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-SoniaNeural', rate: 0, pitch: 0 },
@@ -17,7 +18,11 @@ const VOICES: Record<string, Voice> = {
   atlas: { es: 'en-US-BrianMultilingualNeural', mx: 'en-US-BrianMultilingualNeural', en: 'en-US-BrianMultilingualNeural', rate: 0, pitch: 0 },
   zenit: { es: 'en-US-AndrewMultilingualNeural', mx: 'en-US-AndrewMultilingualNeural', en: 'en-US-AndrewMultilingualNeural', rate: 0, pitch: 0, gemini: 'Charon' },
   selene: { es: 'es-ES-XimenaNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-SoniaNeural', rate: 0, pitch: 0, gemini: 'Despina' },
-  draco: { es: 'es-ES-AlvaroNeural', mx: 'es-MX-JorgeNeural', en: 'en-GB-RyanNeural', rate: 0, pitch: 0, gemini: 'Algieba' }
+  draco: { es: 'es-ES-AlvaroNeural', mx: 'es-MX-JorgeNeural', en: 'en-GB-RyanNeural', rate: 0, pitch: 0, gemini: 'Algieba' },
+  ximenahd: { es: 'es-ES-XimenaNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-SoniaNeural', rate: 0, pitch: 0, azure: { hd: 'es-es-Ximena:DragonHDLatestNeural', std: 'es-ES-XimenaMultilingualNeural' } },
+  tristan: { es: 'es-ES-AlvaroNeural', mx: 'es-MX-JorgeNeural', en: 'en-GB-RyanNeural', rate: 0, pitch: 0, azure: { hd: 'es-es-Tristan:DragonHDLatestNeural', std: 'es-ES-TristanMultilingualNeural' } },
+  isidora: { es: 'es-ES-ElviraNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-LibbyNeural', rate: 0, pitch: 0, azure: { std: 'es-ES-IsidoraMultilingualNeural' } },
+  dario: { es: 'es-ES-AlvaroNeural', mx: 'es-MX-JorgeNeural', en: 'en-GB-RyanNeural', rate: 0, pitch: 0, azure: { std: 'es-ES-DarioNeural' } }
 }
 
 export type SpeakOptions = { voice: string; lang: string; speed: number; pitch: number }
@@ -134,7 +139,7 @@ async function gemini(key: string, voiceName: string, text: string, lang: string
   return data.subarray(0, 4).toString() === 'RIFF' ? data : wav(data, rate)
 }
 
-export const isPremium = (voice: string) => !!(Object.hasOwn(VOICES, voice) && VOICES[voice].gemini)
+export const isPremium = (voice: string) => !!(Object.hasOwn(VOICES, voice) && (VOICES[voice].gemini || VOICES[voice].azure))
 
 /** Opens the Microsoft connection of every voice ahead of time (first samples play fast). */
 export function warmVoices(lang: string) {
@@ -142,12 +147,54 @@ export function warmVoices(lang: string) {
   names.forEach(n => client(n).catch(() => {}))
 }
 
+// ---------- Azure Speech ----------
+let azurePausedUntil = 0
+let onAzureQuota: () => void = () => {}
+export function onAzureQuotaOut(fn: () => void) { onAzureQuota = fn }
+export const azureVoicesPaused = () => Date.now() < azurePausedUntil
+let hdBlocked = false // the free plan may not include HD voices: then the regular version is used
+
+async function azure(key: string, region: string, voice: string, text: string, lang: string, rate: number) {
+  const r = (rate >= 0 ? '+' : '') + Math.round(rate) + '%'
+  const ssml = `<speak version="1.0" xmlns="http://www.w3.org/2001/10/synthesis" xml:lang="${lang}"><voice name="${voice}">${voice.includes('DragonHD') ? escapeXml(text) : `<prosody rate="${r}">${escapeXml(text)}</prosody>`}</voice></speak>`
+  return fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/v1`, {
+    method: 'POST',
+    signal: AbortSignal.timeout(15000),
+    headers: { 'Ocp-Apim-Subscription-Key': key, 'Content-Type': 'application/ssml+xml', 'X-Microsoft-OutputFormat': 'audio-24khz-96kbitrate-mono-mp3', 'User-Agent': 'NEXUS' },
+    body: ssml
+  })
+}
+
+async function azureSpeak(v: NonNullable<Voice['azure']>, text: string, o: SpeakOptions) {
+  const key = getKey('Azure'), region = loadSettings().azureRegion || 'westeurope'
+  const lang = o.lang.startsWith('en') ? 'en-GB' : o.lang
+  const rate = (num(o.speed, 1) - 1) * 100
+  let res = v.hd && !hdBlocked ? await azure(key, region, v.hd, text, lang, rate) : null
+  if (res && !res.ok && res.status !== 429 && res.status !== 401) { hdBlocked = true; res = null }
+  if (!res) res = await azure(key, region, v.std, text, lang, rate)
+  if (res.status === 429 || res.status === 403) {
+    azurePausedUntil = Date.now() + 60 * 60e3
+    onAzureQuota()
+    throw new Error('Azure sin cupo')
+  }
+  if (!res.ok) throw new Error(`Azure HTTP ${res.status}`)
+  return Buffer.from(await res.arrayBuffer())
+}
+
 export async function speak(text: string, o: SpeakOptions): Promise<Buffer> {
+  return (await speakDetailed(text, o)).audio
+}
+
+/** Also tells whether the premium engine (Gemini/Azure) produced the audio or a fallback did. */
+export async function speakDetailed(text: string, o: SpeakOptions): Promise<{ audio: Buffer; premium: boolean }> {
   const v = Object.hasOwn(VOICES, o.voice) ? VOICES[o.voice] : VOICES.lyra
+  if (v.azure && getKey('Azure') && Date.now() > azurePausedUntil) {
+    try { return { audio: await azureSpeak(v.azure, text, o), premium: true } } catch (e: any) { console.warn('[tts] Azure:', e?.message) }
+  }
   const key = v.gemini && loadSettings().geminiTts ? getKey('Gemini') : ''
   if (v.gemini && key && Date.now() > geminiPausedUntil) {
-    try { return await gemini(key, v.gemini, text, o.lang) } catch (e: any) { console.warn('[tts] Gemini:', e?.message) /* fall back to the Microsoft voice */ }
+    try { return { audio: await gemini(key, v.gemini, text, o.lang), premium: true } } catch (e: any) { console.warn('[tts] Gemini:', e?.message) /* fall back to the Microsoft voice */ }
   }
   const name = o.lang.startsWith('en') ? v.en : o.lang === 'es-MX' ? v.mx : v.es
-  return edge(name, text, v.rate + (num(o.speed, 1) - 1) * 100, v.pitch + num(o.pitch, 0) * 2)
+  return { audio: await edge(name, text, v.rate + (num(o.speed, 1) - 1) * 100, v.pitch + num(o.pitch, 0) * 2), premium: false }
 }

@@ -34,10 +34,16 @@ export default class NexusApp extends Component {
     { id: 'lyra', name: 'Lyra', desc: 'Femenina · española · natural', fx: 'clean' },
     { id: 'orion', name: 'Orión', desc: 'Masculina · española · estilo Jarvis', fx: 'jarvis' },
     { id: 'nova', name: 'Nova', desc: 'Femenina · española · serena', fx: 'soft' },
-    { id: 'zenit', name: 'Zenit ✦', desc: 'Masculina · premium · española y profunda', fx: 'clean', premium: true },
-    { id: 'aura', name: 'Aura ✦', desc: 'Femenina · premium · española y cálida', fx: 'clean', premium: true },
-    { id: 'draco', name: 'Draco ✦', desc: 'Masculina · premium · española y serena', fx: 'clean', premium: true },
-    { id: 'selene', name: 'Selene ✦', desc: 'Femenina · premium · española y suave', fx: 'clean', premium: true },
+    // Azure Speech: free 500K characters a month
+    { id: 'ximenahd', name: 'Ximena HD ◆', desc: 'Femenina · premium · española muy natural', fx: 'clean', premium: 'azure' },
+    { id: 'tristan', name: 'Tristán HD ◆', desc: 'Masculina · premium · español muy natural', fx: 'clean', premium: 'azure' },
+    { id: 'isidora', name: 'Isidora ◆', desc: 'Femenina · premium · española y expresiva', fx: 'clean', premium: 'azure' },
+    { id: 'dario', name: 'Darío ◆', desc: 'Masculina · premium · español y cercano', fx: 'clean', premium: 'azure' },
+    // Gemini: the most human, but only a few samples a day for free
+    { id: 'zenit', name: 'Zenit ✦', desc: 'Masculina · premium · española y profunda', fx: 'clean', premium: 'gemini' },
+    { id: 'aura', name: 'Aura ✦', desc: 'Femenina · premium · española y cálida', fx: 'clean', premium: 'gemini' },
+    { id: 'draco', name: 'Draco ✦', desc: 'Masculina · premium · española y serena', fx: 'clean', premium: 'gemini' },
+    { id: 'selene', name: 'Selene ✦', desc: 'Femenina · premium · española y suave', fx: 'clean', premium: 'gemini' },
     { id: 'kairo', name: 'Kairo', desc: 'Masculina · cercana · acento neutro', fx: 'clean' },
     { id: 'vega', name: 'Vega', desc: 'Femenina · alegre · acento neutro', fx: 'clean' },
     { id: 'atlas', name: 'Atlas', desc: 'Masculina · joven · acento neutro', fx: 'clean' },
@@ -162,7 +168,12 @@ export default class NexusApp extends Component {
       this.offs.push(api.onDelta((id, t) => this.onDelta(id, t)));
       this.offs.push(api.onAction((id, label) => this.onAction(id, label)));
       this.offs.push(api.onProgress((id, label) => { if (id === this.reqId) this.setState({ actionLabel: label.toUpperCase() }); }));
-      this.offs.push(api.onTtsQuota(() => {
+      this.offs.push(api.onTtsQuota(engine => {
+        if (engine === 'Azure') {
+          if (!this.state.azurePaused) this.notify('VOZ PREMIUM', 'Cupo mensual de Azure agotado', 'Mientras tanto hablo con una voz normal', '#F5B971');
+          this.setState({ azurePaused: true });
+          return;
+        }
         if (!this.state.premiumPaused) this.notify('VOZ PREMIUM', 'Cupo de voz de Gemini agotado por hoy', 'Mientras tanto hablo con una voz normal · se renueva a las 9:00', '#F5B971');
         this.setState({ premiumPaused: true });
       }));
@@ -194,7 +205,7 @@ export default class NexusApp extends Component {
     this.setState(st => ({
       provider: s.provider, model: s.model, providers: s.providers, voiceSel: s.voice, userName: s.userName, persona: s.persona,
       theme: s.theme, quality: s.quality, reduced: s.reduced, autostart: !!s.autostart, hotkey: s.hotkey || st.hotkey,
-      premiumPaused: !!s.premiumPaused,
+      premiumPaused: !!s.premiumPaused, azurePaused: !!s.azurePaused, hasAzure: !!s.hasAzure, azureRegion: s.azureRegion,
       agent: { web: s.agentWeb, files: s.agentFiles, write: s.agentWrite, shell: s.agentShell }, micId: s.micId || '',
       gemini: { tts: s.geminiTts, search: s.geminiSearch, stt: s.geminiStt, fallback: s.geminiFallback },
       lang: s.lang, sliders: { ...st.sliders, speed: s.speed, pitch: s.pitch, volume: s.volume, warmth: s.warmth, formal: s.formal, fx: s.fx },
@@ -207,7 +218,7 @@ export default class NexusApp extends Component {
     this.firstScreen();
   }
   firstScreen() { voice.warmVoices(); if (this.onboarded) this.bootDesktop(); else this.startOnboarding(); }
-  fem() { return ['lyra', 'vega', 'nova', 'aura', 'selene'].includes(this.state.voiceSel); }
+  fem() { return ['lyra', 'vega', 'nova', 'aura', 'selene', 'ximenahd', 'isidora'].includes(this.state.voiceSel); }
   async countMics() {
     try {
       const list = await voice.listMics();
@@ -604,7 +615,7 @@ export default class NexusApp extends Component {
     const L = { butler: `${this.greet()}, ${n}. Su escritorio está listo cuando usted lo esté.`, direct: `${N}: todo listo. Usted dirá.`, sarcastic: `Oh, ${n}, otra vez usted. Supongo que hoy tampoco hay ganas de trabajar.` };
     this.say(L[this.state.persona] || L.butler);
   }
-  sampleText(v) { return `Hola, ${this.name()}. Soy ${v.name.replace(' ✦', '')}, y así sonaré a partir de ahora.`; }
+  sampleText(v) { return `Hola, ${this.name()}. Soy ${v.name.replace(/ [✦◆]$/, '')}, y así sonaré a partir de ahora.`; }
   // the free voices' samples are generated ahead so the first click plays at once
   prepareSamples() {
     this.VOICES.filter(v => !v.premium).forEach(v => voice.prefetch(this.sampleText(v), v.id));
@@ -614,12 +625,19 @@ export default class NexusApp extends Component {
   premiumLocked(id) {
     const v = this.VOICES.find(x => x.id === id);
     if (!v || !v.premium) return false;
+    const voiceName = v.name.replace(/ [✦◆]$/, '');
+    if (v.premium === 'azure') {
+      if (this.state.hasAzure) return false;
+      this.interrupt();
+      this.setState({ keyAsk: { voice: id, voiceName, engine: 'Azure', region: this.state.azureRegion || 'westeurope' }, keyAskInput: '' });
+      return true;
+    }
     if ((this.state.providers.Gemini || {}).hasKey) {
       if (!(this.state.gemini || {}).tts) this.setGemini('tts', true);
       return false;
     }
     this.interrupt();
-    this.setState({ keyAsk: { voice: id, voiceName: v.name.replace(' ✦', '') }, keyAskInput: '' });
+    this.setState({ keyAsk: { voice: id, voiceName, engine: 'Gemini' }, keyAskInput: '' });
     return true;
   }
   async keyAskSave() {
@@ -627,11 +645,11 @@ export default class NexusApp extends Component {
     if (!k || !api) return;
     if (!key) { this.setState({ keyAsk: { ...k, error: 'PEGUE PRIMERO LA CLAVE' } }); return; }
     this.setState({ keyAsk: { ...k, saving: true, error: '' } });
-    const ok = await api.testKey('Gemini', key);
-    if (!ok) { this.setState({ keyAsk: { ...k, saving: false, error: 'GOOGLE NO ACEPTA ESA CLAVE · REVÍSELA' } }); return; }
-    try { await api.setKey('Gemini', key); } catch { this.setState({ keyAsk: { ...k, saving: false, error: 'NO SE HA PODIDO GUARDAR' } }); return; }
+    const ok = await api.testKey(k.engine, key, k.region);
+    if (!ok) { this.setState({ keyAsk: { ...k, saving: false, error: k.engine === 'Azure' ? 'AZURE NO ACEPTA ESA CLAVE EN ESA REGIÓN · REVÍSELAS' : 'GOOGLE NO ACEPTA ESA CLAVE · REVÍSELA' } }); return; }
+    try { await api.setKey(k.engine, key); } catch { this.setState({ keyAsk: { ...k, saving: false, error: 'NO SE HA PODIDO GUARDAR' } }); return; }
     this.setState({ keyAsk: null, keyAskInput: '' });
-    this.setGemini('tts', true);
+    if (k.engine === 'Azure') this.save({ azureRegion: k.region }); else this.setGemini('tts', true);
     await this.loadSettings();
     this.selectVoice(k.voice);
   }
@@ -652,9 +670,10 @@ export default class NexusApp extends Component {
   }
   providerInfo(p) {
     return {
+      Auto: { name: 'Automático · recomendado', url: 'https://cloud.cerebras.ai', note: 'Reparte las preguntas entre Cerebras y Groq (gratis) y cambia sola si una llega a su límite: unos 1,4 millones de tokens al día con las dos claves.', help: 'Ponga al menos una clave; con las dos casi no hay límites. Ambas son gratis y sin tarjeta.' },
       Gemini: { name: 'Gemini', url: 'https://aistudio.google.com/apikey', note: 'Google Gemini Flash-Lite: 500 preguntas al día. Gasta el cupo de Gemini, el mismo que las voces premium.', help: 'Gratis y sin tarjeta en aistudio.google.com → Get API key. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos.' },
       Groq: { name: 'Groq · recomendado', url: 'https://console.groq.com/keys', note: 'Gratis y muy rápido: unas 1.000 preguntas al día. También entiende su voz, así que el cupo de Gemini queda para lo que usted elija.', help: 'Gratis y sin tarjeta en console.groq.com → API Keys. También se usa para entender su voz.' },
-      Cerebras: { name: 'Cerebras', url: 'https://cloud.cerebras.ai', note: 'Alternativa gratuita con buen margen por minuto.', help: 'Gratis en cloud.cerebras.ai. Para entender su voz hace falta además la clave de Gemini o Groq.' },
+      Cerebras: { name: 'Cerebras', url: 'https://cloud.cerebras.ai', note: 'Gratis: 1 millón de tokens al día, el que más margen da.', help: 'Gratis y sin tarjeta en cloud.cerebras.ai → API Keys. Para entender su voz hace falta además la de Groq.' },
       Ollama: { name: 'Local · sin clave', url: 'https://ollama.com/download', note: 'Funciona en su PC sin clave ni internet. Hay que instalar Ollama y descargar un modelo (unos 5 GB).', help: 'Instale Ollama y ejecute «ollama pull qwen2.5:7b». Para entender su voz hace falta la clave de Gemini o Groq.' },
     }[p] || { name: p, url: '', note: '', help: '' };
   }
@@ -670,8 +689,15 @@ export default class NexusApp extends Component {
   }
   setName(n) { this.setState({ userName: n }); this.saveLater({ userName: n.trim() || 'señor' }); }
   pickProvider(p) {
+    if (p === 'Auto') { this.setState({ provider: p, keyInput: '' }); this.save({ provider: p }); return; }
     const models = (this.state.providers[p] || {}).models || [];
     this.setState({ provider: p, model: models[0], keyInput: '' }); this.save({ provider: p, model: models[0] });
+  }
+  // which service's key the key field edits (in Auto mode the user picks it)
+  keyProv() {
+    const S = this.state;
+    if (S.provider !== 'Auto') return S.provider;
+    return S.keyTarget || ['Cerebras', 'Groq'].find(p => !(S.providers[p] || {}).hasKey) || 'Cerebras';
   }
   cycleModel() {
     const models = (this.state.providers[this.state.provider] || {}).models || [];
@@ -682,7 +708,7 @@ export default class NexusApp extends Component {
   async saveKey() {
     const key = this.state.keyInput.trim(); if (!key || !api) return;
     try {
-      await api.setKey(this.state.provider, key);
+      await api.setKey(this.keyProv(), key);
     } catch {
       this.fail('No he podido guardar la clave');
       return;
@@ -741,7 +767,7 @@ export default class NexusApp extends Component {
   seg(active) { return { bg: active ? 'rgb(var(--acc) / .28)' : 'transparent', color: active ? '#FFF6E9' : 'rgba(226,218,240,.6)' }; }
 
   renderVals() {
-    const S = this.state, th = this.TH[S.theme] || this.TH.nexus, L = this.layout();
+    const S = this.state, th = this.TH[S.theme] || this.TH.nexus, L = this.layout(), kp = this.keyProv();
     const d = new Date(S.now), hh = String(d.getHours()).padStart(2, '0'), mm = String(d.getMinutes()).padStart(2, '0');
     const dig = c => ({ num: true, sep: false, ty: (-(+c)) + 'em' });
     const clockDigits = [dig(hh[0]), dig(hh[1]), { sep: true, num: false }, dig(mm[0]), dig(mm[1])];
@@ -794,7 +820,8 @@ export default class NexusApp extends Component {
       keyAskChange: e => this.setState({ keyAskInput: e.target.value }),
       keyAskKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.keyAskSave(); } },
       keyAskSave: () => this.keyAskSave(), keyAskCancel: () => this.setState({ keyAsk: null }),
-      keyAskOpen: () => window.open('https://aistudio.google.com/apikey'),
+      keyAskOpen: () => window.open(S.keyAsk && S.keyAsk.engine === 'Azure' ? 'https://portal.azure.com/#create/Microsoft.CognitiveServicesSpeechServices' : 'https://aistudio.google.com/apikey'),
+      keyAskRegion: e => this.setState(s => ({ keyAsk: { ...s.keyAsk, region: e.target.value } })),
       confirm: S.confirm, confirmYes: () => this.answerConfirm(true), confirmNo: () => this.answerConfirm(false),
       micOpts: (S.micList || []).map(m => ({ id: m.id, label: m.label, on: !!m.id && m.id === S.micId, pick: () => this.pickMic(m.id) })), micDefault: () => this.pickMic(''), micTesting: !!S.micTesting,
       geminiToggles: (S.providers.Gemini || {}).hasKey ? [
@@ -834,14 +861,14 @@ export default class NexusApp extends Component {
       nextTrack: () => this.setState({ musicPos: 0 }), prevTrack: () => this.setState({ musicPos: 0 }),
       isChat: P === 'chat' && !S.overlay, isVoice: P === 'voice' && !S.overlay, isRoutines: P === 'routines' && !S.overlay, isSystem: P === 'system' && !S.overlay, isMusic: P === 'music' && !S.overlay, isMemory: P === 'memory' && !S.overlay, isSettings: P === 'settings' && !S.overlay,
       closePanel: () => this.openPanel(null),
-      chatRef: this.chatRef, modelName: S.model,
+      chatRef: this.chatRef, modelName: S.provider === 'Auto' ? 'Automático' : S.model,
       chatMsgs: S.chat.map((m, i) => ({ ...m, isUser: m.role === 'user', isNexus: m.role === 'nexus', isAction: m.role === 'action', shown: m.shown !== undefined ? m.shown : m.text,
         anim: 'nx-in 520ms cubic-bezier(.16,1,.3,1) ' + (m.fresh ? 0 : 120 + i * 40) + 'ms both', items: (m.items || []).map((t, j) => ({ t, delay: (m.fresh ? 200 : 400 + i * 40) + j * 180 + 'ms' })) })),
       chatInput: S.chatInput, onChatInput: e => this.setState({ chatInput: e.target.value }),
       onChatKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.sendChat(); } }, onChatSend: () => this.sendChat(),
       showSlash: S.chatInput.startsWith('/'),
       slashCmds: this.CMDS.filter(c => c.cmd.startsWith(S.chatInput.split(' ')[0]) || S.chatInput === '/').map(c => ({ ...c, pick: () => this.setState({ chatInput: c.cmd + ' ' }) })),
-      voiceCards: this.VOICES.map((v, i) => { const sel = S.voiceSel === v.id; const noKey = v.premium && !(S.providers.Gemini || {}).hasKey; return { ...v, desc: noKey ? v.desc.replace('premium', 'premium · con clave gratis') : v.premium && !(S.gemini || {}).tts ? v.desc.replace('premium', 'premium · usa cupo Gemini') : v.premium && S.premiumPaused ? 'Cupo de hoy agotado · suena con voz normal hasta las 9:00' : v.desc, selected: sel, state: S.preview === v.id ? (S.previewLoading ? 'thinking' : 'speaking') : 'idle',
+      voiceCards: this.VOICES.map((v, i) => { const sel = S.voiceSel === v.id; const az = v.premium === 'azure', noKey = v.premium && (az ? !S.hasAzure : !(S.providers.Gemini || {}).hasKey); return { ...v, desc: noKey ? v.desc.replace('premium', az ? 'Azure · con clave gratis' : 'premium · con clave gratis') : az && S.azurePaused ? 'Cupo del mes agotado · suena con voz normal' : az ? v.desc.replace('premium', 'Azure') : v.premium && !(S.gemini || {}).tts ? v.desc.replace('premium', 'premium · usa cupo Gemini') : v.premium && S.premiumPaused ? 'Cupo de hoy agotado · suena con voz normal hasta las 9:00' : v.desc, selected: sel, state: S.preview === v.id ? (S.previewLoading ? 'thinking' : 'speaking') : 'idle',
         bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.1)', delay: (140 + i * 40) + 'ms',
         previewLabel: S.preview === v.id ? (S.previewLoading ? '··· CARGANDO' : '■ SONANDO…') : '▶ ESCUCHAR',
         select: () => this.selectVoice(v.id), preview: e => { e.stopPropagation(); this.previewVoice(v.id); },
@@ -868,12 +895,13 @@ export default class NexusApp extends Component {
       factItems: facts.map((f, i) => ({ ...f, delay: (160 + i * 40) + 'ms', del: () => this.setState(s => ({ facts: s.facts.filter(x => x.id !== f.id) })) })),
       learnT: { bg: this.toggleT(S.learn).tBg, border: this.toggleT(S.learn).tBorder, left: this.toggleT(S.learn).tLeft }, toggleLearn: () => this.setState(s => ({ learn: !s.learn })),
       forgetAll: () => { this.setState({ mem: [], facts: [] }); this.say(`Hecho, ${this.name()}. He olvidado todo lo que sabía de usted.`); },
-      providerOpts: Object.keys(S.providers).map(p => ({ label: p, ...this.seg(S.provider === p), pick: () => this.pickProvider(p) })),
+      providerOpts: ['Auto', ...Object.keys(S.providers)].map(p => ({ label: p === 'Auto' ? 'Auto' : p, ...this.seg(S.provider === p), pick: () => this.pickProvider(p) })),
       cycleModel: () => this.cycleModel(),
-      keyInput: S.keyInput, keyType: S.showKey ? 'text' : 'password', keyDisabled: !(S.providers[S.provider] || {}).needsKey,
-      keyPlaceholder: !(S.providers[S.provider] || {}).needsKey ? 'No necesaria · Ollama en http://localhost:11434' : (S.providers[S.provider] || {}).hasKey ? '•••••••••••• guardada · pegue otra para cambiarla' : 'Pegue aquí su clave de ' + S.provider,
-      keyStatus: !(S.providers[S.provider] || {}).needsKey ? 'LOCAL' : (S.providers[S.provider] || {}).hasKey ? 'GUARDADA' : 'FALTA', keyColor: !(S.providers[S.provider] || {}).needsKey || (S.providers[S.provider] || {}).hasKey ? '#34D399' : '#F5B971',
-      keyHelp: this.providerInfo(S.provider).help,
+      keyInput: S.keyInput, keyType: S.showKey ? 'text' : 'password', keyDisabled: !(S.providers[kp] || {}).needsKey,
+      keyPlaceholder: !(S.providers[kp] || {}).needsKey ? 'No necesaria · Ollama en http://localhost:11434' : (S.providers[kp] || {}).hasKey ? '•••••••••••• guardada · pegue otra para cambiarla' : 'Pegue aquí su clave de ' + kp,
+      keyStatus: !(S.providers[kp] || {}).needsKey ? 'LOCAL' : (S.providers[kp] || {}).hasKey ? 'GUARDADA' : 'FALTA', keyColor: !(S.providers[kp] || {}).needsKey || (S.providers[kp] || {}).hasKey ? '#34D399' : '#F5B971',
+      keyHelp: S.provider === 'Auto' ? this.providerInfo(kp).help : this.providerInfo(S.provider).help,
+      keyTargets: S.provider === 'Auto' ? ['Cerebras', 'Groq', 'Gemini'].map(p => ({ label: ((S.providers[p] || {}).hasKey ? '✓ ' : '') + p, on: kp === p, pick: () => this.setState({ keyTarget: p, keyInput: '' }) })) : null,
       onKeyInput: e => this.setState({ keyInput: e.target.value }), onKeyEnter: e => { if (e.key === 'Enter') this.saveKey(); }, saveKey: () => this.saveKey(),
       keyBtn: S.showKey ? 'Ocultar' : 'Mostrar', toggleKey: () => this.setState(s => ({ showKey: !s.showKey })),
       sysToggles: [
@@ -895,9 +923,9 @@ export default class NexusApp extends Component {
       onbCard: S.onb && S.onbStep > 0, onbStep: vs, onbTotal: 5,
       formalOpts: [['usted', 85], ['tú', 20]].map(([label, val]) => ({ label, on: label === 'usted' ? S.sliders.formal >= 50 : S.sliders.formal < 50, pick: () => { this.setState(s => ({ sliders: { ...s.sliders, formal: val } })); this.save({ formal: val }); } })),
       qualityChips: [['ultra', 'Ultra'], ['equilibrado', 'Equilibrado'], ['ahorro', 'Ahorro']].map(([id, label]) => ({ label, on: S.quality === id, pick: () => this.setQuality(id) })),
-      openGroq: () => window.open(this.providerInfo(S.provider).url),
-      providerChips: ['Groq', 'Gemini', 'Ollama'].filter(p => S.providers[p]).map(p => ({ label: this.providerInfo(p).name, on: S.provider === p, pick: () => this.pickProvider(p) })),
-      providerNote: this.providerInfo(S.provider).note, keyNeeded: !!(S.providers[S.provider] || {}).needsKey, keyTitle: 'Clave de ' + S.provider,
+      openGroq: () => window.open(this.providerInfo(kp).url),
+      providerChips: ['Auto', 'Groq', 'Gemini', 'Ollama'].filter(p => S.providers[p]).map(p => ({ label: this.providerInfo(p).name, on: S.provider === p, pick: () => this.pickProvider(p) })),
+      providerNote: this.providerInfo(S.provider).note, keyNeeded: !!(S.providers[kp] || {}).needsKey, keyTitle: 'Clave de ' + kp,
       hotkeyText: this.hotkeyLabel(),
       onbToggles: [
         { name: 'Iniciar con Windows', note: 'Me abro sola al encender el PC', on: S.autostart, onClick: () => this.setAutostart(!S.autostart) },

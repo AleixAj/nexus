@@ -61,6 +61,13 @@ export default function SettingsPanel({ v }: { v: any }) {
                   {v.keyStatus}
                 </span>
               </div>
+              {v.keyTargets && (
+                <div style={{ display: "flex", gap: "6px" }}>
+                  {v.keyTargets.map(o => (
+                    <button key={o.label} onClick={o.pick} style={{ height: "28px", padding: "0 12px", borderRadius: "999px", cursor: "pointer", fontSize: "12.5px", border: `1px solid ${o.on ? "rgb(var(--acc2) / .6)" : "rgba(196,181,253,.18)"}`, background: o.on ? "rgb(var(--acc) / .26)" : "rgba(255,255,255,.03)", color: "rgba(241,234,248,.9)" }}>{o.label}</button>
+                  ))}
+                </div>
+              )}
               <div style={{ display: "flex", alignItems: "center", gap: "8px", height: "44px", padding: "0 6px 0 14px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.16)" }}>
                 <input type={v.keyType} value={v.keyInput} onChange={v.onKeyInput} onKeyDown={v.onKeyEnter} disabled={v.keyDisabled} placeholder={v.keyPlaceholder} spellCheck={false} style={{ flex: "1", minWidth: 0, background: "none", border: "none", outline: "none", fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", color: "rgba(241,234,248,.9)" }} />
                 <button onClick={v.toggleKey} style={{ height: "32px", padding: "0 12px", borderRadius: "8px", border: "1px solid rgba(196,181,253,.2)", background: "transparent", color: "rgba(226,218,240,.75)", fontSize: "12.5px", cursor: "pointer" }}>

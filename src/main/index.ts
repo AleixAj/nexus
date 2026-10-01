@@ -1,7 +1,7 @@
 import { app, BrowserWindow, Menu, Notification, Tray, globalShortcut, ipcMain, nativeImage, screen, session, shell, type IpcMainInvokeEvent } from 'electron'
 import { join } from 'path'
 import { PROVIDERS, getKey, loadSettings, saveSettings, setKey } from './settings'
-import { geminiVoicesPaused, isPremium, onGeminiQuota, speak, warmVoices } from './tts'
+import { azureVoicesPaused, geminiVoicesPaused, isPremium, onAzureQuotaOut, onGeminiQuota, speak, speakDetailed, warmVoices } from './tts'
 import { createHash } from 'crypto'
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import { ask, abort, transcribe } from './brain'
@@ -144,8 +144,15 @@ function answerConfirm(cid: number, ok: boolean) {
 }
 
 // true if the service accepts the key (lists its models)
-async function testKey(provider: string, key: string) {
+async function testKey(provider: string, key: string, region = '') {
   if (!key) return false
+  if (provider === 'Azure') {
+    if (!/^[a-z0-9]+$/.test(region)) return false
+    try {
+      const res = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/voices/list`, { signal: AbortSignal.timeout(10000), headers: { 'Ocp-Apim-Subscription-Key': key } })
+      return res.ok
+    } catch { return true }
+  }
   const url = provider === 'Gemini' ? 'https://generativelanguage.googleapis.com/v1beta/models?pageSize=1'
     : provider === 'Groq' ? 'https://api.groq.com/openai/v1/models'
     : provider === 'Cerebras' ? 'https://api.cerebras.ai/v1/models' : ''
@@ -175,12 +182,14 @@ function registerIpc() {
     ...loadSettings(),
     hotkey: HOTKEY,
     premiumPaused: geminiVoicesPaused(),
+    azurePaused: azureVoicesPaused(),
+    hasAzure: !!getKey('Azure'),
     autostart: app.getLoginItemSettings().openAtLogin,
     providers: Object.fromEntries(Object.entries(PROVIDERS).map(([k, p]) => [k, { models: p.models, needsKey: p.needsKey, hasKey: !!getKey(k) }]))
   }))
   handle('settings:set', (_e, patch) => saveSettings(patch && typeof patch === 'object' ? patch : {}))
   handle('key:set', (_e, provider, key) => setKey(str(provider, 40), str(key, 400)))
-  handle('key:test', (_e, provider, key) => testKey(str(provider, 40), str(key, 400).trim()))
+  handle('key:test', (_e, provider, key, region) => testKey(str(provider, 40), str(key, 400).trim(), str(region, 40)))
 
   handle('tts:speak', (_e, text) => {
     const s = loadSettings()
@@ -193,9 +202,9 @@ function registerIpc() {
     const dir = join(app.getPath('userData'), 'voice-samples')
     const file = join(dir, createHash('sha1').update(JSON.stringify([str(text, 300), o])).digest('hex') + '.bin')
     try { return await readFile(file) } catch { /* not cached yet */ }
-    const audio = await speak(str(text, 300), o)
-    // a premium voice that fell back to Microsoft (no quota) is not cached as the premium sample
-    if (!isPremium(o.voice) || audio.subarray(0, 4).toString() === 'RIFF') {
+    const { audio, premium } = await speakDetailed(str(text, 300), o)
+    // a premium voice that fell back to a regular one (no key or no quota) is not cached as its sample
+    if (!isPremium(o.voice) || premium) {
       mkdir(dir, { recursive: true }).then(() => writeFile(file, audio)).catch(() => {})
     }
     return audio
@@ -262,7 +271,8 @@ if (!app.requestSingleInstanceLock()) {
     session.defaultSession.setPermissionRequestHandler((wc, permission, cb) => cb(permission === 'media' && wc === win?.webContents))
 
     registerIpc()
-    onGeminiQuota(() => BrowserWindow.getAllWindows().forEach(w => w.webContents.send('tts:quota')))
+    onGeminiQuota(() => BrowserWindow.getAllWindows().forEach(w => w.webContents.send('tts:quota', 'Gemini')))
+    onAzureQuotaOut(() => BrowserWindow.getAllWindows().forEach(w => w.webContents.send('tts:quota', 'Azure')))
     createTray()
     createWindow(loadSettings().mode === 'wallpaper' ? 'wallpaper' : 'window')
 

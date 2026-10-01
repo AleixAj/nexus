@@ -12,37 +12,42 @@ const PERSONAS: Record<string, string> = {
 }
 
 const MAX_ROUNDS = 8
-const MAX_HISTORY = 16
-// tool results kept in the conversation after the turn ends (the free tier counts every token)
-const KEEP_TOOL_CHARS = 600
+// The free tiers count tokens per minute and per day, so every request is kept small:
+// a short history, trimmed old results and a prompt prefix that never changes (cached = free on Groq)
+const MAX_HISTORY = 10
+const KEEP_TOOL_CHARS = 400
+const KEEP_ANSWER_CHARS = 900
+const MAX_ANSWER_TOKENS = 1200
 
 function systemPrompt() {
   const s = loadSettings()
-  const now = new Date().toLocaleString('es-ES', { dateStyle: 'full', timeStyle: 'short' })
   return [
     'Eres NEXUS, un agente de IA que vive en el ordenador Windows del usuario y le ayuda con lo que necesite.',
     PERSONAS[s.persona] || PERSONAS.butler,
     `Llama al usuario «${s.userName}».`,
-    ['lyra', 'vega', 'nova', 'aura', 'selene'].includes(s.voice) ? 'Tu voz es femenina: habla de ti misma en femenino (encantada, lista…).' : 'Tu voz es masculina: habla de ti mismo en masculino.',
+    ['lyra', 'vega', 'nova', 'aura', 'selene', 'ximenahd', 'isidora'].includes(s.voice) ? 'Tu voz es femenina: habla de ti misma en femenino (encantada, lista…).' : 'Tu voz es masculina: habla de ti mismo en masculino.',
     s.lang.startsWith('en') ? 'Answer in British English, whatever language the user writes in.' : s.lang === 'es-MX' ? 'Responde en español de México.' : 'Responde en español de España.',
     s.formal >= 50 ? 'Trata al usuario de usted.' : 'Tutea al usuario, con un registro cercano.',
     s.warmth >= 60 ? 'Tono cálido y amable.' : s.warmth <= 30 ? 'Tono seco y profesional.' : '',
     '',
     'CÓMO TRABAJAS',
-    '- Usa las herramientas en vez de explicar cómo hacer las cosas. Encadena varias si hace falta (buscar, leer, analizar) antes de responder.',
-    s.agentWeb ? '- Para actualidad, precios, resultados, noticias o cualquier dato que pueda haber cambiado o que no sepas con seguridad, usa web_search. No inventes datos: si no lo encuentras, dilo.' : '- No tienes acceso a internet: si te preguntan por actualidad, avisa de que tu información puede estar desfasada.',
-    s.agentFiles ? `- Carpetas del usuario: ${userFolders()}. Antes de modificar un archivo, léelo.` : '- No tienes permiso para mirar los archivos del usuario.',
-    s.agentWrite || s.agentShell ? '- Las acciones que modifican el equipo piden confirmación al usuario; si la deniega, no insistas y ofrece otra opción. Nunca borres nada que no te hayan pedido borrar.' : '',
+    '- Usa herramientas en vez de explicar cómo hacer las cosas; encadénalas si hace falta. Solo úsalas si aportan algo: para charla, responde directamente.',
+    s.agentWeb ? '- Actualidad, precios, resultados o datos que puedan haber cambiado: web_search. No inventes datos.' : '- Sin internet: avisa de que tu información puede estar desfasada.',
+    s.agentFiles ? `- Carpetas del usuario: ${userFolders()}. Lee un archivo antes de modificarlo.` : '- No puedes ver los archivos del usuario.',
+    s.agentWrite || s.agentShell ? '- Lo que modifica el equipo pide permiso al usuario; si lo deniega, no insistas. Nunca borres nada que no te pidan.' : '',
+    '- Música: usa la herramienta spotify (app de escritorio), nunca la web de Spotify.',
     '',
     'CÓMO RESPONDES',
-    '- Tus respuestas se leen en voz alta y se muestran en un chat.',
-    '- Para charla y respuestas simples: 1-3 frases naturales, sin formato.',
-    '- Para respuestas con datos (listas, análisis, resultados de búsqueda): empieza con 1-2 frases que resuman lo importante (eso es lo que se lee en voz alta), deja una línea en blanco y después el detalle en markdown sencillo (listas con "-", **negritas**). Si buscaste en internet, termina con las fuentes.',
-    '- Sin emojis. No leas URLs largas en la parte hablada.',
-    '',
-    `Fecha y hora actual: ${now}.`,
-    worldSummary()
+    '- Se lee en voz alta y se muestra en un chat. Charla: 1-3 frases, sin formato.',
+    '- Respuestas con datos: 1-2 frases de resumen (se leen), línea en blanco y el detalle en markdown sencillo. Si buscaste en internet, termina con las fuentes.',
+    '- Sin emojis ni URLs en la parte hablada.'
   ].filter(s => s !== undefined).join('\n').replace(/\n{3,}/g, '\n\n')
+}
+
+// Clock and place travel with the user's message, after the cached prefix
+function contextNote() {
+  const now = new Date().toLocaleString('es-ES', { dateStyle: 'full', timeStyle: 'short' })
+  return `[Contexto: ${now}. ${worldSummary()}]`
 }
 
 function toolsFor() {
@@ -75,7 +80,10 @@ function trim(h: Msg[]) {
   let out = h.slice(-MAX_HISTORY)
   const first = out.findIndex(m => m.role === 'user')
   out = first < 0 ? [] : out.slice(first)
-  return out.map(m => m.role === 'tool' && m.content && m.content.length > KEEP_TOOL_CHARS ? { ...m, content: m.content.slice(0, KEEP_TOOL_CHARS) + ' …' } : m)
+  return out.map(m =>
+    m.role === 'tool' && m.content && m.content.length > KEEP_TOOL_CHARS ? { ...m, content: m.content.slice(0, KEEP_TOOL_CHARS) + ' …' }
+    : m.role === 'assistant' && m.content && m.content.length > KEEP_ANSWER_CHARS ? { ...m, content: m.content.slice(0, KEEP_ANSWER_CHARS) + ' …' }
+    : m)
 }
 
 const aborted = () => Object.assign(new Error('Aborted'), { name: 'AbortError' })
@@ -101,27 +109,69 @@ export function ask(text: string, h: Handlers): Promise<string> {
   return run
 }
 
+// ---------- which AI answers ----------
+// "Auto" spreads the questions over every free service the user has a key for: when one hits a
+// limit (even the per-minute one) the next takes over at once, and the tired one rests for a while.
+type Target = { name: string; url: string; key: string; model: string }
+
+const resting = new Map<string, number>() // "provider/model" -> rest until (ms)
+const restKey = (t: Target) => t.name + '/' + t.model
+
+let ollamaUp = { at: 0, up: false, model: '' }
+async function ollama(): Promise<Target | null> {
+  if (Date.now() - ollamaUp.at > 60e3) {
+    ollamaUp = { at: Date.now(), up: false, model: '' }
+    try {
+      const j = await (await fetch('http://localhost:11434/api/tags', { signal: AbortSignal.timeout(400) })).json()
+      const names: string[] = (j.models || []).map((m: any) => m.name)
+      const pick = PROVIDERS.Ollama.models.find(m => names.includes(m)) || names[0] || ''
+      ollamaUp = { at: Date.now(), up: !!pick, model: pick }
+    } catch { /* not installed or not running */ }
+  }
+  return ollamaUp.up ? { name: 'Ollama', url: PROVIDERS.Ollama.url, key: '', model: ollamaUp.model } : null
+}
+
+async function targets(s: ReturnType<typeof loadSettings>): Promise<Target[]> {
+  const t = (name: string, model: string): Target | null => {
+    const key = getKey(name)
+    return key ? { name, url: PROVIDERS[name].url, key, model } : null
+  }
+  let list: (Target | null)[]
+  if (s.provider === 'Auto') {
+    list = [
+      t('Cerebras', 'gpt-oss-120b'), // 1M tokens/day free
+      t('Groq', 'openai/gpt-oss-120b'), // 200K/day
+      t('Groq', 'openai/gpt-oss-20b'), // another 200K/day
+      s.geminiFallback ? t('Gemini', 'gemini-3.5-flash-lite') : null,
+      await ollama() // local: no limits at all
+    ]
+  } else if (s.provider === 'Ollama') {
+    list = [{ name: 'Ollama', url: PROVIDERS.Ollama.url, key: '', model: s.model }]
+  } else {
+    const name = Object.hasOwn(PROVIDERS, s.provider) ? s.provider : 'Groq'
+    const small = PROVIDERS[name].models.find(m => m !== s.model && /20b|8b|mini|lite/i.test(m))
+    list = [t(name, s.model), small ? t(name, small) : null, s.geminiFallback && name !== 'Gemini' ? t('Gemini', 'gemini-3.5-flash-lite') : null]
+  }
+  return list.filter((x): x is Target => !!x)
+}
+
 async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise<string> {
   if (ctl.signal.aborted) throw aborted()
   const s = loadSettings()
-  let name = Object.hasOwn(PROVIDERS, s.provider) ? s.provider : 'Gemini'
-  let p = PROVIDERS[name]
-  let key = getKey(name)
-  const tried = new Set([name])
-  if (p.needsKey && !key) throw new Error('NO_KEY')
+  const all = await targets(s)
+  if (!all.length) throw new Error('NO_KEY')
 
   // work on a copy; history only changes if the whole turn succeeds
-  const turn: Msg[] = [...history, { role: 'user', content: text }]
+  const turn: Msg[] = [...history, { role: 'user', content: `${text}\n\n${contextNote()}` }]
   let full = ''
-  let model = s.model
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
     const last = round === MAX_ROUNDS - 1
-    const body = () => JSON.stringify({
+    const body = (model: string) => JSON.stringify({
       model,
       stream: true,
       temperature: 0.5,
-      max_tokens: 2000,
+      max_tokens: MAX_ANSWER_TOKENS,
       // keep thinking short: faster answers and fewer free-tier tokens
       ...(/gpt-oss|gemini/.test(model) ? { reasoning_effort: 'low' } : {}),
       // on the last round force an answer instead of more tool calls
@@ -130,43 +180,55 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
     })
 
     let res: Response | null = null
-    for (let attempt = 0; attempt < 3; attempt++) {
-      try {
-        res = await fetch(p.url + '/chat/completions', {
-          method: 'POST',
-          signal: AbortSignal.any([ctl.signal, AbortSignal.timeout(60000)]),
-          headers: { 'Content-Type': 'application/json', ...(key ? { Authorization: `Bearer ${key}` } : {}) },
-          body: body()
-        })
-      } catch (err: any) {
-        if (ctl.signal.aborted) throw aborted()
-        if (err.name === 'TimeoutError') throw new Error('El modelo tarda demasiado en responder')
-        const code = err.cause?.code
-        if (code === 'ECONNREFUSED' && name === 'Ollama') throw new Error('Ollama no está arrancado')
-        throw new Error(code === 'ENOTFOUND' ? 'Sin conexión a Internet' : 'No se pudo conectar con el modelo')
+    let lastLimit = { daily: false, wait: 0 }
+    for (let pass = 0; pass < 3 && !res?.ok; pass++) {
+      const ready = all.filter(t => (resting.get(restKey(t)) || 0) <= Date.now())
+      if (!ready.length) {
+        // everyone is resting: wait for the first one to come back if it is soon
+        const soonest = Math.min(...all.map(t => resting.get(restKey(t)) || 0)) - Date.now()
+        if (soonest > 45e3) break
+        h.onProgress(`Límite por minuto · espero ${Math.ceil(soonest / 1000)} s`)
+        await sleep(soonest + 300, ctl.signal)
+        continue
       }
-      if (res.status !== 429) break
-      // free tier: wait if it is short, otherwise switch to the smaller model (separate quota)
-      const wait = Math.min(30, Number(res.headers.get('retry-after')) || 8)
-      const fallback = PROVIDERS[name].models.find(m => m !== model && /20b|8b|mini|lite/i.test(m))
-      if (fallback && (wait > 12 || attempt > 0)) {
-        model = fallback
-        h.onProgress('Límite gratuito · uso el modelo rápido')
-      } else {
-        h.onProgress(`Límite gratuito · espero ${wait} s`)
-        await sleep(wait * 1000, ctl.signal)
+      for (const t of ready) {
+        try {
+          res = await fetch(t.url + '/chat/completions', {
+            method: 'POST',
+            signal: AbortSignal.any([ctl.signal, AbortSignal.timeout(60000)]),
+            headers: { 'Content-Type': 'application/json', ...(t.key ? { Authorization: `Bearer ${t.key}` } : {}) },
+            body: body(t.model)
+          })
+        } catch (err: any) {
+          if (ctl.signal.aborted) throw aborted()
+          if (all.length === 1) {
+            if (err.name === 'TimeoutError') throw new Error('El modelo tarda demasiado en responder')
+            const code = err.cause?.code
+            if (code === 'ECONNREFUSED' && t.name === 'Ollama') throw new Error('Ollama no está arrancado')
+            throw new Error(code === 'ENOTFOUND' ? 'Sin conexión a Internet' : 'No se pudo conectar con el modelo')
+          }
+          resting.set(restKey(t), Date.now() + 60e3) // unreachable: try the others
+          res = null
+          continue
+        }
+        if (res.ok) break
+        if (res.status === 429 || res.status >= 500) {
+          const limit = res.status === 429 ? await rateLimit(res) : { daily: false, wait: 30 }
+          lastLimit = limit
+          resting.set(restKey(t), Date.now() + (limit.daily ? 3 * 3600e3 : limit.wait * 1000 + 300))
+          if (ready.length > 1 || all.length > 1) h.onProgress(limit.daily ? `Cupo de ${t.name} agotado · cambio de IA` : `${t.name} ocupada · cambio de IA`)
+          continue
+        }
+        // any other error: with more services available, skip this one for a while
+        if (all.length > 1) { resting.set(restKey(t), Date.now() + 10 * 60e3); console.warn('[brain]', t.name, res.status, (await res.text()).slice(0, 200)); res = null; continue }
+        break // reported below
       }
     }
-    if (!res) throw new Error('No se pudo conectar con el modelo')
-    if (res.status === 429) {
-      // this free tier is used up: continue with another service the user has a key for
-      const alt = [...(s.geminiFallback ? ['Gemini'] : []), 'Groq', 'Cerebras'].find(n => !tried.has(n) && getKey(n))
-      if (!alt) throw new Error('Se ha agotado el límite gratuito por ahora; pruebe en un rato')
-      tried.add(alt)
-      name = alt; p = PROVIDERS[alt]; key = getKey(alt); model = p.models[0]
-      h.onProgress('Cupo agotado · sigo con ' + alt)
-      round--
-      continue
+    if (!res) throw new Error('No se pudo conectar con ninguna IA; revise las claves en Ajustes')
+    if (res.status === 429 || (!res.ok && res.status >= 500)) {
+      throw new Error(lastLimit.daily
+        ? 'Se ha agotado el cupo gratuito de hoy de sus IA. Añada otra clave gratuita en Ajustes (Cerebras da 1 millón de tokens al día) o pruebe más tarde'
+        : 'Las IA gratuitas están saturadas ahora mismo; pruebe en un minuto')
     }
     if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`)
 
@@ -208,6 +270,18 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
   if (ctl.signal.aborted) throw aborted()
   history = trim(turn)
   return full
+}
+
+// Reads a 429: is it the daily quota, and how long to wait (Groq: "Please try again in 1m2.5s")
+async function rateLimit(res: Response) {
+  let msg = ''
+  try { msg = JSON.stringify(await res.json()) } catch { /* no body */ }
+  const daily = /per day|\(TPD\)|\(RPD\)|PerDay|daily/i.test(msg)
+  const m = /try again in (?:(\d+)h)?(?:(\d+)m)?(?:([\d.]+)s)?/i.exec(msg)
+  const fromBody = m ? (+(m[1] || 0)) * 3600 + (+(m[2] || 0)) * 60 + (+(m[3] || 0)) : 0
+  const retryDelay = /"retryDelay":"([\d.]+)s"/.exec(msg) // Gemini
+  const wait = fromBody || (retryDelay ? +retryDelay[1] : 0) || Number(res.headers.get('retry-after')) || 10
+  return { daily: daily || wait > 600, wait }
 }
 
 // Parses an OpenAI-style SSE stream, forwarding text and collecting tool calls

@@ -27,6 +27,7 @@ export type Settings = {
   geminiSearch: boolean
   geminiStt: boolean
   geminiFallback: boolean
+  azureRegion: string
   theme: string
   quality: string
   reduced: boolean
@@ -43,7 +44,8 @@ export const PROVIDERS: Record<string, { url: string; models: string[]; needsKey
 }
 
 const DEFAULTS: Settings = {
-  provider: 'Groq',
+  // Auto: Cerebras + Groq (+ Gemini/Ollama if allowed), switching when one hits a limit
+  provider: 'Auto',
   model: 'openai/gpt-oss-120b',
   voice: 'lyra',
   userName: 'señor',
@@ -68,6 +70,7 @@ const DEFAULTS: Settings = {
   geminiSearch: false,
   geminiStt: false,
   geminiFallback: false,
+  azureRegion: 'westeurope',
   theme: 'nexus',
   quality: 'ultra',
   reduced: false
@@ -94,7 +97,7 @@ function clean(patch: Record<string, unknown>) {
     if (typeof v !== typeof d || (typeof v === 'number' && !Number.isFinite(v))) continue
     out[k] = typeof v === 'string' ? v.slice(0, 80) : v
   }
-  if (out.provider && !Object.hasOwn(PROVIDERS, out.provider as string)) delete out.provider
+  if (out.provider && out.provider !== 'Auto' && !Object.hasOwn(PROVIDERS, out.provider as string)) delete out.provider
   if (out.mode && !['window', 'wallpaper'].includes(out.mode as string)) delete out.mode
   return out
 }
@@ -110,8 +113,11 @@ export function saveSettings(patch: Partial<Settings>): Settings {
 }
 
 // API keys are encrypted with the OS keychain (DPAPI on Windows)
+// services with a key: the AI providers plus Azure (voices only)
+const KEYED = (name: string) => Object.hasOwn(PROVIDERS, name) || name === 'Azure'
+
 export function getKey(provider: string): string {
-  if (!Object.hasOwn(PROVIDERS, provider)) return ''
+  if (!KEYED(provider)) return ''
   const f = keyFile(provider)
   if (!existsSync(f)) return process.env[`${provider.toUpperCase()}_API_KEY`] || ''
   try {
@@ -123,7 +129,7 @@ export function getKey(provider: string): string {
 }
 
 export function setKey(provider: string, key: string) {
-  if (!Object.hasOwn(PROVIDERS, provider)) throw new Error('Proveedor desconocido')
+  if (!KEYED(provider)) throw new Error('Proveedor desconocido')
   if (typeof key !== 'string' || !key.trim() || key.length > 400) throw new Error('Clave no válida')
   if (!safeStorage.isEncryptionAvailable()) throw new Error('El cifrado del sistema no está disponible')
   writeFileSync(keyFile(provider), safeStorage.encryptString(key.trim()))
