@@ -1,6 +1,7 @@
-import { app, safeStorage } from 'electron'
-import { existsSync, readFileSync, renameSync, writeFileSync } from 'fs'
-import { join } from 'path'
+// User settings (settings.json) and the API keys (one encrypted file per service).
+import { safeStorage } from 'electron'
+import { existsSync, readFileSync, writeFileSync } from 'fs'
+import { dataPath, readJson, writeAtomic } from './lib/store'
 
 export type Settings = {
   provider: string
@@ -82,17 +83,10 @@ const DEFAULTS: Settings = {
   reduced: false
 }
 
-const file = () => join(app.getPath('userData'), 'settings.json')
-const keyFile = (provider: string) => join(app.getPath('userData'), `key-${provider.toLowerCase()}.bin`)
+const FILE = 'settings.json'
+const keyFile = (provider: string) => dataPath(`key-${provider.toLowerCase()}.bin`)
 
-export function loadSettings(): Settings {
-  if (!existsSync(file())) return { ...DEFAULTS }
-  try {
-    return { ...DEFAULTS, ...JSON.parse(readFileSync(file(), 'utf8')) }
-  } catch {
-    return { ...DEFAULTS }
-  }
-}
+export const loadSettings = (): Settings => ({ ...DEFAULTS, ...readJson<Partial<Settings>>(FILE, {}) })
 
 // Only known keys with the right type are stored
 function clean(patch: Record<string, unknown>) {
@@ -109,12 +103,7 @@ function clean(patch: Record<string, unknown>) {
 }
 
 export function saveSettings(patch: Partial<Settings>): Settings {
-  let saved = {}
-  try { saved = JSON.parse(readFileSync(file(), 'utf8')) } catch { /* first save */ }
-  // write to a temp file and rename, so a crash never leaves half a JSON
-  const tmp = file() + '.tmp'
-  writeFileSync(tmp, JSON.stringify({ ...saved, ...clean(patch) }, null, 2))
-  renameSync(tmp, file())
+  writeAtomic(FILE, JSON.stringify({ ...readJson(FILE, {}), ...clean(patch) }, null, 2))
   return loadSettings()
 }
 
@@ -139,4 +128,24 @@ export function setKey(provider: string, key: string) {
   if (typeof key !== 'string' || !key.trim() || key.length > 400) throw new Error('Clave no válida')
   if (!safeStorage.isEncryptionAvailable()) throw new Error('El cifrado del sistema no está disponible')
   writeFileSync(keyFile(provider), safeStorage.encryptString(key.trim()))
+}
+
+/** True if the service accepts the key (lists its models). Offline counts as yes, so saving is never blocked. */
+export async function testKey(provider: string, key: string, region = '') {
+  if (!key) return false
+  if (provider === 'Azure') {
+    if (!/^[a-z0-9]+$/.test(region)) return false
+    try {
+      const res = await fetch(`https://${region}.tts.speech.microsoft.com/cognitiveservices/voices/list`, { signal: AbortSignal.timeout(10000), headers: { 'Ocp-Apim-Subscription-Key': key } })
+      return res.ok
+    } catch { return true }
+  }
+  const url = provider === 'Gemini' ? 'https://generativelanguage.googleapis.com/v1beta/models?pageSize=1'
+    : provider === 'Groq' ? 'https://api.groq.com/openai/v1/models'
+    : provider === 'Cerebras' ? 'https://api.cerebras.ai/v1/models' : ''
+  if (!url) return true
+  try {
+    const res = await fetch(url, { signal: AbortSignal.timeout(10000), headers: provider === 'Gemini' ? { 'x-goog-api-key': key } : { Authorization: `Bearer ${key}` } })
+    return res.ok
+  } catch { return true }
 }

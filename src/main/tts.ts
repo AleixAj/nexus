@@ -6,24 +6,27 @@ import { getKey, loadSettings } from './settings'
 // Spanish with a neutral accent. `gemini` marks the premium voices (Gemini TTS),
 // which fall back to the Microsoft voice when there is no Gemini key or its free quota runs out.
 // `azure` marks voices of Azure Speech (free 500K characters/month): an HD voice when the plan allows it, otherwise its regular version
-type Voice = { es: string; mx: string; en: string; rate: number; pitch: number; gemini?: string; azure?: { hd?: string; std: string } }
+type Voice = { female?: boolean; es: string; mx: string; en: string; rate: number; pitch: number; gemini?: string; azure?: { hd?: string; std: string } }
 
 const VOICES: Record<string, Voice> = {
-  lyra: { es: 'es-ES-XimenaNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-SoniaNeural', rate: 0, pitch: 0 },
-  vega: { es: 'en-US-EmmaMultilingualNeural', mx: 'en-US-EmmaMultilingualNeural', en: 'en-US-EmmaMultilingualNeural', rate: 0, pitch: 0 },
-  nova: { es: 'es-ES-ElviraNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-LibbyNeural', rate: 0, pitch: 0 },
-  aura: { es: 'en-US-AvaMultilingualNeural', mx: 'en-US-AvaMultilingualNeural', en: 'en-US-AvaMultilingualNeural', rate: 0, pitch: 0, gemini: 'Sulafat' },
+  lyra: { female: true, es: 'es-ES-XimenaNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-SoniaNeural', rate: 0, pitch: 0 },
+  vega: { female: true, es: 'en-US-EmmaMultilingualNeural', mx: 'en-US-EmmaMultilingualNeural', en: 'en-US-EmmaMultilingualNeural', rate: 0, pitch: 0 },
+  nova: { female: true, es: 'es-ES-ElviraNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-LibbyNeural', rate: 0, pitch: 0 },
+  aura: { female: true, es: 'en-US-AvaMultilingualNeural', mx: 'en-US-AvaMultilingualNeural', en: 'en-US-AvaMultilingualNeural', rate: 0, pitch: 0, gemini: 'Sulafat' },
   orion: { es: 'es-ES-AlvaroNeural', mx: 'es-MX-JorgeNeural', en: 'en-GB-RyanNeural', rate: -4, pitch: -6 },
   kairo: { es: 'en-US-AndrewMultilingualNeural', mx: 'en-US-AndrewMultilingualNeural', en: 'en-US-AndrewMultilingualNeural', rate: 0, pitch: 0 },
   atlas: { es: 'en-US-BrianMultilingualNeural', mx: 'en-US-BrianMultilingualNeural', en: 'en-US-BrianMultilingualNeural', rate: 0, pitch: 0 },
   zenit: { es: 'en-US-AndrewMultilingualNeural', mx: 'en-US-AndrewMultilingualNeural', en: 'en-US-AndrewMultilingualNeural', rate: 0, pitch: 0, gemini: 'Charon' },
-  selene: { es: 'es-ES-XimenaNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-SoniaNeural', rate: 0, pitch: 0, gemini: 'Despina' },
+  selene: { female: true, es: 'es-ES-XimenaNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-SoniaNeural', rate: 0, pitch: 0, gemini: 'Despina' },
   draco: { es: 'es-ES-AlvaroNeural', mx: 'es-MX-JorgeNeural', en: 'en-GB-RyanNeural', rate: 0, pitch: 0, gemini: 'Algieba' },
-  ximenahd: { es: 'es-ES-XimenaNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-SoniaNeural', rate: 0, pitch: 0, azure: { hd: 'es-es-Ximena:DragonHDLatestNeural', std: 'es-ES-XimenaMultilingualNeural' } },
+  ximenahd: { female: true, es: 'es-ES-XimenaNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-SoniaNeural', rate: 0, pitch: 0, azure: { hd: 'es-es-Ximena:DragonHDLatestNeural', std: 'es-ES-XimenaMultilingualNeural' } },
   tristan: { es: 'es-ES-AlvaroNeural', mx: 'es-MX-JorgeNeural', en: 'en-GB-RyanNeural', rate: 0, pitch: 0, azure: { hd: 'es-es-Tristan:DragonHDLatestNeural', std: 'es-ES-TristanMultilingualNeural' } },
-  isidora: { es: 'es-ES-ElviraNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-LibbyNeural', rate: 0, pitch: 0, azure: { std: 'es-ES-IsidoraMultilingualNeural' } },
+  isidora: { female: true, es: 'es-ES-ElviraNeural', mx: 'es-MX-DaliaNeural', en: 'en-GB-LibbyNeural', rate: 0, pitch: 0, azure: { std: 'es-ES-IsidoraMultilingualNeural' } },
   dario: { es: 'es-ES-AlvaroNeural', mx: 'es-MX-JorgeNeural', en: 'en-GB-RyanNeural', rate: 0, pitch: 0, azure: { std: 'es-ES-DarioNeural' } }
 }
+
+/** Female voices speak of themselves in the feminine (the system prompt needs it). */
+export const isFemaleVoice = (id: string) => !!VOICES[id]?.female
 
 export type SpeakOptions = { voice: string; lang: string; speed: number; pitch: number }
 

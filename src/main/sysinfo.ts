@@ -6,7 +6,7 @@ import { app } from 'electron'
 import { execFile } from 'child_process'
 import { readFile, statfs, writeFile } from 'fs/promises'
 import { join } from 'path'
-import { powershell } from './agent'
+import { powershell } from './lib/powershell'
 
 const GiB = 1073741824
 const run = (file: string, args: string[], timeout = 8000) => new Promise<string>(res =>

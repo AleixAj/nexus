@@ -137,32 +137,49 @@ su cupo gratuito, suenan con una voz de Microsoft. *Efecto IA* añade un toque d
 
 ```
 src/
-  main/                 proceso de Electron (Node)
-    index.ts            ventana, atajo global, IPC y seguridad
-    brain.ts            IA: chat en streaming con herramientas y transcripción (Whisper)
-    agent.ts            herramientas del agente: búsqueda web, archivos, sistema y PowerShell
-    tools.ts            acciones rápidas: apps, webs y teclas multimedia
-    tts.ts              voz neuronal de Microsoft Edge (gratis, sin clave)
-    world.ts            ubicación aproximada, tiempo (Open-Meteo) y efemérides (Wikipedia)
-    wallpaper.ts        modo fondo de escritorio y detección de apps a pantalla completa
-    settings.ts         ajustes en JSON y claves cifradas con safeStorage
-  preload/index.ts      puente seguro entre la interfaz y el proceso principal
+  main/                     proceso de Electron (Node)
+    index.ts                arranque: una sola instancia, ventana, bandeja, atajo y vigilantes
+    window.ts               ventana (normal o fondo de escritorio) y menú de la bandeja
+    ipc.ts                  todo lo que la interfaz puede pedir al proceso principal
+    brain/                  el agente
+      index.ts              bucle pregunta → herramientas → respuesta, historial
+      prompt.ts             instrucciones para la IA (personalidad, reglas, lo que sabe de ti)
+      providers.ts          qué IA responde y cambio automático cuando una llega a su límite
+      stream.ts             lectura de la respuesta en streaming
+    tools/                  herramientas del agente, una lista por tema
+      define.ts             formato común: descripción para la IA + lo que se ejecuta
+      index.ts              registro: qué herramientas están activas según los ajustes
+      apps.ts music.ts web.ts files.ts system.ts memory.ts reminders.ts
+    lib/                    piezas comunes: PowerShell, archivos de datos y texto
+    memory.ts               memoria cifrada: datos sobre ti y conversaciones
+    reminders.ts            recordatorios y alarmas
+    media.ts                lo que suena en Spotify, carátula y letra
+    stt.ts / tts.ts         voz a texto y texto a voz
+    settings.ts             ajustes y claves cifradas
+    sysinfo.ts world.ts wallpaper.ts
+  preload/index.ts          puente seguro entre la interfaz y el proceso principal
   renderer/src/
-    NexusApp.jsx        estado de la app y del núcleo (reposo, escucha, piensa, habla…)
-    services/voice.ts   micrófono con detección de silencio, cola de voz, efecto de IA y audio para el halo
-    services/sfx.ts     sonidos de arranque sintetizados
-    views/BootIntro.tsx intro de arranque
-    views/Onboarding.tsx configuración inicial
-    engine/             motor gráfico en Canvas 2D: galaxia, núcleo, halo y partículas
-    views/              pantallas generadas a partir del diseño
-resources/              iconos de la app y de la bandeja (scripts/make-icon.mjs)
-design/                 diseño original de Claude Design (referencia)
-scripts/                conversor del diseño a componentes React
+    NexusApp.jsx            estado, arranque, posición del núcleo y panel abierto
+    app/constants.js        temas, voces, iconos, textos fijos
+    app/util.js             formatos y colores de interruptores
+    app/features/           comportamiento por tema: conversación, música, memoria, voces, ajustes, arranque
+    app/view/               qué muestra cada panel (un archivo por panel)
+    views/                  los componentes visuales de cada pantalla
+    services/voice.ts       micrófono, cola de voz, efecto de IA y audio para el halo
+    services/sfx.ts         sonidos sintetizados (arranque, avisos)
+    engine/                 motor gráfico en Canvas 2D: galaxia, núcleo, halo y partículas
+resources/                  iconos de la app y de la bandeja
+design/                     diseño original de Claude Design (referencia)
+scripts/                    conversor del diseño e icono
 ```
 
+**Para añadir una herramienta al agente:** se escribe en el archivo de su tema dentro de `src/main/tools/`
+(nombre, descripción, parámetros y la función que la ejecuta) y, si es un archivo nuevo, se añade su lista en
+`tools/index.ts`. Si cambia algo del equipo, se le pone `confirm` y la app pedirá permiso antes de cada uso.
+
 **Tecnologías:** Electron, React, TypeScript, Vite (electron-vite) y Canvas 2D.
-**Servicios externos, todos gratuitos:** Gemini o Groq (IA y voz a texto), DuckDuckGo (búsqueda sin clave), Microsoft Edge TTS (voz),
-Open-Meteo (tiempo), Wikipedia (efemérides) e ipapi.co (ciudad aproximada).
+**Servicios externos, todos gratuitos:** Cerebras, Groq o Gemini (IA y voz a texto), DuckDuckGo (búsqueda sin clave), Microsoft Edge TTS (voz),
+Open-Meteo (tiempo), Wikipedia (efemérides), ipapi.co (ciudad aproximada), iTunes (carátulas) y LRCLIB (letras).
 
 ### Rendimiento
 
@@ -174,8 +191,8 @@ Open-Meteo (tiempo), Wikipedia (efemérides) e ipapi.co (ciudad aproximada).
 ### Seguridad
 
 - La interfaz se ejecuta aislada del sistema (sandbox) y solo puede usar las funciones que expone el preload.
-- La IA no puede ejecutar comandos: solo abre accesos directos del menú Inicio, una lista cerrada de
-  herramientas de Windows y webs `http(s)`.
+- Lo que modifica el equipo (escribir, mover o borrar archivos, PowerShell) pide permiso en cada uso y
+  se puede desactivar en Ajustes. Las apps se abren sin pasar por la consola, así que un nombre nunca ejecuta un comando.
 - Una sola instancia de la app y sin navegación fuera de la interfaz.
 
 ## Pendiente

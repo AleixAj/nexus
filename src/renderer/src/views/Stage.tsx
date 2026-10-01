@@ -10,7 +10,6 @@ import SettingsPanel from './SettingsPanel'
 import Overlay from './Overlay'
 import Onboarding from './Onboarding'
 import Dock from './Dock'
-import Director from './Director'
 import BootIntro from './BootIntro'
 import ConfirmCard from './ConfirmCard'
 import KeyCard from './KeyCard'
@@ -32,7 +31,6 @@ export default function Stage({ v }: { v: any }) {
         <Overlay v={v} />
         <Onboarding v={v} />
         <Dock v={v} />
-        <Director v={v} />
         <ConfirmCard v={v} />
         <KeyCard v={v} />
       </div>

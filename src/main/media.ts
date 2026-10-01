@@ -1,10 +1,9 @@
-// What is playing on the PC (Spotify, browsers…) through Windows' media sessions,
-// its controls, and synced lyrics from LRCLIB (free, no key).
-import { app } from 'electron'
+// What the Spotify desktop app is playing, read from Windows' media sessions (no account
+// needed), its controls, the cover (iTunes catalogue) and synced lyrics (LRCLIB). All free, no keys.
 import { spawn, type ChildProcess } from 'child_process'
 import { writeFileSync } from 'fs'
-import { join } from 'path'
-import { powershell } from './agent'
+import { dataPath } from './lib/store'
+import { powershell } from './lib/powershell'
 
 const COMMON = String.raw`
 $ErrorActionPreference = 'Stop'
@@ -38,12 +37,10 @@ while ($true) {
       $key = "$($s.SourceAppUserModelId)|$($p.Title)|$($p.Artist)|$playing|$($pb.IsShuffleActive)|$($pb.AutoRepeatMode)"
       $seeked = [math]::Abs($pos - $expected) -gt 3
       if ($key -ne $last -or $seeked) {
-        $others = @()
         [pscustomobject]@{
-          app = $s.SourceAppUserModelId; title = $p.Title; artist = $p.Artist; album = $p.AlbumTitle
+          title = $p.Title; artist = $p.Artist; album = $p.AlbumTitle
           playing = $playing; pos = $pos; dur = $dur; shuffle = $pb.IsShuffleActive; repeat = "$($pb.AutoRepeatMode)"
-          others = $others
-        } | ConvertTo-Json -Compress -Depth 4
+        } | ConvertTo-Json -Compress
         [Console]::Out.Flush()
         $last = $key
       }
@@ -54,24 +51,37 @@ while ($true) {
 }
 `
 
-export type MediaState = {
-  none?: boolean; app: string; title: string; artist: string; album: string; playing: boolean
-  pos: number; dur: number; shuffle: boolean; repeat: string; others: { app: string; title: string; artist: string }[]
-}
+export type MediaState = { title: string; artist: string; album: string; playing: boolean; pos: number; dur: number; shuffle: boolean; repeat: string }
+export type MediaExtra = { key: string; cover: string; lyrics: Lyric[] | null }
+type Lyric = { t: number; text: string }
 
 let watcher: ChildProcess | null = null
 let last: MediaState | null = null
+let extra: MediaExtra = { key: '', cover: '', lyrics: null }
 
-function script(name: string, body: string) {
-  const f = join(app.getPath('userData'), name)
-  writeFileSync(f, body, 'utf8')
-  return f
-}
+export const currentMedia = () => last
+export const currentExtra = () => extra
 
-/** Starts watching the media sessions; `onChange` receives every change (cover only when the track changes). */
-export function watchMedia(onChange: (m: MediaState | null) => void) {
+/**
+ * Watches Spotify. `onState` gets every change (play, pause, seek, new song);
+ * `onExtra` gets the cover and lyrics once per song, when they have been found.
+ */
+export function watchMedia(onState: (m: MediaState | null) => void, onExtra: (x: MediaExtra) => void) {
   if (watcher) return
-  const file = script('nexus-media.ps1', WATCH)
+  const changed = async (m: MediaState | null) => {
+    last = m
+    onState(m)
+    if (!m || !m.title) return
+    const key = m.artist + '|' + m.title
+    if (key === extra.key) return
+    extra = { key, cover: '', lyrics: null }
+    const [cover, lyrics] = await Promise.all([coverFor(m.title, m.artist), lyricsFor(m.title, m.artist, m.album, m.dur)])
+    if (extra.key !== key) return // the song changed meanwhile
+    extra = { key, cover, lyrics }
+    onExtra(extra)
+  }
+  const file = dataPath('nexus-media.ps1')
+  writeFileSync(file, WATCH, 'utf8')
   const p = spawn('powershell', ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', file], {
     windowsHide: true, env: { ...process.env, NX_PARENT: String(process.pid) }
   })
@@ -84,18 +94,13 @@ export function watchMedia(onChange: (m: MediaState | null) => void) {
       if (!l.startsWith('{')) continue
       try {
         const m = JSON.parse(l)
-        if (m.none) { last = null; onChange(null); continue }
-        m.others = Array.isArray(m.others) ? m.others : m.others ? [m.others] : []
-        last = m
-        onChange(m)
+        changed(m.none ? null : m)
       } catch { /* partial line */ }
     }
   })
-  p.on('exit', () => { watcher = null; setTimeout(() => watchMedia(onChange), 5000) }) // restart if it dies
+  p.on('exit', () => { watcher = null; setTimeout(() => watchMedia(onState, onExtra), 5000) }) // restart if it dies
   watcher = p
 }
-
-export const currentMedia = () => last
 
 const ACTIONS: Record<string, string> = {
   play_pause: '$s.TryTogglePlayPauseAsync()',
@@ -118,9 +123,9 @@ export async function mediaControl(action: string) {
 // Windows gives the cover as a stream PowerShell 5 cannot read, so it comes from the
 // public iTunes catalogue (free, no key) by artist and title.
 const coverCache = new Map<string, string>()
-export const cleanTitle = (t: string) => t.replace(/\s*[([](with|feat\.?|ft\.?|prod\.?)[^)\]]*[)\]]/gi, '').replace(/\s+-\s+(\d{4} )?(remaster|live|radio edit|versi|en directo).*$/i, '').trim()
+const cleanTitle = (t: string) => t.replace(/\s*[([](with|feat\.?|ft\.?|prod\.?)[^)\]]*[)\]]/gi, '').replace(/\s+-\s+(\d{4} )?(remaster|live|radio edit|versi|en directo).*$/i, '').trim()
 
-export async function coverFor(title: string, artist: string) {
+async function coverFor(title: string, artist: string) {
   const key = (artist + '|' + title).toLowerCase()
   if (coverCache.has(key)) return coverCache.get(key)!
   let url = ''
@@ -138,10 +143,10 @@ export async function coverFor(title: string, artist: string) {
 }
 
 // ---------- lyrics ----------
-const lyricsCache = new Map<string, { t: number; text: string }[] | null>()
+const lyricsCache = new Map<string, Lyric[] | null>()
 
 function parseLrc(lrc: string) {
-  const out: { t: number; text: string }[] = []
+  const out: Lyric[] = []
   for (const line of lrc.split(/\r?\n/)) {
     const m = /^\[(\d+):(\d+(?:\.\d+)?)\](.*)$/.exec(line.trim())
     if (m) out.push({ t: +m[1] * 60 + +m[2], text: m[3].trim() || '♪' })
@@ -150,14 +155,14 @@ function parseLrc(lrc: string) {
 }
 
 /** Synced lyrics for a song (null if LRCLIB does not have them). */
-export async function lyricsFor(title: string, artist: string, album: string, dur: number) {
+async function lyricsFor(title: string, artist: string, album: string, dur: number) {
   const key = `${artist}|${title}`.toLowerCase()
   if (lyricsCache.has(key)) return lyricsCache.get(key)!
   const get = async (url: string) => {
     const r = await fetch(url, { signal: AbortSignal.timeout(8000), headers: { 'User-Agent': 'NEXUS desktop assistant (github.com/AleixAj/nexus)' } })
     return r.ok ? r.json() : null
   }
-  let lines: { t: number; text: string }[] | null = null
+  let lines: Lyric[] | null = null
   try {
     const q = new URLSearchParams({ track_name: cleanTitle(title), artist_name: artist, ...(album ? { album_name: album } : {}), ...(dur ? { duration: String(Math.round(dur)) } : {}) })
     let j: any = await get('https://lrclib.net/api/get?' + q)

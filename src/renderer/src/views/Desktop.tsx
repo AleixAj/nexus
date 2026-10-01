@@ -245,33 +245,6 @@ export default function Desktop({ v }: { v: any }) {
           </div>
         </>)}
       </div>
-      {/* mic */}
-      {v.showMic && (<>
-        <div style={{ position: "absolute", left: "0", right: "0", bottom: "28px", display: "flex", justifyContent: "center", pointerEvents: "none" }}>
-          <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "10px", pointerEvents: "auto", animation: "nx-up 800ms cubic-bezier(.16,1,.3,1) 250ms both" }}>
-            <div style={{ position: "relative", width: "560px", height: "76px", display: "grid", placeItems: "center" }}>
-              <canvas data-nexus-wave="1" style={{ position: "absolute", inset: "16px 0", width: "560px", height: "44px", opacity: ".7" }} />
-              <svg width="112" height="112" viewBox="0 0 112 112" style={{ position: "absolute", left: "224px", top: "-18px", pointerEvents: "none", animation: "nx-spin 30s linear infinite" }}>
-                <circle cx="56" cy="56" r="54" fill="none" strokeWidth="1" strokeDasharray="1 5" style={{ stroke: "rgb(var(--acc2) / .5)" }} />
-              </svg>
-              <svg width="98" height="98" viewBox="0 0 98 98" style={{ position: "absolute", left: "231px", top: "-11px", pointerEvents: "none", animation: "nx-spinr 14s linear infinite" }}>
-                <path d="M49 2a47 47 0 0 1 33 14M49 96a47 47 0 0 1-33-14" fill="none" strokeWidth="1.4" style={{ stroke: "rgb(var(--acc2) / .75)" }} />
-              </svg>
-              {v.micRing && (<>
-                <span style={{ position: "absolute", width: "76px", height: "76px", borderRadius: "50%", border: "1px solid rgb(var(--acc2) / .6)", animation: "nx-ring 1600ms cubic-bezier(.16,1,.3,1) infinite" }}></span>
-              </>)}
-              <button onClick={v.onMic} style={{ position: "relative", width: "76px", height: "76px", borderRadius: "50%", display: "grid", placeItems: "center", cursor: "pointer", color: "#FFF6E9", background: "radial-gradient(circle at 50% 30%, rgb(var(--acc) / .35), rgba(7,5,14,.7) 70%) padding-box, linear-gradient(160deg, rgb(var(--acc2) / .8), rgb(var(--acc) / .1)) border-box", border: "1px solid transparent", backdropFilter: "blur(20px)", boxShadow: "0 0 40px rgb(var(--acc) / .35), inset 0 1px 0 rgba(255,255,255,.2)", transition: "transform 300ms cubic-bezier(.34,1.3,.64,1)" }} className="dc3 dc4">
-                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
-                  <path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3" />
-                </svg>
-              </button>
-            </div>
-            <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "10.5px", letterSpacing: ".24em", color: "rgba(226,218,240,.5)", whiteSpace: "nowrap" }}>
-              {v.micStatus}
-            </span>
-          </div>
-        </div>
-      </>)}
       {/* music mini card */}
       {v.showMusicMini && (<>
         <div data-spot="1" style={{ position: "absolute", right: "24px", bottom: "112px", width: "360px", padding: "14px", display: "flex", gap: "14px", alignItems: "center", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgba(251,146,60,.45), rgb(var(--acc) / .1) 55%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07)", animation: "nx-up 700ms cubic-bezier(.16,1,.3,1) both" }} className="dc5">
