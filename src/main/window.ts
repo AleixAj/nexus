@@ -19,6 +19,14 @@ export let quitting = false
 
 export const mainWindow = () => win
 
+// "--display=secondary": open on the other monitor without taking the focus (tests and updates,
+// so a game or work on the main screen is not interrupted)
+const SECONDARY = process.argv.includes('--display=secondary')
+function secondaryArea() {
+  const primary = screen.getPrimaryDisplay()
+  return SECONDARY ? screen.getAllDisplays().find(d => d.id !== primary.id)?.workArea || null : null
+}
+
 /** Sends an event to every open window. */
 export const broadcast = (channel: string, ...data: unknown[]) =>
   BrowserWindow.getAllWindows().forEach(w => { if (!w.isDestroyed()) w.webContents.send(channel, ...data) })
@@ -35,7 +43,7 @@ export function createWindow(m: Mode, query: Record<string, string> = {}) {
     ...(wall
       // off-screen until it is moved behind the desktop icons
       ? { x: -32000, y: -32000, width, height, frame: false, skipTaskbar: true, resizable: false, movable: false, focusable: false }
-      : { width: 1600, height: 900, minWidth: 960, minHeight: 540, autoHideMenuBar: true }),
+      : { width: 1600, height: 900, minWidth: 960, minHeight: 540, autoHideMenuBar: true, ...placeOnSecondary() }),
     backgroundColor: '#05030A',
     show: false,
     title: 'NEXUS',
@@ -50,7 +58,7 @@ export function createWindow(m: Mode, query: Record<string, string> = {}) {
   win = w
 
   w.once('ready-to-show', async () => {
-    if (!wall) { w.show(); return }
+    if (!wall) { if (SECONDARY) w.showInactive(); else w.show(); return }
     w.showInactive()
     try {
       await attachToDesktop(w)
@@ -88,6 +96,13 @@ export function createWindow(m: Mode, query: Record<string, string> = {}) {
   if (isDev) w.loadURL(process.env.ELECTRON_RENDERER_URL! + '?' + new URLSearchParams(q))
   else w.loadFile(join(__dirname, '../renderer/index.html'), { query: q })
   updateTray()
+}
+
+function placeOnSecondary() {
+  const a = secondaryArea()
+  if (!a) return {}
+  const width = Math.min(1600, a.width), height = Math.min(900, a.height)
+  return { x: a.x + Math.round((a.width - width) / 2), y: a.y + Math.round((a.height - height) / 2), width, height }
 }
 
 export async function switchMode(m: Mode, query: Record<string, string> = {}) {

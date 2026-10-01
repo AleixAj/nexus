@@ -54,7 +54,7 @@ export function shellView(app, c) {
     hasHover: !!S.hoverDock && !S.volOpen, hoverLabel: S.hoverDock, volOpen: S.volOpen,
 
     // approval card (the agent wants to change something)
-    confirm: S.confirm, confirmYes: () => app.answerConfirm(true), confirmNo: () => app.answerConfirm(false),
+    confirm: S.confirm, confirmYes: () => app.answerConfirm(true), confirmNo: () => app.answerConfirm(false), confirmAlways: () => app.answerConfirm('always'),
 
     // key card (a premium voice needs its key)
     keyAsk: S.keyAsk, keyAskInput: S.keyAskInput || '',

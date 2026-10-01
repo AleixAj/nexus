@@ -4,6 +4,7 @@ import { promises as fs, type Dirent } from 'fs'
 import { basename, dirname, extname, isAbsolute, join, resolve } from 'path'
 import { clip, short, size } from '../lib/text'
 import { bool, num, str, type Tool } from './define'
+import { blockedPath } from '../lib/privacy'
 
 const MAX_READ = 9000
 
@@ -29,7 +30,9 @@ export function toPath(p: unknown) {
   const known = KNOWN[raw.toLowerCase()]
   if (known) return known()
   const expanded = raw.replace(/^~(?=[\\/]|$)/, app.getPath('home')).replace(/%([^%]+)%/g, (_, v) => process.env[v] || '')
-  return isAbsolute(expanded) ? resolve(expanded) : resolve(app.getPath('home'), expanded)
+  const path = isAbsolute(expanded) ? resolve(expanded) : resolve(app.getPath('home'), expanded)
+  if (blockedPath(path)) throw new Error('Ese archivo guarda claves o contraseñas: por seguridad no lo toco')
+  return path
 }
 const showPath = (x: unknown) => { try { return toPath(x) } catch { return String(x) } }
 const nameOf = (p: unknown) => basename(String(p || ''))
@@ -209,7 +212,7 @@ export const fileTools: Tool[] = [
     }
   },
   {
-    name: 'delete_path', group: 'write',
+    name: 'delete_path', group: 'write', noAlways: true,
     description: 'Envía a la papelera (solo si lo piden).',
     params: { path: str('Ruta') }, required: ['path'],
     confirm: a => ({ title: 'Enviar a la papelera', detail: showPath(a.path) }),

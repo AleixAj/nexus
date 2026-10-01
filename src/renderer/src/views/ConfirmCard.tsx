@@ -25,6 +25,7 @@ export default function ConfirmCard({ v }: { v: any }) {
         }}>{c.detail}</pre>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ flex: 1, fontSize: 12.5, color: 'rgba(226,218,240,.45)' }}>Enter para permitir · Esc para denegar</span>
+          {c.always && <button onClick={v.confirmAlways} title="No volveré a preguntar por este tipo de acción (se puede quitar en Rutinas → Permisos)" style={{ height: 44, padding: '0 16px', borderRadius: 10, border: '1px solid rgba(245,185,113,.35)', background: 'transparent', color: '#F5B971', fontSize: 14, cursor: 'pointer' }}>Permitir siempre</button>}
           <button onClick={v.confirmNo} style={{ height: 44, padding: '0 20px', borderRadius: 10, border: '1px solid rgba(196,181,253,.2)', background: 'rgba(0,0,0,.3)', color: 'rgba(241,234,248,.85)', fontSize: 14.5, cursor: 'pointer' }}>Denegar</button>
           <button onClick={v.confirmYes} autoFocus style={{ height: 44, padding: '0 24px', borderRadius: 10, border: '1px solid rgba(255,255,255,.18)', background: 'linear-gradient(180deg, rgba(245,185,113,.95), rgba(214,140,70,.85))', color: '#1A1020', fontSize: 14.5, fontWeight: 600, cursor: 'pointer', boxShadow: '0 0 24px rgba(245,185,113,.35)' }}>Permitir</button>
         </div>

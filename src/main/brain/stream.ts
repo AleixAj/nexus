@@ -17,7 +17,9 @@ export async function readStream(body: ReadableStream<Uint8Array>, onDelta: (t: 
     if (json.error) throw new Error(json.error.message || 'Error del modelo')
     const delta = json.choices?.[0]?.delta
     if (!delta) return
-    if (delta.content) { content += delta.content; onDelta(delta.content) }
+    // zero-width characters some models emit would be read aloud as silence or garbage
+    const text = typeof delta.content === 'string' ? delta.content.replace(/[​-‍⁠﻿]/g, '') : ''
+    if (text) { content += text; onDelta(text) }
     for (const tc of delta.tool_calls || []) {
       const c = (calls[tc.index ?? calls.length] ??= { id: '', type: 'function', function: { name: '', arguments: '' } })
       if (tc.id) c.id = tc.id

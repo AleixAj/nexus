@@ -193,7 +193,7 @@ export const conversation = {
   answerConfirm(ok) {
     const c = this.state.confirm; if (!c) return;
     api.confirmReply(c.cid, ok);
-    this.setState({ confirm: null, actionLabel: ok ? 'PERMITIDO' : 'DENEGADO' });
+    this.setState({ confirm: null, actionLabel: ok === 'always' ? 'PERMITIDO SIEMPRE' : ok ? 'PERMITIDO' : 'DENEGADO' });
   },
   // on the wallpaper nothing can be clicked: ask out loud and listen for yes/no
   confirmByVoice(req) {

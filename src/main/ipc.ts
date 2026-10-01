@@ -16,6 +16,7 @@ import { addFact, clearMemory, deleteExchange, deleteFact, getMemory } from './m
 import { currentExtra, currentMedia, mediaControl } from './media'
 import { HOTKEY, isDev, switchMode } from './window'
 import { typeText } from './dictation'
+import { listApprovals, revoke } from './approvals'
 import { REDIRECT, connectSpotify, disconnectSpotify, spotifyStatus } from './spotifyApi'
 
 const trusted = (e: IpcMainInvokeEvent) => {
@@ -33,9 +34,9 @@ function handle(channel: string, fn: (e: IpcMainInvokeEvent, ...args: any[]) => 
 const str = (v: unknown, max = 4000) => (typeof v === 'string' ? v.slice(0, max) : '')
 
 // approvals the agent is waiting for (write files, run commands…)
-const pendingConfirms = new Map<number, (ok: boolean) => void>()
+const pendingConfirms = new Map<number, (ok: boolean | 'always') => void>()
 let confirmSeq = 0
-function answerConfirm(cid: number, ok: boolean) {
+function answerConfirm(cid: number, ok: boolean | 'always') {
   const r = pendingConfirms.get(cid)
   if (!r) return
   pendingConfirms.delete(cid)
@@ -91,7 +92,7 @@ export function registerIpc() {
         onDelta: t => send('brain:delta', id, t),
         onAction: label => send('brain:action', id, label),
         onProgress: label => send('brain:progress', id, label),
-        confirm: req => new Promise<boolean>(resolve => {
+        confirm: req => new Promise<boolean | 'always'>(resolve => {
           const cid = ++confirmSeq
           pendingConfirms.set(cid, resolve)
           send('brain:confirm', id, cid, req)
@@ -106,7 +107,9 @@ export function registerIpc() {
     }
   })
   handle('brain:abort', () => { abort(); pendingConfirms.forEach((_, cid) => answerConfirm(cid, false)) })
-  handle('brain:confirm-reply', (_e, cid, ok) => answerConfirm(Number(cid), ok === true))
+  handle('brain:confirm-reply', (_e, cid, ok) => answerConfirm(Number(cid), ok === 'always' ? 'always' : ok === true))
+  handle('approvals:list', () => listApprovals())
+  handle('approvals:revoke', (_e, key) => revoke(str(key, 100)))
 
   // ---------- panels ----------
   handle('system:snapshot', () => systemSnapshot())

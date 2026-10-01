@@ -24,17 +24,20 @@ async function ollama(): Promise<Target | null> {
   return ollamaUp.up ? { name: 'Ollama', url: PROVIDERS.Ollama.url, key: '', model: ollamaUp.model } : null
 }
 
-export async function targets(s: Settings): Promise<Target[]> {
+/** The services to try, in order. Easy questions go to the small fast model first. */
+export async function targets(s: Settings, simple = false): Promise<Target[]> {
   const t = (name: string, model: string): Target | null => {
     const key = getKey(name)
     return key ? { name, url: PROVIDERS[name].url, key, model } : null
   }
   let list: (Target | null)[]
   if (s.provider === 'Auto') {
+    const small = t('Groq', 'openai/gpt-oss-20b') // its own 200K/day and the fastest
     list = [
+      simple ? small : null,
       t('Cerebras', 'gpt-oss-120b'), // 1M tokens/day free
       t('Groq', 'openai/gpt-oss-120b'), // 200K/day
-      t('Groq', 'openai/gpt-oss-20b'), // another 200K/day
+      simple ? null : small,
       s.geminiFallback ? t('Gemini', 'gemini-3.5-flash-lite') : null,
       await ollama() // local: no limits at all
     ]
@@ -43,7 +46,8 @@ export async function targets(s: Settings): Promise<Target[]> {
   } else {
     const name = Object.hasOwn(PROVIDERS, s.provider) ? s.provider : 'Groq'
     const small = PROVIDERS[name].models.find(m => m !== s.model && /20b|8b|mini|lite/i.test(m))
-    list = [t(name, s.model), small ? t(name, small) : null, s.geminiFallback && name !== 'Gemini' ? t('Gemini', 'gemini-3.5-flash-lite') : null]
+    list = simple && small ? [t(name, small), t(name, s.model)] : [t(name, s.model), small ? t(name, small) : null]
+    list.push(s.geminiFallback && name !== 'Gemini' ? t('Gemini', 'gemini-3.5-flash-lite') : null)
   }
   return list.filter((x): x is Target => !!x)
 }

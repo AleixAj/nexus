@@ -15,6 +15,8 @@ export type Tool = {
   group?: Group
   /** If present the user must approve the call; returns what the approval card shows (null = no need this time). */
   confirm?: (a: any) => { title: string; detail: string } | null
+  /** Too risky to approve for good (any command, deleting): it always asks. */
+  noAlways?: boolean
   /** Label on the core while it runs. */
   progress?: (a: any) => string
   run: (a: any) => Promise<ToolResult> | ToolResult

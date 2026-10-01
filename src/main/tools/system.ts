@@ -51,7 +51,7 @@ export const systemTools: Tool[] = [
     run: async a => ({ result: await topProcesses(a.sort, a.count), label: 'Procesos revisados' })
   },
   {
-    name: 'run_powershell', group: 'shell',
+    name: 'run_powershell', group: 'shell', noAlways: true,
     description: 'Ejecuta PowerShell (estadísticas, configuración, tareas avanzadas).',
     params: { command: str('Comando'), reason: str('Para qué, en una frase') },
     required: ['command', 'reason'],

@@ -5,6 +5,11 @@ import { findTool, runTool, toolDefs, type ToolResult } from '../tools'
 import { contextNote, systemPrompt } from './prompt'
 import { aborted, callModel, targets } from './providers'
 import { readStream } from './stream'
+import { LoopGuard } from './guard'
+import { isSimple } from './complexity'
+import { redact } from '../lib/privacy'
+import { noteTool, resetTaint } from '../lib/taint'
+import { approvalKey, approve, isApproved } from '../approvals'
 
 type Msg = { role: string; content?: string | null; tool_calls?: any[]; tool_call_id?: string }
 
@@ -12,7 +17,8 @@ export type Handlers = {
   onDelta: (t: string) => void
   onAction: (label: string) => void
   onProgress: (label: string) => void
-  confirm: (req: { title: string; detail: string }) => Promise<boolean>
+  /** true = yes this time, 'always' = yes and do not ask again for this kind of action */
+  confirm: (req: { title: string; detail: string; always: boolean }) => Promise<boolean | 'always'>
 }
 
 const MAX_ROUNDS = 8
@@ -22,6 +28,7 @@ const MAX_HISTORY = 10
 const KEEP_TOOL_CHARS = 400
 const KEEP_ANSWER_CHARS = 900
 const MAX_ANSWER_TOKENS = 1200
+const SIMPLE_ANSWER_TOKENS = 700
 
 let history: Msg[] = []
 let restored = false
@@ -64,25 +71,35 @@ export function ask(text: string, h: Handlers): Promise<string> {
   return run
 }
 
-async function useTool(name: string, args: any, h: Handlers, signal: AbortSignal): Promise<ToolResult> {
+async function useTool(name: string, args: any, h: Handlers, signal: AbortSignal, guard: LoopGuard): Promise<ToolResult> {
   const t = findTool(name)
   if (!t) return { result: 'Herramienta desconocida', label: name }
+  const loop = guard.check(name, args)
+  if (loop) return { result: loop, label: 'Repetición evitada' }
   const req = t.confirm?.(args)
-  if (req) {
-    const ok = await h.confirm(req)
+  const key = approvalKey(name, args)
+  if (req && !isApproved(key)) {
+    const ok = await h.confirm({ ...req, always: !t.noAlways })
     if (signal.aborted) throw aborted()
     if (!ok) return { result: 'El usuario ha denegado el permiso para esta acción.', label: 'Acción denegada' }
+    if (ok === 'always' && !t.noAlways) approve(key, req.title)
   }
   const label = t.progress?.(args)
   if (label) h.onProgress(label)
-  return runTool(t, args)
+  noteTool(name)
+  const r = await runTool(t, args)
+  // keys, passwords or card numbers found in a file, the clipboard or the screen never reach the online AI
+  return { ...r, result: redact(r.result) }
 }
 
 async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise<string> {
   if (ctl.signal.aborted) throw aborted()
   const s = loadSettings()
-  const all = await targets(s)
+  const simple = isSimple(text)
+  const all = await targets(s, simple)
   if (!all.length) throw new Error('NO_KEY')
+  const guard = new LoopGuard()
+  resetTaint()
 
   restoreHistory()
   // work on a copy; history only changes if the whole turn succeeds
@@ -96,7 +113,7 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
       model,
       stream: true,
       temperature: 0.5,
-      max_tokens: MAX_ANSWER_TOKENS,
+      max_tokens: simple ? SIMPLE_ANSWER_TOKENS : MAX_ANSWER_TOKENS,
       // keep thinking short: faster answers and fewer free-tier tokens
       ...(/gpt-oss|gemini/.test(model) ? { reasoning_effort: 'low' } : {}),
       // on the last round force an answer instead of more tool calls
@@ -117,7 +134,7 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
       if (ctl.signal.aborted) throw aborted()
       let args: any = {}
       try { args = JSON.parse(call.function.arguments || '{}') } catch { /* keep empty */ }
-      const r = await useTool(call.function.name, args, h, ctl.signal)
+      const r = await useTool(call.function.name, args, h, ctl.signal, guard)
       h.onAction(r.label)
       turn.push({ role: 'tool', tool_call_id: call.id, content: r.result })
     }
