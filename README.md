@@ -15,8 +15,7 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 - **Acciones rápidas.** Abre aplicaciones y webs y controla la música y el volumen.
 - **Memoria real.** Nexus aprende datos tuyos de lo que hablas (gustos, personas, lugares, trabajo) y los usa
   después; puedes añadirlos, borrarlos o desactivar el aprendizaje en el panel Memoria. Las conversaciones se guardan y
-  el chat se recupera al reiniciar. Todo va cifrado con Windows (DPAPI) en `%APPDATA%
-exus\memory.bin`.
+  el chat se recupera al reiniciar. Todo va cifrado con Windows (DPAPI) en `%APPDATA%\nexus\memory.bin`.
 - **Música de Spotify real.** Lee lo que suena en la app de escritorio de Spotify (no el navegador): carátula,
   progreso, aleatorio, repetir, anterior/siguiente y letra sincronizada (LRCLIB, gratis). El halo toma el color de
   la carátula y se mueve con el audio real del PC.
