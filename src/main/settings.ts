@@ -51,7 +51,7 @@ export const PROVIDERS: Record<string, { url: string; models: string[]; needsKey
   Gemini: { url: 'https://generativelanguage.googleapis.com/v1beta/openai', models: ['gemini-3.5-flash-lite', 'gemini-3.1-flash-lite', 'gemini-3.8-flash'], needsKey: true },
   // very fast; each model has its own 200K tokens a day with the same key
   Groq: { url: 'https://api.groq.com/openai/v1', models: ['openai/gpt-oss-120b', 'qwen/qwen3.8-27b', 'openai/gpt-oss-20b'], needsKey: true },
-  // the biggest free pool (about 1,000 million tokens a month, 1 request/s): only an SMS check, no card
+  // big pool, but since 2026 Mistral's free plan gives no API keys: only for paid or older keys
   Mistral: { url: 'https://api.mistral.ai/v1', models: ['mistral-medium-latest', 'mistral-small-latest'], needsKey: true },
   // free models chosen by OpenRouter itself (50 requests a day): the last net
   OpenRouter: { url: 'https://openrouter.ai/api/v1', models: ['openrouter/free'], needsKey: true },

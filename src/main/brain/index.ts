@@ -224,11 +224,11 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
   }
 
   if (ctl.signal.aborted) throw aborted()
-  // one warning a day when the free quota is nearly gone and there is no big reserve (Mistral)
+  // one warning a day when the free quota is nearly gone
   const ids = all.filter(t => t.name !== 'Ollama').map(targetId)
   if (warnedDay !== new Date().toDateString() && ids.length && leftToday(ids) < 0.2) {
     warnedDay = new Date().toDateString()
-    h.onAction('Queda poco cupo gratis hoy · con la clave de Mistral no se acaba')
+    h.onAction('Queda poco cupo gratis hoy · activa «Respaldo» (Gemini) en Ajustes')
   }
   history = trim(turn)
   if (full.trim()) logExchange(text, full)

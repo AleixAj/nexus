@@ -30,7 +30,8 @@ async function check(group: string, name: string, fn: () => Promise<Omit<Check, 
 
 const NO_KEY: Record<string, string> = {
   Groq: 'Sin clave · gratis y sin tarjeta en console.groq.com (también entiende tu voz)',
-  Mistral: 'Sin clave · la reserva grande: gratis en console.mistral.ai (solo verificar el móvil)',
+  Mistral: 'Sin clave (opcional; las cuentas gratis de Mistral ya no dan clave de API)',
+  OpenRouter: 'Sin clave · gratis y sin tarjeta en openrouter.ai (50 preguntas al día de reserva)',
   Cerebras: 'Sin clave (opcional; las cuentas nuevas piden tarjeta)',
 }
 
@@ -56,7 +57,7 @@ export async function runDiagnostics(): Promise<Check[]> {
       if (!q.length) return { status: 'off', detail: 'Sin IA con límite diario' }
       const spent = q.filter(l => l.used! >= 1).map(l => l.label)
       const avg = Math.round(q.reduce((a, l) => a + l.used!, 0) / q.length * 100)
-      if (spent.length === q.length) return { status: 'fail', detail: 'Agotado hasta mañana: añade la clave de Mistral para no quedarte sin IA' }
+      if (spent.length === q.length) return { status: 'fail', detail: 'Agotado por hoy: activa «Respaldo» (Gemini) en Ajustes o añade la clave gratuita de OpenRouter' }
       return { status: spent.length ? 'warn' : 'ok', detail: `${avg} % usado hoy${spent.length ? ' · agotado: ' + spent.join(', ') : ''} · las órdenes sencillas no gastan` }
     }),
     check('Voz', 'Voz neuronal (Microsoft)', async () => {

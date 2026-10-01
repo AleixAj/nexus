@@ -84,9 +84,9 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 
 | Opción | Clave | Notas |
 | --- | --- | --- |
-| **Automático** (recomendada) | Groq y, mejor aún, también Mistral | Reparte las preguntas entre todas las IA con clave y cambia sola si una llega a su límite. Con Groq y Mistral prácticamente no se acaba. |
+| **Automático** (recomendada) | Groq (y de reserva Gemini y OpenRouter) | Reparte las preguntas entre todas las IA con clave y cambia sola si una llega a su límite. |
 | **Groq** | Gratis en [console.groq.com](https://console.groq.com/keys) | Tres modelos (GPT-OSS 120B, Qwen y GPT-OSS 20B) con 200.000 tokens al día cada uno; también entiende la voz. |
-| **Mistral** | Gratis en [console.mistral.ai](https://console.mistral.ai/api-keys) | Plan *Experiment*: unos 1.000 millones de tokens al mes. Sin tarjeta, solo verificar el móvil por SMS. |
+| **Mistral** | [console.mistral.ai](https://console.mistral.ai/api-keys) | Solo con clave de pago o antigua: desde 2026 su plan gratuito no da claves de API. |
 | **OpenRouter** | Gratis en [openrouter.ai](https://openrouter.ai/keys) | 50 preguntas al día con el modelo gratis que esté libre: último recurso. |
 | **Cerebras** | [cloud.cerebras.ai](https://cloud.cerebras.ai) | 1 millón de tokens al día con las claves gratuitas antiguas; las cuentas nuevas ya piden tarjeta. |
 | **Gemini Flash-Lite** | Gratis en [Google AI Studio](https://aistudio.google.com/apikey) | 500 preguntas al día. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos. |

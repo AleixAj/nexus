@@ -41,7 +41,7 @@ export async function targets(s: Settings, simple = false): Promise<Target[]> {
       simple ? small : null,
       t('Cerebras', 'gpt-oss-120b'), // 1M/day on keys made before the card requirement
       t('Groq', 'openai/gpt-oss-120b'), // fast; the repeated prompt prefix is cached and free
-      t('Mistral', 'mistral-medium-latest'), // ~1,000M/month: the big reserve
+      t('Mistral', 'mistral-medium-latest'), // only paid/old keys now: Mistral's free plan no longer gives API keys
       t('Groq', 'qwen/qwen3.8-27b'),
       simple ? null : small,
       t('Mistral', 'mistral-small-latest'),
@@ -140,7 +140,7 @@ export async function callModel(all: Target[], body: (t: Target) => string, sign
   }
   if ((!res && lastLimit.daily) || (res && (res.status === 429 || (!res.ok && res.status >= 500)))) {
     throw new Error(lastLimit.daily
-      ? 'Se ha agotado el cupo gratuito de hoy de sus IA. Añada la clave gratuita de Mistral en Ajustes (unos 1.000 millones de tokens al mes) o pruebe más tarde'
+      ? 'Se ha agotado el cupo gratuito de hoy de sus IA. Para seguir, active «Respaldo» (Gemini) en Ajustes o añada una clave gratuita de OpenRouter, o pruebe más tarde'
       : 'Las IA gratuitas están saturadas ahora mismo; pruebe en un minuto')
   }
   if (!res) throw new Error('No se pudo conectar con ninguna IA; revise las claves en Ajustes')

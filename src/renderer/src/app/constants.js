@@ -89,16 +89,16 @@ export const CHAT_COMMANDS = [
 ];
 
 export const PROVIDER_INFO = {
-  Auto: { name: 'Automático · recomendado', url: 'https://console.groq.com/keys', note: 'Reparte las preguntas entre todas las IA gratis con clave y cambia sola si una llega a su límite. Las órdenes sencillas (música, volumen, abrir apps, alarmas) no gastan cupo.', help: 'Con Groq y Mistral casi no hay límites: las dos son gratis y sin tarjeta.' },
+  Auto: { name: 'Automático · recomendado', url: 'https://console.groq.com/keys', note: 'Reparte las preguntas entre todas las IA gratis con clave y cambia sola si una llega a su límite. Las órdenes sencillas (música, volumen, abrir apps, alarmas) no gastan cupo.', help: 'Con Groq basta para el día a día. Para tener reserva: active «Respaldo» con Gemini y añada OpenRouter (los dos gratis y sin tarjeta).' },
   Groq: { name: 'Groq · recomendado', url: 'https://console.groq.com/keys', note: 'Gratis y muy rápida: tres modelos con 200.000 tokens al día cada uno. También entiende su voz.', help: 'Gratis y sin tarjeta en console.groq.com → API Keys. También se usa para entender su voz.' },
-  Mistral: { name: 'Mistral · la reserva grande', url: 'https://console.mistral.ai/api-keys', note: 'Unos 1.000 millones de tokens al mes gratis: con ella el cupo prácticamente no se acaba.', help: 'Gratis y sin tarjeta en console.mistral.ai: elija el plan Experiment, verifique su móvil por SMS y cree una clave en API Keys.' },
+  Mistral: { name: 'Mistral', url: 'https://console.mistral.ai/api-keys', note: 'Mucho margen, pero solo con una clave de pago o antigua.', help: 'El plan gratuito de Mistral ya no permite crear claves de API; solo sirve si ya tiene una o paga.' },
   Gemini: { name: 'Gemini', url: 'https://aistudio.google.com/apikey', note: 'Google Gemini Flash-Lite: 500 preguntas al día. Gasta el cupo de Gemini, el mismo que las voces premium.', help: 'Gratis y sin tarjeta en aistudio.google.com → Get API key. En el plan gratuito Google puede usar las conversaciones para mejorar sus productos.' },
   OpenRouter: { name: 'OpenRouter', url: 'https://openrouter.ai/keys', note: 'Último recurso: 50 preguntas al día con el modelo gratis que esté libre.', help: 'Gratis y sin tarjeta en openrouter.ai → Keys.' },
   Cerebras: { name: 'Cerebras', url: 'https://cloud.cerebras.ai', note: '1 millón de tokens al día con las claves antiguas gratuitas.', help: 'Las cuentas nuevas de Cerebras ya piden tarjeta; si ya tiene una clave gratuita, sigue sirviendo.' },
   Ollama: { name: 'Local · sin clave', url: 'https://ollama.com/download', note: 'Funciona en su PC sin clave ni internet. Hay que instalar Ollama y descargar un modelo (unos 5 GB).', help: 'Instale Ollama y ejecute «ollama pull qwen2.5:7b». Para entender su voz hace falta la clave de Gemini o Groq.' },
 };
 // the keys offered in Auto mode, most useful first
-export const KEY_ORDER = ['Groq', 'Mistral', 'Gemini', 'OpenRouter', 'Cerebras'];
+export const KEY_ORDER = ['Groq', 'Gemini', 'OpenRouter', 'Mistral', 'Cerebras'];
 export const providerInfo = p => PROVIDER_INFO[p] || { name: p, url: '', note: '', help: '' };
 
 // Gemini switches: the key alone turns nothing on (its free quota is small)
