@@ -98,7 +98,7 @@ export const PROVIDER_INFO = {
 export const providerInfo = p => PROVIDER_INFO[p] || { name: p, url: '', note: '', help: '' };
 
 // Gemini switches: the key alone turns nothing on (its free quota is small)
-export const GEMINI_SETTING = { tts: 'geminiTts', search: 'geminiSearch', stt: 'geminiStt', fallback: 'geminiFallback' };
+export const GEMINI_SETTING = { tts: 'geminiTts', search: 'geminiSearch', stt: 'geminiStt', vision: 'geminiVision', fallback: 'geminiFallback' };
 
 // ---------- routines (still a design preview; they become real in a later step) ----------
 export const ROUTINES = [

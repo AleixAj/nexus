@@ -1,7 +1,7 @@
 // Talking with Nexus: listen, ask the agent, stream the answer to the chat and the voice,
 // approvals, errors and interruptions. Methods of NexusApp (`this` is the app).
 import * as voice from '../../services/voice';
-import { WALLPAPER, api, cap, hm } from '../util';
+import { WALLPAPER, api, cap, hm, withAttachments } from '../util';
 
 export const conversation = {
   say(text, done, opts, voiceId) {
@@ -77,10 +77,21 @@ export const conversation = {
     });
   },
   sendChat() {
-    const text = this.state.chatInput.trim(); if (!text) return;
-    this.setState({ chatInput: '' });
-    this.ask(text);
+    const files = this.state.attachments;
+    const text = this.state.chatInput.trim() || (files.length ? (files.length > 1 ? '¿Qué son estos archivos? Resúmemelos.' : '¿Qué es esto? Resúmemelo.') : '');
+    if (!text) return;
+    this.setState({ chatInput: '', attachments: [] });
+    this.ask(withAttachments(text, files));
   },
+  // files dropped on the window: they wait above the chat box until the message is sent
+  dropFiles(list) {
+    if (!api) return;
+    const files = [...list].map(f => ({ name: f.name, path: api.pathForFile(f) })).filter(f => f.path);
+    if (!files.length) return;
+    this.setState(s => ({ attachments: [...s.attachments, ...files.filter(f => !s.attachments.some(a => a.path === f.path))].slice(0, 6), dragOver: false }));
+    this.openPanel('chat', true);
+  },
+  removeAttachment(path) { this.setState(s => ({ attachments: s.attachments.filter(a => a.path !== path) })); },
   ovAsk() {
     const q = this.state.ovInput.trim(); if (!q) return;
     this.setState({ ovInput: '' });

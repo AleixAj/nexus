@@ -21,6 +21,15 @@ export const cut = (s, n) => (s.length > n ? s.slice(0, n) + '…' : s);
 /** Markdown to plain text, for summaries. */
 export const plain = t => t.replace(/[#*_`>|[\]()-]+/g, ' ').replace(/\s+/g, ' ').trim();
 
+// Files sent with a message: "texto\n\n[Adjuntos: C:\a.pdf | C:\b.png]". The agent reads the
+// paths; the chat shows the text and a chip per file.
+const ATTACH = /\n\n\[Adjuntos: ([^\]]+)\]$/;
+export const withAttachments = (text, files) => (files.length ? `${text}\n\n[Adjuntos: ${files.map(f => f.path).join(' | ')}]` : text);
+export function splitAttachments(text) {
+  const m = ATTACH.exec(text || '');
+  return m ? { text: text.slice(0, m.index), files: m[1].split(' | ').map(p => p.split(/[\\/]/).pop()) } : { text, files: [] };
+}
+
 /** HOY, AYER or LUN 28 SEP */
 export function dayLabel(at) {
   const today = new Date().setHours(0, 0, 0, 0);

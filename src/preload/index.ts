@@ -1,4 +1,4 @@
-import { contextBridge, ipcRenderer } from 'electron'
+import { contextBridge, ipcRenderer, webUtils } from 'electron'
 
 const on = (channel: string, fn: (...args: any[]) => void) => {
   const h = (_e: unknown, ...args: any[]) => fn(...args)
@@ -16,6 +16,8 @@ contextBridge.exposeInMainWorld('nexus', {
   warmVoices: () => ipcRenderer.invoke('tts:warm'),
   transcribe: (audio: ArrayBuffer) => ipcRenderer.invoke('stt:transcribe', audio),
   ask: (id: number, text: string) => ipcRenderer.invoke('brain:ask', id, text),
+  // where a file dropped on the window lives (the agent reads it from there)
+  pathForFile: (file: File) => webUtils.getPathForFile(file),
   abort: () => ipcRenderer.invoke('brain:abort'),
   systemSnapshot: () => ipcRenderer.invoke('system:snapshot'),
   getWorld: () => ipcRenderer.invoke('world:get'),

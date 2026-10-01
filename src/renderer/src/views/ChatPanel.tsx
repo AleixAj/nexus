@@ -27,6 +27,7 @@ export default function ChatPanel({ v }: { v: any }) {
             {m.isUser && (<>
               <div style={{ alignSelf: "flex-end", maxWidth: "78%", padding: "12px 16px", borderRadius: "14px 14px 4px 14px", background: "rgb(var(--acc) / .16)", border: "1px solid rgb(var(--acc) / .28)", fontSize: "15.5px", lineHeight: "1.5", color: "#FFF6E9", animation: m.anim }}>
                 {m.text}
+                {m.files?.length > 0 && <div style={{ display: "flex", flexWrap: "wrap", gap: "6px", marginTop: m.text ? "8px" : 0 }}>{m.files.map((f, i) => <span key={i} style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", padding: "4px 8px", borderRadius: "6px", background: "rgba(0,0,0,.25)", color: "rgba(255,246,233,.85)" }}>📎 {f}</span>)}</div>}
               </div>
             </>)}
             {m.isNexus && (<>
@@ -74,6 +75,16 @@ export default function ChatPanel({ v }: { v: any }) {
               </Fragment>))}
             </div>
           </>)}
+          {v.attachments.length > 0 && (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "6px" }}>
+              {v.attachments.map(a => (
+                <span key={a.path} title={a.path} style={{ display: "flex", alignItems: "center", gap: "6px", maxWidth: "260px", padding: "5px 6px 5px 10px", borderRadius: "8px", background: "rgb(var(--acc) / .16)", border: "1px solid rgb(var(--acc) / .3)", fontSize: "12.5px", color: "#FFF6E9" }}>
+                  <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>📎 {a.name}</span>
+                  <button onClick={a.remove} title="Quitar" style={{ width: "18px", height: "18px", border: "none", background: "none", color: "rgba(226,218,240,.6)", cursor: "pointer", padding: 0 }}>✕</button>
+                </span>
+              ))}
+            </div>
+          )}
           <div style={{ display: "flex", alignItems: "center", gap: "8px", height: "52px", padding: "0 8px 0 16px", borderRadius: "12px", background: "rgba(0,0,0,.35)", border: "1px solid rgba(196,181,253,.16)", transition: "border-color 250ms, box-shadow 250ms" }} className="dc12">
             <input value={v.chatInput} onChange={v.onChatInput} onKeyDown={v.onChatKey} placeholder="Escriba a Nexus o pulse / para comandos" style={{ flex: "1", background: "none", border: "none", outline: "none", color: "#FFF6E9", fontSize: "15px" }} />
             <button onClick={v.onMic} style={{ width: "38px", height: "38px", borderRadius: "9px", border: "none", background: "transparent", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc13">
@@ -93,6 +104,9 @@ export default function ChatPanel({ v }: { v: any }) {
             </span>
             <span>
               / COMANDOS
+            </span>
+            <span>
+              ARRASTRA ARCHIVOS AQUÍ
             </span>
             <span style={{ marginLeft: "auto" }}>
               CTRL + ALT + ESPACIO DESDE CUALQUIER APP

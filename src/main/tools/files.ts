@@ -80,17 +80,34 @@ async function findFiles(query: string, folder?: string) {
   return hits.length ? clip(`${hits.length} resultados en ${root} (revisados ${seen}):\n` + hits.join('\n')) : `Nada con «${query}» en ${root} (revisados ${seen} elementos).`
 }
 
+// PDF text, extracted on the PC (works with any AI)
+async function pdfText(file: string) {
+  const { extractText, getDocumentProxy } = await import('unpdf')
+  const pdf = await getDocumentProxy(new Uint8Array(await fs.readFile(file)))
+  const { totalPages, text } = await extractText(pdf, { mergePages: true })
+  return { pages: totalPages, text: String(text).replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim() }
+}
+
 async function readFile(p: unknown, offset = 0) {
   const file = toPath(p)
   const st = await fs.stat(file)
   if (st.isDirectory()) return listDirectory(file)
-  if (!TEXT.test(file) && st.size > 200000) return `${basename(file)} es un archivo binario de ${size(st.size)}; no se puede leer como texto.`
-  const text = await fs.readFile(file, 'utf8')
+  let text: string, note = ''
+  if (/\.pdf$/i.test(file)) {
+    const pdf = await pdfText(file)
+    if (!pdf.text) return `${basename(file)} es un PDF de ${pdf.pages} páginas sin texto (escaneado); no puedo leerlo.`
+    text = pdf.text
+    note = ` · PDF de ${pdf.pages} páginas`
+  } else {
+    if (/\.(jpe?g|png|webp|gif|bmp)$/i.test(file)) return `${basename(file)} es una imagen: usa look_at_image para verla.`
+    if (!TEXT.test(file) && st.size > 200000) return `${basename(file)} es un archivo binario de ${size(st.size)}; no se puede leer como texto.`
+    text = await fs.readFile(file, 'utf8')
+  }
   if (text.includes('\u0000')) return `${basename(file)} es un archivo binario (${extname(file) || 'sin extensión'}, ${size(st.size)}).`
   const start = Math.max(0, Math.floor(offset || 0))
   const part = text.slice(start, start + MAX_READ)
   const rest = text.length - start - part.length
-  return `${file} · ${size(st.size)} · ${text.length} caracteres${start ? ` · desde ${start}` : ''}\n---\n${part}${rest > 0 ? `\n--- [quedan ${rest} caracteres: usa offset ${start + part.length}]` : ''}`
+  return `${file} · ${size(st.size)}${note} · ${text.length} caracteres${start ? ` · desde ${start}` : ''}\n---\n${part}${rest > 0 ? `\n--- [quedan ${rest} caracteres: usa offset ${start + part.length}]` : ''}`
 }
 
 async function folderSize(p: unknown) {
@@ -139,7 +156,7 @@ export const fileTools: Tool[] = [
   },
   {
     name: 'read_file', group: 'files',
-    description: 'Lee un archivo de texto.',
+    description: 'Lee un archivo de texto o PDF.',
     params: { path: str('Ruta'), offset: num('Desde el carácter') }, required: ['path'],
     progress: a => 'Leyendo · ' + short(nameOf(a.path)),
     run: async a => ({ result: await readFile(a.path, a.offset), label: 'Leído · ' + nameOf(a.path) })

@@ -15,7 +15,7 @@ export const settings = {
       subtitles: !!s.subtitles, learn: s.memoryLearn !== false, newsTopics: s.newsTopics, newsAvoid: s.newsAvoid,
       premiumPaused: !!s.premiumPaused, azurePaused: !!s.azurePaused, hasAzure: !!s.hasAzure, azureRegion: s.azureRegion,
       agent: { web: s.agentWeb, files: s.agentFiles, write: s.agentWrite, shell: s.agentShell }, micId: s.micId || '',
-      gemini: { tts: s.geminiTts, search: s.geminiSearch, stt: s.geminiStt, fallback: s.geminiFallback },
+      gemini: { tts: s.geminiTts, search: s.geminiSearch, stt: s.geminiStt, vision: s.geminiVision, fallback: s.geminiFallback },
       lang: s.lang, sliders: { ...st.sliders, speed: s.speed, pitch: s.pitch, volume: s.volume, warmth: s.warmth, formal: s.formal, fx: s.fx },
     }));
     return s;

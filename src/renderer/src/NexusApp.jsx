@@ -31,7 +31,7 @@ export default class NexusApp extends Component {
     // music
     music: false, media: null, mediaAt: 0, mediaExtra: null,
     // chat and quick overlay
-    chat: [], chatInput: '', ovInput: '', ovState: 'idle', ovLabel: 'NEXUS', ovReply: '',
+    chat: [], chatInput: '', attachments: [], ovInput: '', ovState: 'idle', ovLabel: 'NEXUS', ovReply: '',
     // voice and personality
     voiceSel: 'lyra', preview: null, persona: 'butler', userName: 'señor', lang: 'es-ES', wakeWord: 'Hey Nexus',
     sliders: { speed: 1, pitch: 0, warmth: 70, formal: 85, volume: 64, fx: 35 },

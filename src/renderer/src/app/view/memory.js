@@ -1,6 +1,6 @@
 // Memory panel: past conversations by day and what Nexus knows about the user.
 import { MEMORY_CATEGORIES } from '../constants';
-import { chip, cut, dayLabel, hm, plain, toggleT } from '../util';
+import { chip, cut, dayLabel, hm, plain, splitAttachments, toggleT } from '../util';
 
 export function memoryView(app, c) {
   const { S } = c, q = S.memQuery.trim().toLowerCase();
@@ -9,7 +9,7 @@ export function memoryView(app, c) {
   let lastDay = null;
   const memItems = chats.map((x, i) => {
     const group = dayLabel(x.at), head = group !== lastDay; lastDay = group;
-    return { id: x.id, group, head, time: hm(x.at), title: cut(x.q, 110), sum: cut(plain(x.a), 220), delay: Math.min(i, 12) * 40 + 120 + 'ms', del: () => app.deleteChat(x.id) };
+    return { id: x.id, group, head, time: hm(x.at), title: cut(splitAttachments(x.q).text, 110), sum: cut(plain(x.a), 220), delay: Math.min(i, 12) * 40 + 120 + 'ms', del: () => app.deleteChat(x.id) };
   });
   const learn = toggleT(S.learn);
   return {

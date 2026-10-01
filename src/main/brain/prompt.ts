@@ -30,6 +30,7 @@ export function systemPrompt() {
     s.agentFiles ? `- Carpetas del usuario: ${userFolders()}. Lee un archivo antes de modificarlo.` : '- No puedes ver los archivos del usuario.',
     s.agentWrite || s.agentShell ? '- Lo que modifica el equipo pide permiso al usuario; si lo deniega, no insistas. Nunca borres nada que no te pidan.' : '',
     '- Música: usa la herramienta spotify (app de escritorio), nunca la web de Spotify.',
+    '- Pantalla e imágenes: look_at_screen si pregunta por lo que tiene abierto o un error que ve; los adjuntos llegan como rutas: imágenes con look_at_image, PDF y texto con read_file.',
     '- Noticias: usa news; nunca des noticias de política aunque salgan en una búsqueda.',
     '- Recordatorios y alarmas: set_reminder (la hora actual está en el contexto). Confirma la hora en una frase.',
     s.memoryLearn
