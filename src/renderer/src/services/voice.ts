@@ -157,19 +157,45 @@ let waitTimer = 0
 // Synthesis runs one request at a time (the next line is prepared while the current one plays)
 let synthChain: Promise<unknown> = Promise.resolve()
 
+// Voice samples (previews) are kept: replaying one is instant and costs no quota
+const previewCache = new Map<string, Promise<AudioBuffer | null>>()
+
 function synth(text: string, voice?: string): Promise<AudioBuffer | null> {
-  const job = synthChain.then(async () => {
-    try {
-      const bytes: Uint8Array = voice ? await api.previewVoice(text, voice) : await api.speak(text)
-      const copy = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer
-      return await audio().decodeAudioData(copy)
-    } catch (e) {
-      console.warn('tts failed', e)
-      return null
+  if (voice) {
+    const key = voice + '|' + text
+    let p = previewCache.get(key)
+    if (!p) {
+      // previews skip the queue: a new voice must not wait for the previous one
+      p = fetchAudio(text, voice)
+      previewCache.set(key, p)
+      p.then(b => { if (!b) previewCache.delete(key) })
     }
-  })
+    return p
+  }
+  const job = synthChain.then(() => fetchAudio(text))
   synthChain = job
   return job
+}
+
+async function fetchAudio(text: string, voice?: string): Promise<AudioBuffer | null> {
+  try {
+    const bytes: Uint8Array = voice ? await api.previewVoice(text, voice) : await api.speak(text)
+    const copy = bytes.buffer.slice(bytes.byteOffset, bytes.byteOffset + bytes.byteLength) as ArrayBuffer
+    return await audio().decodeAudioData(copy)
+  } catch (e) {
+    console.warn('tts failed', e)
+    return null
+  }
+}
+
+/** Prepares a voice sample in the background (plays instantly when asked for). */
+export function prefetch(text: string, voice: string) {
+  synth(text, voice)
+}
+
+/** Opens the connections of every voice in the background so the first sample plays fast. */
+export function warmVoices() {
+  api?.warmVoices?.()
 }
 
 function maybeDone() {
@@ -290,6 +316,7 @@ export function say(text: string, h: SpeakHandlers, voice?: string, fx?: string)
 export function stopSpeech() {
   token++
   chunkIndex = 0
+  synthChain = Promise.resolve() // what was cancelled must not delay what comes next
   queue = []
   pending = ''
   playing = false

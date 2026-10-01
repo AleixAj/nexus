@@ -122,6 +122,14 @@ async function gemini(key: string, voiceName: string, text: string, lang: string
   return data.subarray(0, 4).toString() === 'RIFF' ? data : wav(data, rate)
 }
 
+export const isPremium = (voice: string) => !!(Object.hasOwn(VOICES, voice) && VOICES[voice].gemini)
+
+/** Opens the Microsoft connection of every voice ahead of time (first samples play fast). */
+export function warmVoices(lang: string) {
+  const names = new Set(Object.values(VOICES).map(v => lang.startsWith('en') ? v.en : lang === 'es-MX' ? v.mx : v.es))
+  names.forEach(n => client(n).catch(() => {}))
+}
+
 export async function speak(text: string, o: SpeakOptions): Promise<Buffer> {
   const v = Object.hasOwn(VOICES, o.voice) ? VOICES[o.voice] : VOICES.lyra
   const key = v.gemini && loadSettings().geminiTts ? getKey('Gemini') : ''

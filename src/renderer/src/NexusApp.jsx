@@ -201,7 +201,7 @@ export default class NexusApp extends Component {
     sfx.ignition(1);
     this.firstScreen();
   }
-  firstScreen() { if (this.onboarded) this.bootDesktop(); else this.startOnboarding(); }
+  firstScreen() { voice.warmVoices(); if (this.onboarded) this.bootDesktop(); else this.startOnboarding(); }
   fem() { return ['lyra', 'vega', 'nova', 'aura', 'selene'].includes(this.state.voiceSel); }
   async countMics() {
     try {
@@ -319,7 +319,7 @@ export default class NexusApp extends Component {
   }
   speechHandlers(done, opts = {}) {
     return {
-      onLine: (line, dur) => this.revealLine(line, dur),
+      onLine: (line, dur) => { if (this.state.previewLoading) this.setState({ previewLoading: false }); this.revealLine(line, dur); },
       onVoiceError: () => {
         if (this.voiceWarned) return;
         this.voiceWarned = true;
@@ -516,6 +516,7 @@ export default class NexusApp extends Component {
   }
   togglePlay() { if (this.state.music) { this.setState({ music: false }); if (this.state.core === 'music') this.setCore('idle'); } else this.startMusic(); }
   openPanel(p, keepOpen) {
+    if (p === 'voice') this.prepareSamples();
     const opening = !!p && (keepOpen || this.state.panel !== p);
     this.setState({ panel: opening ? p : null, volOpen: false });
     const busy = ['wake', 'listening', 'thinking', 'speaking', 'action'].includes(this.state.core);
@@ -540,6 +541,7 @@ export default class NexusApp extends Component {
     const s = this.state.onbStep, n = this.name();
     if (s < 5) {
       this.setState({ onbStep: s + 1 });
+      if (s + 1 === 2) this.prepareSamples();
       const L = {
         2: `${this.fem() ? 'Encantada' : 'Encantado'}, ${n}. Ahora elija cómo quiere que suene.`,
         3: 'Perfecto. Elija también mi color.',
@@ -597,6 +599,11 @@ export default class NexusApp extends Component {
     const L = { butler: `${this.greet()}, ${n}. Su escritorio está listo cuando usted lo esté.`, direct: `${N}: todo listo. Usted dirá.`, sarcastic: `Oh, ${n}, otra vez usted. Supongo que hoy tampoco hay ganas de trabajar.` };
     this.say(L[this.state.persona] || L.butler);
   }
+  sampleText(v) { return `Hola, ${this.name()}. Soy ${v.name.replace(' ✦', '')}, y así sonaré a partir de ahora.`; }
+  // the free voices' samples are generated ahead so the first click plays at once
+  prepareSamples() {
+    this.VOICES.filter(v => !v.premium).forEach(v => voice.prefetch(this.sampleText(v), v.id));
+  }
   fxOf(id) { return (this.VOICES.find(x => x.id === id) || this.VOICES[0]).fx; }
   // premium voices need the Gemini key; without it they would just sound like another voice
   premiumLocked(id) {
@@ -627,16 +634,16 @@ export default class NexusApp extends Component {
     if (this.premiumLocked(id)) return;
     if (this.state.preview === id) { this.stopAll(); return; }
     this.interrupt();
-    this.setState({ preview: id });
+    this.setState({ preview: id, previewLoading: true });
     const v = this.VOICES.find(x => x.id === id);
-    this.say(`Hola, ${this.name()}. Soy ${v.name}. Sistemas en línea y a su disposición.`, () => { this.setState({ preview: null }); this.settle(); }, {}, id);
+    this.say(this.sampleText(v), () => { this.setState({ preview: null }); this.settle(); }, {}, id);
   }
   selectVoice(id) {
     if (this.premiumLocked(id)) return;
     this.interrupt();
-    this.setState({ voiceSel: id, preview: id }); this.save({ voice: id });
+    this.setState({ voiceSel: id, preview: id, previewLoading: true }); this.save({ voice: id });
     voice.setVoiceFx(this.fxOf(id));
-    this.say(`Hola, ${this.name()}. Así sonaré a partir de ahora.`, () => { this.setState({ preview: null }); this.settle(); }, {}, id);
+    this.say(this.sampleText(this.VOICES.find(x => x.id === id)), () => { this.setState({ preview: null }); this.settle(); }, {}, id);
   }
   providerInfo(p) {
     return {
@@ -829,9 +836,9 @@ export default class NexusApp extends Component {
       onChatKey: e => { if (e.key === 'Enter') { e.preventDefault(); this.sendChat(); } }, onChatSend: () => this.sendChat(),
       showSlash: S.chatInput.startsWith('/'),
       slashCmds: this.CMDS.filter(c => c.cmd.startsWith(S.chatInput.split(' ')[0]) || S.chatInput === '/').map(c => ({ ...c, pick: () => this.setState({ chatInput: c.cmd + ' ' }) })),
-      voiceCards: this.VOICES.map((v, i) => { const sel = S.voiceSel === v.id; const noKey = v.premium && !(S.providers.Gemini || {}).hasKey; return { ...v, desc: noKey ? v.desc.replace('premium', 'premium · con clave gratis') : v.premium && !(S.gemini || {}).tts ? v.desc.replace('premium', 'premium · usa cupo Gemini') : v.desc, selected: sel, state: S.preview === v.id ? 'speaking' : sel ? 'idle' : 'idle',
+      voiceCards: this.VOICES.map((v, i) => { const sel = S.voiceSel === v.id; const noKey = v.premium && !(S.providers.Gemini || {}).hasKey; return { ...v, desc: noKey ? v.desc.replace('premium', 'premium · con clave gratis') : v.premium && !(S.gemini || {}).tts ? v.desc.replace('premium', 'premium · usa cupo Gemini') : v.desc, selected: sel, state: S.preview === v.id ? (S.previewLoading ? 'thinking' : 'speaking') : 'idle',
         bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.1)', delay: (140 + i * 40) + 'ms',
-        previewLabel: S.preview === v.id ? '■ SONANDO…' : '▶ ESCUCHAR',
+        previewLabel: S.preview === v.id ? (S.previewLoading ? '··· CARGANDO' : '■ SONANDO…') : '▶ ESCUCHAR',
         select: () => this.selectVoice(v.id), preview: e => { e.stopPropagation(); this.previewVoice(v.id); },
         selectSay: () => this.selectVoice(v.id) }; }),
       personaCards: this.PERSONAS.map((p, i) => { const sel = S.persona === p.id; return { ...p, sel, bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.1)', delay: (320 + i * 40) + 'ms', select: () => { this.setState({ persona: p.id }); this.save({ persona: p.id }); } }; }),

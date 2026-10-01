@@ -1,7 +1,9 @@
 import { app, BrowserWindow, Menu, Notification, Tray, globalShortcut, ipcMain, nativeImage, screen, session, shell, type IpcMainInvokeEvent } from 'electron'
 import { join } from 'path'
 import { PROVIDERS, getKey, loadSettings, saveSettings, setKey } from './settings'
-import { speak } from './tts'
+import { isPremium, speak, warmVoices } from './tts'
+import { createHash } from 'crypto'
+import { mkdir, readFile, writeFile } from 'fs/promises'
 import { ask, abort, transcribe } from './brain'
 import { systemStatus } from './tools'
 import { getWorld } from './world'
@@ -183,11 +185,22 @@ function registerIpc() {
     const s = loadSettings()
     return speak(str(text, 1500), { voice: s.voice, lang: s.lang, speed: s.speed, pitch: s.pitch })
   })
-  handle('tts:preview', (_e, text, voice) => {
+  handle('tts:preview', async (_e, text, voice) => {
     const s = loadSettings()
-    return speak(str(text, 300), { voice: str(voice, 20), lang: s.lang, speed: s.speed, pitch: s.pitch })
+    const o = { voice: str(voice, 20), lang: s.lang, speed: s.speed, pitch: s.pitch }
+    // samples are always the same sentence: keep them on disk (premium ones cost quota only once)
+    const dir = join(app.getPath('userData'), 'voice-samples')
+    const file = join(dir, createHash('sha1').update(JSON.stringify([str(text, 300), o])).digest('hex') + '.bin')
+    try { return await readFile(file) } catch { /* not cached yet */ }
+    const audio = await speak(str(text, 300), o)
+    // a premium voice that fell back to Microsoft (no quota) is not cached as the premium sample
+    if (!isPremium(o.voice) || audio.subarray(0, 4).toString() === 'RIFF') {
+      mkdir(dir, { recursive: true }).then(() => writeFile(file, audio)).catch(() => {})
+    }
+    return audio
   })
 
+  handle('tts:warm', () => warmVoices(loadSettings().lang))
   handle('stt:transcribe', (_e, audio) => {
     if (!(audio instanceof ArrayBuffer) || audio.byteLength > 25e6) throw new Error('Audio no válido')
     return transcribe(audio, loadSettings().lang)
