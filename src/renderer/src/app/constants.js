@@ -51,6 +51,7 @@ export const ICON = {
   routines: 'M6 4a2 2 0 1 0 0 4a2 2 0 1 0 0-4M18 16a2 2 0 1 0 0 4a2 2 0 1 0 0-4M8 6h5a3 3 0 0 1 0 6h-2a3 3 0 0 0 0 6h5',
   system: 'M7 6h10a1 1 0 0 1 1 1v10a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1zM10 10h4v4h-4zM9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4',
   music: 'M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0a3 3 0 1 1 6 0M20 16a3 3 0 1 1-6 0a3 3 0 1 1 6 0',
+  news: 'M5 5h12v14H6a1 1 0 0 1-1-1zM17 9h2v9a1 1 0 0 1-2 0M8 9h6M8 12h6M8 15h4',
   memory: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 7v5l3 2',
   settings: 'M4 7h10M18 7h2M4 17h4M12 17h8M16 5a2 2 0 1 0 0 4a2 2 0 1 0 0-4M10 15a2 2 0 1 0 0 4a2 2 0 1 0 0-4',
   volume: 'M4 9h4l5-4v14l-5-4H4zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11',
@@ -64,7 +65,7 @@ export const ICON = {
   save: 'M5 4h11l3 3v13H5zM8 4v5h8V4M8 20v-6h8v6',
 };
 
-export const DOCK = [['chat', 'CHAT'], ['voice', 'VOZ Y PERSONALIDAD'], ['routines', 'RUTINAS'], ['system', 'SISTEMA'], ['music', 'MÚSICA'], ['memory', 'MEMORIA'], ['settings', 'AJUSTES'], ['volume', 'VOLUMEN']];
+export const DOCK = [['chat', 'CHAT'], ['voice', 'VOZ Y PERSONALIDAD'], ['routines', 'RUTINAS'], ['system', 'SISTEMA'], ['music', 'MÚSICA'], ['news', 'NOTICIAS'], ['memory', 'MEMORIA'], ['settings', 'AJUSTES'], ['volume', 'VOLUMEN']];
 
 export const CORE_LABELS = { idle: 'EN REPOSO', wake: 'ACTIVANDO', listening: 'ESCUCHANDO', thinking: 'PENSANDO', speaking: 'HABLANDO', action: 'EJECUTANDO ACCIÓN', error: 'SIN CONEXIÓN', music: 'MODO MÚSICA' };
 export const LIVE_STATES = ['wake', 'listening', 'thinking', 'speaking', 'action'];
@@ -74,7 +75,7 @@ export const CORE_LAYOUT = {
   overlay: { x: 960, y: 540, s: .5, v: 0 },
   onboarding: { x: 960, y: 230, s: .5, v: 1 },
   chat: { x: 652, y: 480, s: .8, v: 1 },
-  voice: { x: 410, y: 440, s: .62, v: 1 }, routines: { x: 410, y: 440, s: .62, v: 1 }, memory: { x: 410, y: 440, s: .62, v: 1 }, settings: { x: 410, y: 440, s: .62, v: 1 },
+  voice: { x: 410, y: 440, s: .62, v: 1 }, routines: { x: 410, y: 440, s: .62, v: 1 }, memory: { x: 410, y: 440, s: .62, v: 1 }, news: { x: 410, y: 440, s: .62, v: 1 }, settings: { x: 410, y: 440, s: .62, v: 1 },
   system: { x: 960, y: 520, s: .46, v: 1 },
   music: { x: 960, y: 470, s: .92, v: 1 },
   home: { x: 960, y: 480, s: 1, v: 1 },

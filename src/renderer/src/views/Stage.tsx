@@ -6,6 +6,7 @@ import RoutinesPanel from './RoutinesPanel'
 import SystemPanel from './SystemPanel'
 import MusicPanel from './MusicPanel'
 import MemoryPanel from './MemoryPanel'
+import NewsPanel from './NewsPanel'
 import SettingsPanel from './SettingsPanel'
 import Overlay from './Overlay'
 import Onboarding from './Onboarding'
@@ -27,6 +28,7 @@ export default function Stage({ v }: { v: any }) {
         <SystemPanel v={v} />
         <MusicPanel v={v} />
         <MemoryPanel v={v} />
+        <NewsPanel v={v} />
         <SettingsPanel v={v} />
         <Overlay v={v} />
         <Onboarding v={v} />

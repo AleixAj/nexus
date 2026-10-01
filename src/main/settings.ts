@@ -30,6 +30,8 @@ export type Settings = {
   geminiFallback: boolean
   azureRegion: string
   subtitles: boolean
+  newsTopics: string
+  newsAvoid: string
   memoryLearn: boolean
   theme: string
   quality: string
@@ -76,6 +78,9 @@ const DEFAULTS: Settings = {
   azureRegion: 'westeurope',
   // text of what Nexus says under the core: off by default
   subtitles: false,
+  // News panel: topic ids (news.ts) and words to leave out ("política" = a whole list)
+  newsTopics: 'tech,science,curious',
+  newsAvoid: 'política',
   // the agent saves what it learns about the user (Memory panel)
   memoryLearn: true,
   theme: 'nexus',

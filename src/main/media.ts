@@ -6,6 +6,7 @@ import { dataPath } from './lib/store'
 import { powershell } from './lib/powershell'
 
 const COMMON = String.raw`
+[Console]::OutputEncoding = [Text.Encoding]::UTF8  # accents in song titles
 $ErrorActionPreference = 'Stop'
 Add-Type -AssemblyName System.Runtime.WindowsRuntime
 $asTask = ([System.WindowsRuntimeSystemExtensions].GetMethods() | Where-Object { $_.Name -eq 'AsTask' -and $_.GetParameters().Count -eq 1 -and $_.GetParameters()[0].ParameterType.Name -eq 'IAsyncOperation` + '`' + String.raw`1' })[0]
@@ -86,6 +87,7 @@ export function watchMedia(onState: (m: MediaState | null) => void, onExtra: (x:
     windowsHide: true, env: { ...process.env, NX_PARENT: String(process.pid) }
   })
   let buf = ''
+  p.stdout.setEncoding('utf8') // decodes characters split between chunks
   p.stdout.on('data', d => {
     buf += d
     const lines = buf.split(/\r?\n/)

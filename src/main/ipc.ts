@@ -9,6 +9,7 @@ import { abort, ask, resetHistory } from './brain'
 import { transcribe } from './stt'
 import { spotify } from './tools'
 import { getWorld } from './world'
+import { TOPICS, getNews } from './news'
 import { systemSnapshot } from './sysinfo'
 import { cancelReminders, listReminders } from './reminders'
 import { addFact, clearMemory, deleteExchange, deleteFact, getMemory } from './memory'
@@ -107,6 +108,8 @@ export function registerIpc() {
   // ---------- panels ----------
   handle('system:snapshot', () => systemSnapshot())
   handle('world:get', () => getWorld())
+  handle('news:get', () => { const s = loadSettings(); return getNews(s.newsTopics, s.newsAvoid) })
+  handle('news:topics', () => Object.entries(TOPICS).map(([id, t]) => ({ id, label: t.label, sources: t.feeds.map(f => f[0]) })))
   handle('reminders:list', () => listReminders())
   handle('reminders:cancel', (_e, id) => cancelReminders([Number(id)]))
   handle('memory:get', () => getMemory())

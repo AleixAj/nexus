@@ -28,6 +28,8 @@ contextBridge.exposeInMainWorld('nexus', {
   onConfirm: (fn: (id: number, cid: number, req: { title: string; detail: string }) => void) => on('brain:confirm', fn),
   confirmReply: (cid: number, ok: boolean) => ipcRenderer.invoke('brain:confirm-reply', cid, ok),
   onTtsQuota: (fn: (engine: string) => void) => on('tts:quota', fn),
+  getNews: () => ipcRenderer.invoke('news:get'),
+  newsTopics: () => ipcRenderer.invoke('news:topics'),
   listReminders: () => ipcRenderer.invoke('reminders:list'),
   cancelReminder: (id: number) => ipcRenderer.invoke('reminders:cancel', id),
   onReminder: (fn: (r: any) => void) => on('reminder:due', fn),

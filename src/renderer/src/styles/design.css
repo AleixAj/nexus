@@ -125,3 +125,5 @@ button{font:inherit}
 .nx-core-hit:active { transform: scale(.97); }
 
 @keyframes nxi-bar { from { transform: scaleY(0) } to { transform: scaleY(1) } }
+
+.nx-news{transition:background 250ms}.nx-news:hover{background:rgba(255,255,255,.04)}

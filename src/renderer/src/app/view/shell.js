@@ -6,7 +6,7 @@ import { WALLPAPER } from '../util';
 export function shellView(app, c) {
   const { S, P, L, core, live } = c;
   const th = THEMES[S.theme] || THEMES.nexus;
-  const wide = ['voice', 'routines', 'memory', 'settings'].includes(P);
+  const wide = ['voice', 'routines', 'memory', 'news', 'settings'].includes(P);
   const wk = S.wordsKind;
   const stateColor = core === 'error' ? '#FB7185' : core === 'thinking' || core === 'action' ? '#F5B971' : core === 'speaking' ? '#FFE4C4' : core === 'music' ? '#FDBA74' : 'rgb(var(--acc2) / .75)';
   const pillText = core === 'error' ? 'SIN CONEXIÓN · TOCA PARA REINTENTAR' : live ? 'EN VIVO · TOCA PARA PARAR' : core === 'music' ? 'MÚSICA · TOCA PARA PAUSAR' : WALLPAPER ? 'EN ESPERA · ' + app.hotkeyLabel() + ' PARA HABLAR' : 'EN ESPERA · TOCA EL NÚCLEO PARA HABLAR';

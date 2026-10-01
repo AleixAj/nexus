@@ -13,6 +13,9 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   carpetas, mira estadísticas del equipo y procesos, crea o modifica archivos y ejecuta comandos de PowerShell.
   Todo lo que cambia el equipo pide permiso antes, y lo que borra va a la papelera.
 - **Acciones rápidas.** Abre aplicaciones y webs y controla la música y el volumen.
+- **Noticias del día sin política.** Panel con lo más reciente de tecnología, ciencia y curiosidades (y, si quieres,
+  videojuegos, cine, motor, cocina o salud), de medios en español por RSS, gratis y sin clave. Filtra la política por
+  defecto y puedes añadir otros temas a evitar. «¿Qué noticias hay hoy?» o *Resumen en voz* te las cuenta.
 - **Recordatorios y alarmas por voz.** «Avísame en 20 minutos», «mañana a las 9 recuérdame…», «pon una alarma de
   lunes a viernes a las 7». Suena un aviso, lo dice en voz alta y sale una notificación de Windows. Los próximos aparecen
   a la derecha del escritorio. Si el PC estaba apagado, te avisa al abrir de lo que se pasó.
@@ -149,11 +152,12 @@ src/
     tools/                  herramientas del agente, una lista por tema
       define.ts             formato común: descripción para la IA + lo que se ejecuta
       index.ts              registro: qué herramientas están activas según los ajustes
-      apps.ts music.ts web.ts files.ts system.ts memory.ts reminders.ts
+      apps.ts music.ts news.ts web.ts files.ts system.ts memory.ts reminders.ts
     lib/                    piezas comunes: PowerShell, archivos de datos y texto
     memory.ts               memoria cifrada: datos sobre ti y conversaciones
     reminders.ts            recordatorios y alarmas
     media.ts                lo que suena en Spotify, carátula y letra
+    news.ts                 noticias por RSS, por temas y sin política
     stt.ts / tts.ts         voz a texto y texto a voz
     settings.ts             ajustes y claves cifradas
     sysinfo.ts world.ts wallpaper.ts

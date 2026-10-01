@@ -10,6 +10,7 @@ import { buildView } from './app/view';
 import { conversation } from './app/features/conversation';
 import { memory } from './app/features/memory';
 import { music } from './app/features/music';
+import { news } from './app/features/news';
 import { routines } from './app/features/routines';
 import { settings } from './app/features/settings';
 import { startup } from './app/features/startup';
@@ -38,6 +39,8 @@ export default class NexusApp extends Component {
     routineSel: 'work', routineOn: { work: true, night: true, home: true, pres: false }, runStep: -1,
     perms: { apps: true, music: true, files: true, home: true, power: true, msg: false, cam: false },
     // memory and reminders
+    // news
+    news: null, newsTopics: 'tech,science,curious', newsAvoid: 'política',
     memQuery: '', memFilter: 'Todo', learn: true, memChats: [], facts: [], factInput: '', forgetArmed: false, reminders: [],
     // settings
     provider: 'Auto', model: '', providers: {}, keyInput: '', showKey: false, autostart: false, hotkey: 'Control+Alt+Space',
@@ -156,6 +159,7 @@ export default class NexusApp extends Component {
     if (opening && p === 'system') this.loadSystem();
     if (opening && p === 'voice') this.prepareSamples();
     if (opening && p === 'memory') this.loadMemory();
+    if (opening && p === 'news') this.loadNews();
     this.setState({ panel: opening ? p : null, volOpen: false });
   }
 
@@ -171,4 +175,4 @@ export default class NexusApp extends Component {
   }
 }
 
-Object.assign(NexusApp.prototype, conversation, memory, music, routines, settings, startup, voices);
+Object.assign(NexusApp.prototype, conversation, memory, music, news, routines, settings, startup, voices);

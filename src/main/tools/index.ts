@@ -6,11 +6,12 @@ import { appTools } from './apps'
 import { fileTools } from './files'
 import { memoryTools } from './memory'
 import { musicTools } from './music'
+import { newsTools } from './news'
 import { reminderTools } from './reminders'
 import { systemTools } from './system'
 import { webTools } from './web'
 
-const ALL: Tool[] = [...appTools, ...musicTools, ...memoryTools, ...reminderTools, ...systemTools, ...webTools, ...fileTools]
+const ALL: Tool[] = [...appTools, ...musicTools, ...memoryTools, ...reminderTools, ...newsTools, ...systemTools, ...webTools, ...fileTools]
 const BY_NAME = new Map(ALL.map(t => [t.name, t]))
 
 /** The switches in Settings → Agent. */
