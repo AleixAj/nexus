@@ -841,10 +841,10 @@ export default class NexusApp extends Component {
       bgFilter: S.overlay ? 'blur(12px) brightness(.3)' : P === 'music' ? 'brightness(.85)' : P === 'system' ? 'blur(3px) brightness(.78)' : P ? 'blur(6px) brightness(.7)' : 'none',
       overlay: S.overlay,
       showUI: S.uiIn && !S.overlay && !S.onb,
-      showHud: !P || P === 'chat', showFrame: (S.uiIn && !S.overlay) || S.onb, showMic: false, showNotifs: !P,
-      // wallpaper: info on the right (desktop icons live on the left), no clickable controls
-      hudPos: WALLPAPER ? { left: 'auto', right: '64px', alignItems: 'flex-end', textAlign: 'right' } : null,
-      notifPos: WALLPAPER ? { top: 'auto', bottom: '150px' } : null,
+      showHud: !P, showFrame: (S.uiIn && !S.overlay) || S.onb, showMic: false, showNotifs: !P,
+      // info on the right: desktop icons live on the left (same layout as the wallpaper mode)
+      hudPos: { left: 'auto', right: '64px', alignItems: 'flex-end', textAlign: 'right' },
+      notifPos: { top: 'auto', bottom: WALLPAPER ? '150px' : '128px' },
       pillPointer: WALLPAPER ? 'none' : 'auto', dismissDisplay: WALLPAPER ? 'none' : 'grid',
       clockDigits, dateStr, greetText: `${this.greet()}, ${this.name()}.`,
       indicators: [{ label: 'IA', color: S.error ? '#FB7185' : '#34D399' }, { label: 'LOCAL', color: '#34D399' }, { label: 'VOZ', color: S.voiceDown ? '#FB7185' : '#34D399' }],
