@@ -214,7 +214,11 @@ function Tab({ v }: { v: any }) {
     case 'system': return (
       <>
         <Group title="AL ENCENDER"><Toggles list={[t.autostart, t.briefing]} /></Group>
-        <Group title="FONDO DE ESCRITORIO"><Toggles list={[t.wallpaper, t.wallExtend, t.wallDock, t.wallClicks, t.bgMotion]} /></Group>
+        <Group title="FONDO DE ESCRITORIO"><Toggles list={[t.wallpaper]} />
+          <Row label="En qué pantallas" note="Con varias, las secundarias muestran la misma galaxia sin el núcleo, estén donde estén (izquierda, derecha, arriba o abajo)">
+            <div style={{ width: '360px' }}><Segments opts={v.wallScreens} /></div>
+          </Row>
+          <Toggles list={[t.wallDock, t.wallClicks, t.bgMotion]} /></Group>
       </>
     )
     case 'accounts': return <AccountsTab v={v} />

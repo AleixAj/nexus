@@ -158,7 +158,7 @@ En **modo fondo de escritorio** la animación sustituye a tu fondo de pantalla, 
 - Para escribir, pulsa un campo de texto: aparece encima una cajita que sí recibe el teclado. Lo que escribes va
   al campo; Enter lo envía y Esc o pulsar fuera la cierran.
 - Las dos cosas se apagan en Ajustes → Sistema (*Barra de abajo en el fondo* y *Pulsar en el fondo*).
-- **Varias pantallas:** con *Fondo en las otras pantallas* (Ajustes → Sistema) el resto de monitores muestran la
+- **Varias pantallas:** en Ajustes → Sistema → *En qué pantallas* eliges *Solo la principal* (por defecto) o *Todas las pantallas*. Con todas, cada secundaria (esté a la izquierda, a la derecha, arriba o abajo) muestra la
   misma galaxia, sin núcleo ni botones, con tu tema y entrando por el lado que toca la pantalla principal. Se
   rehace sola si conectas o quitas un monitor, y se queda quieta igual que la principal.
 - También se le habla con **Ctrl + Alt + Espacio**. Para volver a ventana, Ajustes → Sistema o la bandeja.

@@ -73,13 +73,16 @@ export function settingsView(app, c) {
       { id: 'wake', label: `Escuchar «${S.wakeWord}» siempre`, note: S.wakeProgress != null ? `Descargando el modelo de voz… ${Math.round(S.wakeProgress * 100)} %` : 'Me despierto al oírlo. Se cambia en Voz y personalidad. Todo en tu PC: no se graba ni se envía nada', on: !!S.wakeListen, toggle: () => app.setWakeListen(!S.wakeListen) },
       { id: 'wallDock', label: 'Barra de abajo en el fondo', note: 'Con NEXUS de fondo de escritorio, sigue viéndose la barra con el chat, la música, los ajustes…', on: S.wallDock !== false, toggle: () => app.flip('wallDock') },
       { id: 'wallClicks', label: 'Pulsar en el fondo', note: 'Toca el núcleo para hablar y usa la barra aunque esté detrás de los iconos. Solo cuenta lo que pulsas en el escritorio vacío', on: S.wallClicks !== false, toggle: () => app.flip('wallClicks') },
-      { id: 'wallExtend', label: 'Fondo en las otras pantallas', note: 'Con NEXUS de fondo, el resto de monitores muestran la misma galaxia (sin el núcleo), a juego con la principal', on: !!S.wallExtend, toggle: () => app.flip('wallExtend') },
       { id: 'bgMotion', label: 'Fondo quieto mientras usas otras apps', note: 'En modo fondo de escritorio solo se anima cuando miras el escritorio o te hablo. Ahorra batería y CPU', on: (S.bgMotion || 'desktop') !== 'always', toggle: () => { const v = (S.bgMotion || 'desktop') === 'always' ? 'desktop' : 'always'; app.setState({ bgMotion: v }, () => app.updatePower()); app.save({ bgMotion: v }); } },
       { id: 'briefing', label: 'Resumen al encender', note: 'La primera vez que me abres cada día: tiempo, recordatorios y noticias', on: !!S.briefing, toggle: () => app.flip('briefing') },
       { id: 'subtitles', label: 'Subtítulos', note: 'Muestra bajo el núcleo lo que te digo, para leerlo además de oírlo', on: !!S.subtitles, toggle: () => app.flip('subtitles') },
       { id: 'reduced', label: 'Reducir movimiento', note: 'Sin parallax, estelas ni partículas extra. Mejor si el movimiento te marea', on: S.reduced, toggle: () => app.setReduced(!S.reduced) },
     ].map(t => [t.id, { ...t, ...toggleT(t.on) }])),
     hotkeyKeys: app.hotkeyLabel().split(' + '),
+    // on which monitors the wallpaper shows (the others get only the galaxy, without the core)
+    wallScreens: [['Solo la principal', false], ['Todas las pantallas', true]].map(([label, all]) => ({
+      label, ...seg(!!S.wallExtend === all), pick: () => { if (!!S.wallExtend !== all) app.flip('wallExtend'); },
+    })),
     // the voice itself is chosen (and heard) in the Voice panel
     voiceNow: `${voiceById(S.voiceSel).name} · ${(PERSONAS.find(p => p.id === S.persona) || PERSONAS[0]).name}`,
     openVoice: () => app.openPanel('voice', true),
