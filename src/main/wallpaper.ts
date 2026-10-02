@@ -13,7 +13,7 @@ import { existsSync, readdirSync, rmSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
 // bump when the C# changes, so the cached DLL is rebuilt
-const VERSION = 3
+const VERSION = 5
 
 const CSHARP = String.raw`
 using System;
@@ -61,7 +61,8 @@ public static class NxDesk {
   }
   static string ClassOf(IntPtr h) { StringBuilder c = new StringBuilder(64); GetClassName(h, c, 64); return c.ToString(); }
 
-  public static string Attach(long hwnd) {
+  // mx, my, mw, mh: the monitor in physical pixels; mw = 0 means the primary monitor
+  public static string Attach(long hwnd, int mx, int my, int mw, int mh) {
     SetProcessDPIAware();
     IntPtr me = new IntPtr(hwnd);
     IntPtr progman = FindWindow("Progman", null);
@@ -86,12 +87,15 @@ public static class NxDesk {
       after = FindWindowEx(progman, IntPtr.Zero, "SHELLDLL_DefView", null);
     }
 
-    // primary monitor, in coordinates relative to the virtual screen
-    MONITORINFO mi = Info(MonitorFromWindow(IntPtr.Zero, 1));
+    if (mw <= 0) {
+      MONITORINFO mi = Info(MonitorFromWindow(IntPtr.Zero, 1));
+      mx = mi.rcMonitor.L; my = mi.rcMonitor.T; mw = mi.rcMonitor.R - mi.rcMonitor.L; mh = mi.rcMonitor.B - mi.rcMonitor.T;
+    }
+    // the desktop layer starts at the top-left of the whole virtual screen
     int vx = GetSystemMetrics(76), vy = GetSystemMetrics(77);
     SetParent(me, parent);
     uint flags = after == IntPtr.Zero ? 0x0054u : 0x0050u; // (NOZORDER |) NOACTIVATE | SHOWWINDOW
-    SetWindowPos(me, after, mi.rcMonitor.L - vx, mi.rcMonitor.T - vy, mi.rcMonitor.R - mi.rcMonitor.L, mi.rcMonitor.B - mi.rcMonitor.T, flags);
+    SetWindowPos(me, after, mx - vx, my - vy, mw, mh, flags);
     return "ok";
   }
 
@@ -170,7 +174,7 @@ public static class NxDesk {
 `
 
 const HELPER = String.raw`
-param([string]$Action, [string]$Hwnd = '0', [int]$ParentPid = 0, [string]$Dll, [int]$Mouse = 0)
+param([string]$Action, [string]$Hwnd = '0', [int]$ParentPid = 0, [string]$Dll, [int]$Mouse = 0, [string]$Rect = 'primary')
 $ErrorActionPreference = 'Stop'
 # compiled once; later runs just load the DLL (much faster)
 if (-not (Test-Path $Dll)) {
@@ -181,7 +185,8 @@ Add-Type -LiteralPath $Dll
 
 if ($Action -eq 'refresh') { [NxDesk]::Refresh(); exit }
 if ($Action -eq 'run') {
-  [Console]::Out.WriteLine('attach ' + [NxDesk]::Attach([long]$Hwnd)); [Console]::Out.Flush()
+  $m = if ($Rect -eq 'primary') { @(0, 0, 0, 0) } else { $Rect.Split(',') | ForEach-Object { [int]$_ } }
+  [Console]::Out.WriteLine('attach ' + [NxDesk]::Attach([long]$Hwnd, $m[0], $m[1], $m[2], $m[3])); [Console]::Out.Flush()
   if ($Mouse) { [NxDesk]::ListenMouse([long]$Hwnd) }
   $last = -1
   while ($true) {
@@ -225,20 +230,25 @@ export type DeskEvents = {
   onPointer?: (e: Pointer) => void
 }
 
-let helperProc: ChildProcess | null = null
+// one helper per wallpaper window (the main one and one per extra monitor)
+const helpers = new Map<BrowserWindow, ChildProcess>()
 
 /**
- * Puts the window behind the desktop icons (primary monitor) and keeps one helper running
- * that reports what is in front of it and, if wanted, clicks on the desktop.
+ * Puts the window behind the desktop icons and keeps one helper running that reports what is
+ * in front of it and, if wanted, the mouse on the desktop. Without a display it goes on the
+ * primary monitor.
  */
-export function attachToDesktop(win: BrowserWindow, ev: DeskEvents): Promise<void> {
-  stopDesktop()
+export function attachToDesktop(win: BrowserWindow, ev: DeskEvents, display?: Electron.Display): Promise<void> {
+  stopDesktop(win)
+  // the monitor in physical pixels (what Win32 uses)
+  const r = display ? screen.dipToScreenRect(null, display.bounds) : null
+  const rect = r ? `${r.x},${r.y},${r.width},${r.height}` : ''
   return new Promise((resolve, reject) => {
-    const p = spawn('powershell', args('run', handleOf(win), !!ev.onPointer), { windowsHide: true })
-    helperProc = p
-    const scale = screen.getPrimaryDisplay().scaleFactor || 1
+    const p = spawn('powershell', [...args('run', handleOf(win), !!ev.onPointer), '-Rect', rect || 'primary'], { windowsHide: true })
+    helpers.set(win, p)
+    const scale = (display || screen.getPrimaryDisplay()).scaleFactor || 1
     let buf = '', settled = false
-    const fail = (msg: string) => { if (!settled) { settled = true; stopDesktop(); reject(new Error(msg)) } }
+    const fail = (msg: string) => { if (!settled) { settled = true; stopDesktop(win); reject(new Error(msg)) } }
     const timer = setTimeout(() => fail('sin respuesta'), 20000)
     p.stdout!.on('data', d => {
       buf += d
@@ -266,7 +276,11 @@ export function refreshWallpaper() {
   return new Promise<void>(resolve => execFile('powershell', args('refresh'), { windowsHide: true, timeout: 15000 }, () => resolve()))
 }
 
-export function stopDesktop() {
-  helperProc?.kill()
-  helperProc = null
+/** Stops the helper of one wallpaper window, or of all of them. */
+export function stopDesktop(win?: BrowserWindow) {
+  for (const [w, p] of helpers) {
+    if (win && w !== win) continue
+    p.kill()
+    helpers.delete(w)
+  }
 }

@@ -106,6 +106,7 @@ export function createWindow(m: Mode, query: Record<string, string> = {}) {
     w.showInactive()
     try {
       await attachWall(w)
+      openExtras()
     } catch (err: any) {
       console.warn('[wallpaper]', err.message)
       switchMode('window', { notice: 'wallpaper-failed' })
@@ -135,10 +136,68 @@ export function createWindow(m: Mode, query: Record<string, string> = {}) {
 
 
   const q = { mode: m, ...(BACKGROUND ? { quiet: '1' } : {}), ...query }
-  if (isDev) w.loadURL(process.env.ELECTRON_RENDERER_URL! + '?' + new URLSearchParams(q))
-  else w.loadFile(join(__dirname, '../renderer/index.html'), { query: q })
+  loadPage(w, q)
   updateTray()
 }
+
+function loadPage(w: BrowserWindow, q: Record<string, string>) {
+  if (isDev) w.loadURL(process.env.ELECTRON_RENDERER_URL! + '?' + new URLSearchParams(q))
+  else w.loadFile(join(__dirname, '../renderer/index.html'), { query: q })
+}
+
+// ---------- the other monitors ----------
+// With "Fondo en las otras pantallas" every other monitor gets a window with only the galaxy
+// (no core, no buttons), also behind its icons and matching the main one.
+let extras: BrowserWindow[] = []
+let watchingDisplays = false
+
+/** Where a monitor is, seen from the primary one (the galaxy glows from that side). */
+function sideOf(d: Electron.Display) {
+  const p = screen.getPrimaryDisplay().bounds, b = d.bounds
+  const dx = b.x + b.width / 2 - (p.x + p.width / 2), dy = b.y + b.height / 2 - (p.y + p.height / 2)
+  return Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'top' : 'bottom')
+}
+
+export function closeExtras() {
+  for (const w of extras) { stopDesktop(w); if (!w.isDestroyed()) w.destroy() }
+  extras = []
+}
+
+export function openExtras() {
+  closeExtras()
+  if (!watchingDisplays) {
+    // monitors plugged, unplugged or rearranged: rebuild
+    watchingDisplays = true
+    let t: NodeJS.Timeout | undefined
+    const again = () => { clearTimeout(t); t = setTimeout(() => { if (mode === 'wallpaper' && win) openExtras() }, 1500) }
+    screen.on('display-added', again); screen.on('display-removed', again); screen.on('display-metrics-changed', again)
+  }
+  if (mode !== 'wallpaper' || !loadSettings().wallExtend) return
+  const primary = screen.getPrimaryDisplay()
+  for (const d of screen.getAllDisplays()) {
+    if (d.id === primary.id) continue
+    const w = new BrowserWindow({
+      x: -32000, y: -32000, width: d.bounds.width, height: d.bounds.height, frame: false, skipTaskbar: true, resizable: false,
+      movable: false, focusable: false, show: false, backgroundColor: '#05030A', title: 'NEXUS',
+      webPreferences: { preload: join(__dirname, '../preload/index.js'), sandbox: true, spellcheck: false, backgroundThrottling: false }
+    })
+    extras.push(w)
+    w.once('ready-to-show', async () => {
+      w.showInactive()
+      try {
+        await attachToDesktop(w, { onFront: state => { if (!w.isDestroyed()) w.webContents.send('app:covered', state) } }, d)
+      } catch (err: any) {
+        console.warn('[wallpaper] otra pantalla:', err.message)
+        stopDesktop(w); if (!w.isDestroyed()) w.destroy()
+      }
+    })
+    w.webContents.on('will-navigate', e => e.preventDefault())
+    loadPage(w, { mode: 'wallpaper', screen: 'extra', side: sideOf(d), quiet: '1' })
+  }
+}
+
+/** The look changed (theme, quality, motion): the other monitors follow. */
+export const extrasRefresh = () => extras.forEach(w => { if (!w.isDestroyed()) w.webContents.send('extra:settings') })
 
 function placeOnSecondary() {
   const a = secondaryArea()
@@ -151,6 +210,7 @@ export async function switchMode(m: Mode, query: Record<string, string> = {}) {
   if (switching) return
   switching = true
   closeEditBox()
+  closeExtras()
   const was = mode
   stopDesktop()
   win?.destroy()
@@ -198,6 +258,7 @@ export function createTray() {
 /** Before quitting: give the desktop its normal wallpaper back. Returns true if quitting must wait. */
 export function beforeQuit(done: () => void) {
   quitting = true
+  closeExtras()
   stopDesktop()
   if (mode !== 'wallpaper' || !win) return false
   mode = 'window'

@@ -214,7 +214,7 @@ function Tab({ v }: { v: any }) {
     case 'system': return (
       <>
         <Group title="AL ENCENDER"><Toggles list={[t.autostart, t.briefing]} /></Group>
-        <Group title="FONDO DE ESCRITORIO"><Toggles list={[t.wallpaper, t.wallDock, t.wallClicks, t.bgMotion]} /></Group>
+        <Group title="FONDO DE ESCRITORIO"><Toggles list={[t.wallpaper, t.wallExtend, t.wallDock, t.wallClicks, t.bgMotion]} /></Group>
       </>
     )
     case 'accounts': return <AccountsTab v={v} />

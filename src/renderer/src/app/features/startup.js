@@ -19,7 +19,8 @@ export const startup = {
     // (otherwise it would wait, black and without the bar, until you look at the desktop)
     this.booting = true; this.updatePower();
     E.boot({ onUI: () => this.setState({ uiIn: true }), onDone: () => {
-      this.booting = false; this.updatePower();
+      // a little longer, so the last frame before resting has the full galaxy and colours
+      setTimeout(() => { this.booting = false; this.updatePower(); }, 2000);
       if (!QUIET) this.greetOrBrief();
       if (NOTICE === 'wallpaper-failed') this.notify('FONDO DE ESCRITORIO', 'No he podido ponerme de fondo', 'Windows no lo ha permitido · sigo en modo ventana', '#FB7185');
       const p = this.state.providers[this.state.provider];

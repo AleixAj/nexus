@@ -39,6 +39,8 @@ export type Settings = {
   // wallpaper mode: show the bottom bar, and answer clicks on the desktop
   wallDock: boolean
   wallClicks: boolean
+  // wallpaper mode: the galaxy (without the core) also on the other monitors
+  wallExtend: boolean
   wakeWord: string
   spotifyClientId: string
   lastBriefing: string
@@ -108,6 +110,7 @@ const DEFAULTS: Settings = {
   bgMotion: 'desktop',
   wallDock: true,
   wallClicks: true,
+  wallExtend: false,
   // the phrase that wakes it: whatever the user likes ("Oye Jarvis", "Hola Viernes"…)
   wakeWord: 'Hey Nexus',
   // the user's own app at developer.spotify.com (for playlists by name)

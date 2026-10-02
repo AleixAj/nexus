@@ -25,6 +25,7 @@ contextBridge.exposeInMainWorld('nexus', {
   setAutostart: (on: boolean) => ipcRenderer.invoke('app:autostart', on),
   setMode: (mode: 'window' | 'wallpaper') => ipcRenderer.invoke('app:mode', mode),
   onCovered: (fn: (covered: boolean) => void) => on('app:covered', fn),
+  onExtraSettings: (fn: () => void) => on('extra:settings', fn),
   wallEdit: (r: Record<string, unknown>) => ipcRenderer.invoke('desk:edit-open', r),
   onDeskEdit: (fn: (e: { id: string; value: string; submit: boolean }) => void) => on('desk:edit', fn),
   onDelta: (fn: (id: number, t: string) => void) => on('brain:delta', fn),

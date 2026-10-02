@@ -158,6 +158,9 @@ En **modo fondo de escritorio** la animación sustituye a tu fondo de pantalla, 
 - Para escribir, pulsa un campo de texto: aparece encima una cajita que sí recibe el teclado. Lo que escribes va
   al campo; Enter lo envía y Esc o pulsar fuera la cierran.
 - Las dos cosas se apagan en Ajustes → Sistema (*Barra de abajo en el fondo* y *Pulsar en el fondo*).
+- **Varias pantallas:** con *Fondo en las otras pantallas* (Ajustes → Sistema) el resto de monitores muestran la
+  misma galaxia, sin núcleo ni botones, con tu tema y entrando por el lado que toca la pantalla principal. Se
+  rehace sola si conectas o quitas un monitor, y se queda quieta igual que la principal.
 - También se le habla con **Ctrl + Alt + Espacio**. Para volver a ventana, Ajustes → Sistema o la bandeja.
 - Ponerse de fondo tarda menos de un segundo: el ayudante de Windows se compila una sola vez y se guarda.
 - Se pausa sola mientras una aplicación maximizada o a pantalla completa (un juego, por ejemplo) tapa el escritorio.

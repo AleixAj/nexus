@@ -14,7 +14,7 @@ import { systemSnapshot } from './sysinfo'
 import { cancelReminders, listReminders } from './reminders'
 import { addFact, approveFact, clearMemory, deleteExchange, deleteFact, getMemory } from './memory'
 import { currentExtra, currentMedia, mediaControl } from './media'
-import { HOTKEY, isDev, switchMode, wallClicksChanged } from './window'
+import { HOTKEY, closeExtras, extrasRefresh, isDev, openExtras, switchMode, wallClicksChanged } from './window'
 import { typeText } from './dictation'
 import { ensureModel, feedWakeWord, modelReady, startWakeWord, stopWakeWord } from './wakeword'
 import { broadcast } from './window'
@@ -65,6 +65,8 @@ export function registerIpc() {
     const p = patch && typeof patch === 'object' ? patch : {}
     const out = saveSettings(p)
     if ('wallClicks' in p) wallClicksChanged()
+    if ('wallExtend' in p) { if (out.wallExtend) openExtras(); else closeExtras() }
+    if (['theme', 'quality', 'reduced', 'bgMotion'].some(k => k in p)) extrasRefresh()
     return out
   })
   handle('key:set', (_e, provider, key) => setKey(str(provider, 40), str(key, 400)))
