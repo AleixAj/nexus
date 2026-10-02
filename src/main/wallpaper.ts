@@ -9,7 +9,7 @@
 // on the bare desktop; the page then acts as if they had been made on it.
 import { app, BrowserWindow, screen } from 'electron'
 import { execFile, spawn, type ChildProcess } from 'child_process'
-import { existsSync, writeFileSync } from 'fs'
+import { existsSync, readdirSync, rmSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
 // bump when the C# changes, so the cached DLL is rebuilt
@@ -201,6 +201,10 @@ function helper() {
     const ps1 = join(dir, 'nexus-desktop.ps1')
     writeFileSync(ps1, HELPER, 'utf8')
     if (!existsSync(dll)) writeFileSync(dll.replace(/\.dll$/, '.cs'), CSHARP, 'utf8')
+    // helpers of older versions are not needed any more
+    for (const old of readdirSync(dir)) {
+      if (/^nexus-desktop-\d+\.(dll|cs)$/.test(old) && !old.startsWith(`nexus-desktop-${VERSION}.`)) rmSync(join(dir, old), { force: true })
+    }
     files = { ps1, dll }
   }
   return files

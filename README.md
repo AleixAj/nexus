@@ -152,9 +152,11 @@ escuchando el atajo **Ctrl + Alt + Espacio**. Para cerrarla del todo, usa *Salir
 
 En **modo fondo de escritorio** la animación sustituye a tu fondo de pantalla, detrás de los iconos:
 
-- Sigue viéndose la barra de abajo y se puede pulsar: toca el núcleo para hablar o abre cualquier panel. Como
-  Wallpaper Engine, NEXUS escucha los clics que caen en el escritorio vacío (nunca los de otras apps) y los
-  aplica sobre sí misma. Escribir no se puede: para el chat, háblale o vuelve a modo ventana.
+- Sigue viéndose la barra de abajo y se usa como siempre: toca el núcleo para hablar, abre paneles, usa la rueda
+  y verás el hover. Como Wallpaper Engine, NEXUS recibe el ratón que pasa por el escritorio vacío (nunca el de
+  otras apps) como si fuera una ventana normal.
+- Para escribir, pulsa un campo de texto: aparece encima una cajita que sí recibe el teclado. Lo que escribes va
+  al campo; Enter lo envía y Esc o pulsar fuera la cierran.
 - Las dos cosas se apagan en Ajustes → Sistema (*Barra de abajo en el fondo* y *Pulsar en el fondo*).
 - También se le habla con **Ctrl + Alt + Espacio**. Para volver a ventana, Ajustes → Sistema o la bandeja.
 - Ponerse de fondo tarda menos de un segundo: el ayudante de Windows se compila una sola vez y se guarda.
