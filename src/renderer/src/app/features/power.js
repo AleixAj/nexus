@@ -3,7 +3,7 @@
 // hidden, covered or (as a wallpaper) while you work in another app.
 import * as voice from '../../services/voice';
 import { LIVE_STATES } from '../constants';
-import { WALLPAPER } from '../util';
+import { WALLPAPER, api } from '../util';
 
 export const power = {
   // mouse or keyboard on the window: back to the normal frame rate at once
@@ -14,24 +14,30 @@ export const power = {
     this.restT = setTimeout(() => this.updatePower(), 45500);
     if (wasResting) this.updatePower();
   },
-  // a click or wheel turn made on the bare desktop while NEXUS is the wallpaper (Windows sends
-  // none to a window behind the icons, so the main process passes them on): do the same here
-  onDeskPointer({ kind, x, y, delta }) {
-    if (!WALLPAPER || this.state.wallClicks === false) return;
-    const el = document.elementFromPoint(x, y);
+  // Typing as a wallpaper: the window never gets the keyboard, so a click on a text field asks
+  // the main process for a real text box on top of it; what is typed there comes back here.
+  watchWallTyping() {
+    if (!WALLPAPER || !api) return;
+    document.addEventListener('mousedown', e => {
+      const el = e.target.closest && e.target.closest('input, textarea');
+      if (!el || ['range', 'checkbox', 'radio'].includes(el.type) || el.disabled) return;
+      el.dataset.nxEdit ||= Math.random().toString(36).slice(2);
+      const r = el.getBoundingClientRect(), k = this.state.k || 1;
+      const accent = getComputedStyle(el).getPropertyValue('--acc2').trim() || '196 181 253';
+      api.wallEdit({
+        id: el.dataset.nxEdit, x: r.left, y: r.top, w: r.width, h: r.height, value: el.value, placeholder: el.placeholder || '',
+        secret: el.type === 'password', multiline: el.tagName === 'TEXTAREA', fontSize: (parseFloat(getComputedStyle(el).fontSize) || 15) * k, accent,
+      });
+    }, true);
+  },
+  onDeskEdit({ id, value, submit }) {
+    const el = document.querySelector(`[data-nx-edit="${id}"]`);
     if (!el) return;
-    this.noteActivity();
-    if (kind === 'wheel') {
-      for (let n = el; n && n !== document.body; n = n.parentElement) {
-        const o = getComputedStyle(n).overflowY;
-        if ((o === 'auto' || o === 'scroll') && n.scrollHeight > n.clientHeight) { n.scrollBy({ top: -(delta || 0), behavior: 'smooth' }); return; }
-      }
-      return;
-    }
-    const opts = { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0, view: window };
-    for (const type of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']) {
-      el.dispatchEvent(type.startsWith('pointer') ? new PointerEvent(type, { ...opts, pointerType: 'mouse', isPrimary: true }) : new MouseEvent(type, opts));
-    }
+    // React keeps its own copy of the value: set it the way a keystroke would
+    const proto = el.tagName === 'TEXTAREA' ? HTMLTextAreaElement.prototype : HTMLInputElement.prototype;
+    Object.getOwnPropertyDescriptor(proto, 'value').set.call(el, value);
+    el.dispatchEvent(new Event('input', { bubbles: true }));
+    if (submit) setTimeout(() => el.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', code: 'Enter', bubbles: true, cancelable: true })), 30);
   },
   // what is in front of the wallpaper: 'desktop', 'app' or 'covered' (sent by the main process)
   onScreenState(state) { this.screenState = state; this.updatePower(); },

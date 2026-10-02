@@ -2,7 +2,8 @@
 import { app, BrowserWindow, Menu, Notification, Tray, ipcMain, nativeImage, screen, shell } from 'electron'
 import { join } from 'path'
 import { loadSettings, saveSettings } from './settings'
-import { attachToDesktop, refreshWallpaper, stopDesktop } from './wallpaper'
+import { attachToDesktop, refreshWallpaper, stopDesktop, type Pointer } from './wallpaper'
+import { closeEditBox } from './editBox'
 
 export type Mode = 'window' | 'wallpaper'
 
@@ -57,8 +58,19 @@ function attachWall(w: BrowserWindow) {
   const send = (ch: string, data: unknown) => { if (!w.isDestroyed()) w.webContents.send(ch, data) }
   return attachToDesktop(w, {
     onFront: state => send('app:covered', state),
-    onPointer: loadSettings().wallClicks ? e => send('desk:pointer', e) : undefined,
+    onPointer: loadSettings().wallClicks ? p => pointerTo(w, p) : undefined,
   })
+}
+
+// The mouse on the desktop, given to the page as real input: hover effects, clicks and the
+// wheel behave exactly as in a normal window
+function pointerTo(w: BrowserWindow, p: Pointer) {
+  if (w.isDestroyed()) return
+  const x = Math.round(p.x), y = Math.round(p.y), wc = w.webContents
+  if (p.kind === 'leave') wc.sendInputEvent({ type: 'mouseLeave', x: -1, y: -1 })
+  else if (p.kind === 'move') wc.sendInputEvent({ type: 'mouseMove', x, y })
+  else if (p.kind === 'wheel') wc.sendInputEvent({ type: 'mouseWheel', x, y, deltaX: 0, deltaY: p.delta || 0, canScroll: true })
+  else wc.sendInputEvent({ type: p.kind === 'down' ? 'mouseDown' : 'mouseUp', x, y, button: 'left', clickCount: 1 })
 }
 
 /** The "answer clicks on the wallpaper" switch changed: restart the helper with or without the mouse. */
@@ -138,6 +150,7 @@ function placeOnSecondary() {
 export async function switchMode(m: Mode, query: Record<string, string> = {}) {
   if (switching) return
   switching = true
+  closeEditBox()
   const was = mode
   stopDesktop()
   win?.destroy()

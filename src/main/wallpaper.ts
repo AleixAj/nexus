@@ -13,7 +13,7 @@ import { existsSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
 // bump when the C# changes, so the cached DLL is rebuilt
-const VERSION = 2
+const VERSION = 3
 
 const CSHARP = String.raw`
 using System;
@@ -113,23 +113,34 @@ public static class NxDesk {
   // ---------- clicks on the desktop ----------
   static IntPtr ours, hook;
   static HookProc keep; // the delegate must outlive the hook
+  static bool inside, pressed;
+  static int lastMove;
+
+  static void Say(string s) { Console.Out.WriteLine(s); Console.Out.Flush(); }
 
   static IntPtr OnMouse(int code, IntPtr w, IntPtr l) {
     int msg = w.ToInt32();
-    // left button released, or the wheel
-    if (code >= 0 && (msg == 0x0202 || msg == 0x020A)) {
+    // move, left button down/up, wheel
+    if (code >= 0 && (msg == 0x0200 || msg == 0x0201 || msg == 0x0202 || msg == 0x020A)) {
       try {
         MOUSEHOOK m = (MOUSEHOOK)Marshal.PtrToStructure(l, typeof(MOUSEHOOK));
-        // only what lands on the bare desktop (icons layer or wallpaper), never on an app
+        // moves are many: at most ~40 a second
+        if (msg == 0x0200 && unchecked(Environment.TickCount - lastMove) < 25) return CallNextHookEx(hook, code, w, l);
+        if (msg == 0x0200) lastMove = Environment.TickCount;
+        // only what happens on the bare desktop (icons layer or wallpaper), never on an app
         string root = ClassOf(GetAncestor(WindowFromPoint(m.pt), 2));
-        if (root == "Progman" || root == "WorkerW") {
-          RECT r; GetWindowRect(ours, out r);
-          if (m.pt.X >= r.L && m.pt.X < r.R && m.pt.Y >= r.T && m.pt.Y < r.B) {
-            int x = m.pt.X - r.L, y = m.pt.Y - r.T;
-            if (msg == 0x0202) Console.Out.WriteLine("click " + x + " " + y);
-            else Console.Out.WriteLine("wheel " + x + " " + y + " " + (short)(m.data >> 16));
-            Console.Out.Flush();
-          }
+        RECT r; GetWindowRect(ours, out r);
+        bool onDesk = (root == "Progman" || root == "WorkerW") && m.pt.X >= r.L && m.pt.X < r.R && m.pt.Y >= r.T && m.pt.Y < r.B;
+        string at = " " + (m.pt.X - r.L) + " " + (m.pt.Y - r.T);
+        if (!onDesk) {
+          if (inside) { inside = false; Say("leave"); }
+          if (msg == 0x0202 && pressed) { pressed = false; Say("up" + at); }
+        } else {
+          inside = true;
+          if (msg == 0x0200) Say("move" + at);
+          else if (msg == 0x0201) { pressed = true; Say("down" + at); }
+          else if (msg == 0x0202) { pressed = false; Say("up" + at); }
+          else Say("wheel" + at + " " + (short)(m.data >> 16));
         }
       } catch { }
     }
@@ -203,10 +214,11 @@ const args = (action: string, hwnd = '0', mouse = false) => {
 const handleOf = (win: BrowserWindow) => win.getNativeWindowHandle().readBigUInt64LE(0).toString()
 
 export type Front = 'desktop' | 'app' | 'covered'
+export type Pointer = { kind: 'move' | 'down' | 'up' | 'wheel' | 'leave'; x: number; y: number; delta?: number }
 export type DeskEvents = {
   onFront: (state: Front) => void
-  /** a click or wheel turn on the bare desktop, in page pixels */
-  onPointer?: (e: { kind: 'click' | 'wheel'; x: number; y: number; delta?: number }) => void
+  /** the mouse on the bare desktop, in page pixels */
+  onPointer?: (e: Pointer) => void
 }
 
 let helperProc: ChildProcess | null = null
@@ -233,9 +245,9 @@ export function attachToDesktop(win: BrowserWindow, ev: DeskEvents): Promise<voi
           clearTimeout(timer)
           if (l.endsWith('ok')) { settled = true; resolve() } else fail(l.slice(7))
         } else if (l.startsWith('covered ')) ev.onFront(l.endsWith('2') ? 'covered' : l.endsWith('1') ? 'app' : 'desktop')
-        else if (ev.onPointer && (l.startsWith('click ') || l.startsWith('wheel '))) {
+        else if (ev.onPointer && /^(move|down|up|wheel|leave)( |$)/.test(l)) {
           const [kind, x, y, delta] = l.split(' ')
-          ev.onPointer({ kind: kind as 'click' | 'wheel', x: +x / scale, y: +y / scale, delta: delta ? +delta : undefined })
+          ev.onPointer({ kind: kind as Pointer['kind'], x: +x / scale || 0, y: +y / scale || 0, delta: delta ? +delta : undefined })
         }
       }
     })

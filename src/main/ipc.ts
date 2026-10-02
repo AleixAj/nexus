@@ -1,5 +1,5 @@
 // Everything the window can ask the main process for. Only our own page may call it.
-import { app, ipcMain, type IpcMainInvokeEvent } from 'electron'
+import { app, BrowserWindow, ipcMain, type IpcMainInvokeEvent } from 'electron'
 import { createHash } from 'crypto'
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
@@ -20,6 +20,7 @@ import { ensureModel, feedWakeWord, modelReady, startWakeWord, stopWakeWord } fr
 import { broadcast } from './window'
 import { listApprovals, revoke } from './approvals'
 import { runDiagnostics } from './diagnostics'
+import { openEditBox } from './editBox'
 import { quotaToday } from './brain/providers'
 import { calendarConnected, events, setCalendarUrl } from './calendar'
 import { deleteRoutine, listRoutines, setRoutineEnabled, triggerText } from './routines'
@@ -131,6 +132,16 @@ export function registerIpc() {
   handle('calendar:set', (_e, url) => setCalendarUrl(str(url, 1000)))
   handle('calendar:events', async (_e, days) => (calendarConnected() ? events(Math.max(1, Math.min(31, Number(days) || 1))).catch(() => []) : null))
   handle('diagnostics:run', () => runDiagnostics())
+  // a text field clicked while NEXUS is the wallpaper: open a real text box on top of it
+  handle('desk:edit-open', (e, r) => {
+    const owner = BrowserWindow.fromWebContents(e.sender)
+    if (!owner || !r || typeof r !== 'object') return
+    const n = (v: unknown) => (Number.isFinite(+v!) ? +v! : 0)
+    openEditBox(owner, {
+      id: str(r.id, 40), x: n(r.x), y: n(r.y), w: n(r.w), h: n(r.h), value: str(r.value, 20000), placeholder: str(r.placeholder, 200),
+      secret: !!r.secret, multiline: !!r.multiline, fontSize: Math.min(40, Math.max(10, n(r.fontSize))), accent: /^[0-9 ]+$/.test(String(r.accent)) ? String(r.accent) : '196 181 253'
+    })
+  })
   handle('quota:get', () => quotaToday(loadSettings()))
   handle('approvals:list', () => listApprovals())
   handle('routines:list', () => listRoutines().map(r => ({ ...r, trigger: triggerText(r) })))

@@ -107,7 +107,8 @@ export default class NexusApp extends Component {
     on(api.onProgress, (id, label) => { if (id === this.reqId) this.setState({ actionLabel: label.toUpperCase() }); });
     on(api.onConfirm, (id, cid, req) => this.onConfirm(id, cid, req));
     on(api.onCovered, state => this.onScreenState(state));
-    on(api.onDeskPointer, e => this.onDeskPointer(e));
+    on(api.onDeskEdit, e => this.onDeskEdit(e));
+    this.watchWallTyping();
     on(api.onTtsQuota, engine => this.onVoiceQuota(engine));
     on(api.onMedia, m => this.onMedia(m));
     on(api.onMediaExtra, x => this.onMediaExtra(x));
