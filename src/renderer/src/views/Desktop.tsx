@@ -6,7 +6,7 @@ export default function Desktop({ v }: { v: any }) {
     <>
     {v.overlay && (<>
       <div style={{ position: "absolute", inset: "0", background: "repeating-linear-gradient(135deg, rgba(255,255,255,.025) 0 2px, transparent 2px 14px), #0B0B10", display: "flex", alignItems: "flex-end", justifyContent: "flex-start", padding: "48px", boxSizing: "border-box", animation: "nx-in 500ms cubic-bezier(.16,1,.3,1) both" }}>
-        <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".2em", color: "rgba(255,255,255,.28)" }}>
+        <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "15px", letterSpacing: ".2em", color: "rgba(255,255,255,.28)" }}>
           APLICACIÓN EN PRIMER PLANO · P. EJ. VS CODE, NAVEGADOR, JUEGO
         </span>
       </div>
@@ -15,7 +15,7 @@ export default function Desktop({ v }: { v: any }) {
     {v.coreHit && <div onClick={v.onCore} className="nx-core-hit" title="Hablar con Nexus" style={{ position: "absolute", left: v.coreHit.x - v.coreHit.r, top: v.coreHit.y - v.coreHit.r, width: v.coreHit.r * 2, height: v.coreHit.r * 2, borderRadius: "50%", cursor: "pointer", transition: "left 1000ms cubic-bezier(.16,1,.3,1), top 1000ms cubic-bezier(.16,1,.3,1), width 1000ms cubic-bezier(.16,1,.3,1), height 1000ms cubic-bezier(.16,1,.3,1)" }} />}
     {v.showFrame && (<>
       <div style={{ position: "absolute", inset: "14px calc(14px - var(--ex))", pointerEvents: "none", animation: "nx-in 1000ms cubic-bezier(.16,1,.3,1) both", background: "linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 0 / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 0 / 1px 26px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 0 / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 0 / 1px 26px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 100% / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 100% / 1px 26px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 100% / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 100% / 1px 26px no-repeat" }}></div>
-      <div style={{ position: "absolute", left: "calc(64px - var(--ex))", right: "calc(64px - var(--ex))", top: "12px", display: "flex", justifyContent: "space-between", pointerEvents: "none", fontFamily: "'JetBrains Mono',monospace", fontSize: "9.5px", letterSpacing: ".22em", color: "rgba(226,218,240,.4)", animation: "nx-down 900ms cubic-bezier(.16,1,.3,1) 300ms both" }}>
+      <div style={{ position: "absolute", left: "calc(64px - var(--ex))", right: "calc(64px - var(--ex))", top: "12px", display: "flex", justifyContent: "space-between", pointerEvents: "none", fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", letterSpacing: ".22em", color: "rgba(226,218,240,.4)", animation: "nx-down 900ms cubic-bezier(.16,1,.3,1) 300ms both" }}>
         <div style={{ display: "flex", gap: "22px" }}>
           <span data-scramble="1">
             NX-OS 2.4.0
@@ -66,7 +66,7 @@ export default function Desktop({ v }: { v: any }) {
       {v.showHud && (<>
         <div style={{ position: "absolute", left: "calc(64px - var(--ex))", top: "52px", display: "flex", flexDirection: "column", gap: "22px", width: "440px", ...v.hudPos }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "6px", animation: "nx-left 800ms cubic-bezier(.16,1,.3,1) both" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", letterSpacing: ".24em", color: "rgb(var(--acc2) / .5)" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", fontFamily: "'JetBrains Mono',monospace", fontSize: "12.5px", letterSpacing: ".24em", color: "rgb(var(--acc2) / .5)" }}>
               <span style={{ width: "6px", height: "6px", border: "1px solid rgb(var(--acc2) / .7)", transform: "rotate(45deg)" }}></span>
               <span data-scramble="1">
                 SEC.01 — CRONO LOCAL · {v.utc}
@@ -120,12 +120,12 @@ export default function Desktop({ v }: { v: any }) {
                 <span data-tele="sec" style={{ fontSize: "28px", lineHeight: "1", color: "rgb(var(--acc2) / .9)" }}>
                   00
                 </span>
-                <span style={{ fontSize: "9.5px", letterSpacing: ".24em", color: "rgba(226,218,240,.4)" }}>
+                <span style={{ fontSize: "12px", letterSpacing: ".24em", color: "rgba(226,218,240,.4)" }}>
                   SEG
                 </span>
               </span>
             </div>
-            <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "12px", letterSpacing: ".2em", textTransform: "uppercase", color: "rgb(var(--acc2) / .7)" }}>
+            <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "14px", letterSpacing: ".2em", textTransform: "uppercase", color: "rgb(var(--acc2) / .7)" }}>
               {v.dateStr}
             </span>
           </div>
@@ -134,39 +134,31 @@ export default function Desktop({ v }: { v: any }) {
               {v.wTemp}
             </span>
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-              <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgba(226,218,240,.8)" }}>
+              <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13.5px", letterSpacing: ".2em", color: "rgba(226,218,240,.8)" }}>
                 {v.wPlace}
               </span>
-              <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgba(226,218,240,.5)" }}>
+              <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13.5px", letterSpacing: ".2em", color: "rgba(226,218,240,.68)" }}>
                 {v.wDetail}
               </span>
             </div>
           </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px", maxWidth: "380px", animation: "nx-left 800ms cubic-bezier(.16,1,.3,1) 240ms both" }}>
-            <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .6)" }}>
-              EN UN DÍA COMO HOY · {v.factYear}
-            </span>
-            <span style={{ fontSize: "15px", lineHeight: "1.5", color: "rgba(226,218,240,.72)", textWrap: "pretty" }}>
-              {v.factText}
-            </span>
-          </div>
           {v.upcoming?.length > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: "8px", alignItems: "inherit", animation: "nx-left 800ms cubic-bezier(.16,1,.3,1) 280ms both" }}>
-              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .6)" }}>PRÓXIMAMENTE</span>
+              <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13.5px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .6)" }}>PRÓXIMAMENTE</span>
               {v.upcoming.map(r => (
                 <div key={r.id} className="nx-rem" style={{ display: "flex", alignItems: "center", gap: "10px", maxWidth: "380px" }}>
-                  {r.event ? <span title="Calendario" style={{ width: "22px", textAlign: "center", color: "rgb(var(--acc2) / .7)", fontSize: "12px" }}>◷</span> : <button onClick={r.cancel} title="Cancelar" className="nx-rem-x" style={{ width: "22px", height: "22px", borderRadius: "6px", border: "none", background: "transparent", color: "rgba(226,218,240,.45)", cursor: "pointer", display: "grid", placeItems: "center", padding: 0 }}>
+                  {r.event ? <span title="Calendario" style={{ width: "22px", textAlign: "center", color: "rgb(var(--acc2) / .7)", fontSize: "14px" }}>◷</span> : <button onClick={r.cancel} title="Cancelar" className="nx-rem-x" style={{ width: "22px", height: "22px", borderRadius: "6px", border: "none", background: "transparent", color: "rgba(226,218,240,.68)", cursor: "pointer", display: "grid", placeItems: "center", padding: 0 }}>
                     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M6 6l12 12M18 6L6 18" /></svg>
                   </button>}
-                  <span style={{ fontSize: "14.5px", color: "rgba(241,234,248,.85)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.text}</span>
-                  <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11.5px", letterSpacing: ".1em", color: r.alarm ? "#FDBA74" : "rgb(var(--acc2) / .85)", whiteSpace: "nowrap" }}>{r.alarm ? "⏰ " : ""}{r.time}</span>
+                  <span style={{ fontSize: "16px", color: "rgba(241,234,248,.85)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{r.text}</span>
+                  <span style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "14px", letterSpacing: ".1em", color: r.alarm ? "#FDBA74" : "rgb(var(--acc2) / .85)", whiteSpace: "nowrap" }}>{r.alarm ? "⏰ " : ""}{r.time}</span>
                 </div>
               ))}
             </div>
           )}
           <div style={{ display: "flex", gap: "8px", animation: "nx-left 800ms cubic-bezier(.16,1,.3,1) 320ms both" }}>
             {(v.indicators || []).map((ind, indIndex) => (<Fragment key={ind?.id ?? indIndex}>
-              <span style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 11px", borderRadius: "999px", border: "1px solid rgba(196,181,253,.16)", background: "rgba(0,0,0,.25)", fontFamily: "'JetBrains Mono',monospace", fontSize: "10.5px", letterSpacing: ".2em", color: "rgba(226,218,240,.78)" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 11px", borderRadius: "999px", border: "1px solid rgba(196,181,253,.16)", background: "rgba(0,0,0,.25)", fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".2em", color: "rgba(226,218,240,.78)" }}>
                 <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: ind.color, boxShadow: `0 0 8px ${ind.color}` }}></span>
                 {ind.label}
               </span>
@@ -176,7 +168,7 @@ export default function Desktop({ v }: { v: any }) {
       </>)}
       {/* status pill */}
       <div style={{ position: "absolute", top: "28px", left: v.pillLeft, width: "0", display: "flex", justifyContent: "center", transition: "left 1000ms cubic-bezier(.16,1,.3,1)" }}>
-        <button onClick={v.onPill} style={{ pointerEvents: v.pillPointer, flex: "none", display: "flex", alignItems: "center", gap: "10px", height: "36px", padding: "0 18px", borderRadius: "999px", cursor: "pointer", background: "linear-gradient(rgba(7,5,14,.55),rgba(7,5,14,.55)) padding-box, linear-gradient(90deg, rgb(var(--acc) / .5), rgb(var(--acc2) / .15), rgb(var(--acc) / .5)) border-box", border: "1px solid transparent", backdropFilter: "blur(20px)", color: "rgba(241,234,248,.9)", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", whiteSpace: "nowrap", animation: "nx-down 700ms cubic-bezier(.16,1,.3,1) 200ms both" }}>
+        <button onClick={v.onPill} style={{ pointerEvents: v.pillPointer, flex: "none", display: "flex", alignItems: "center", gap: "10px", height: "36px", padding: "0 18px", borderRadius: "999px", cursor: "pointer", background: "linear-gradient(rgba(7,5,14,.55),rgba(7,5,14,.55)) padding-box, linear-gradient(90deg, rgb(var(--acc) / .5), rgb(var(--acc2) / .15), rgb(var(--acc) / .5)) border-box", border: "1px solid transparent", backdropFilter: "blur(20px)", color: "rgba(241,234,248,.9)", fontFamily: "'JetBrains Mono',monospace", fontSize: "13.5px", letterSpacing: ".2em", whiteSpace: "nowrap", animation: "nx-down 700ms cubic-bezier(.16,1,.3,1) 200ms both" }}>
           <span style={{ width: "7px", height: "7px", borderRadius: "50%", background: v.pillDot, boxShadow: `0 0 10px ${v.pillDot}`, animation: v.pillAnim }}></span>
           <span data-scramble="1">
             {v.pillText}
@@ -189,11 +181,11 @@ export default function Desktop({ v }: { v: any }) {
           {(v.notifs || []).map((n, nIndex) => (<Fragment key={n?.id ?? nIndex}>
             <div data-spot="1" style={{ position: "relative", padding: "16px 18px", display: "flex", flexDirection: "column", gap: "6px", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07)", animation: "nx-right 700ms cubic-bezier(.16,1,.3,1) both" }} className="dc1">
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <span style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "10.5px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .7)" }}>
+                <span style={{ display: "flex", alignItems: "center", gap: "8px", fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .7)" }}>
                   <span style={{ width: "5px", height: "5px", borderRadius: "50%", background: n.dot }}></span>
                   {n.app} · {n.time}
                 </span>
-                <button onClick={n.dismiss} style={{ width: "22px", height: "22px", display: v.dismissDisplay, placeItems: "center", border: "none", background: "none", color: "rgba(226,218,240,.45)", cursor: "pointer", padding: "0" }} className="dc2">
+                <button onClick={n.dismiss} style={{ width: "22px", height: "22px", display: v.dismissDisplay, placeItems: "center", border: "none", background: "none", color: "rgba(226,218,240,.68)", cursor: "pointer", padding: "0" }} className="dc2">
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                     <path d="M6 6l12 12M18 6L6 18" />
                   </svg>
@@ -202,7 +194,7 @@ export default function Desktop({ v }: { v: any }) {
               <span style={{ fontSize: "16px", fontWeight: "500", color: "#FFF6E9" }}>
                 {n.title}
               </span>
-              <span style={{ fontSize: "13.5px", color: "rgba(226,218,240,.62)" }}>
+              <span style={{ fontSize: "15px", color: "rgba(226,218,240,.62)" }}>
                 {n.body}
               </span>
             </div>
@@ -211,7 +203,7 @@ export default function Desktop({ v }: { v: any }) {
       </>)}
       {/* core caption */}
       <div style={{ position: "absolute", left: v.capLeft, top: v.capTop, transform: "translateX(-50%)", width: v.capWidth, display: "flex", flexDirection: "column", alignItems: "center", gap: "14px", textAlign: "center", pointerEvents: "none", transition: "left 1000ms cubic-bezier(.16,1,.3,1), top 1000ms cubic-bezier(.16,1,.3,1)" }}>
-        <span style={{ display: "flex", alignItems: "center", gap: "10px", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".3em", color: v.stateColor, transition: "color 400ms" }}>
+        <span style={{ display: "flex", alignItems: "center", gap: "10px", fontFamily: "'JetBrains Mono',monospace", fontSize: "13.5px", letterSpacing: ".3em", color: v.stateColor, transition: "color 400ms" }}>
           <span style={{ width: "18px", height: "1px", background: "currentColor", opacity: ".5" }}></span>
           <span data-scramble="1">
             {v.stateLabel}
@@ -229,7 +221,7 @@ export default function Desktop({ v }: { v: any }) {
           </Fragment>))}
         </div>
         {v.hasAction && (<>
-          <span style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 14px", borderRadius: "999px", border: "1px solid rgba(245,185,113,.35)", background: "rgba(245,185,113,.08)", fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "#F5B971", animation: "nx-in 400ms cubic-bezier(.16,1,.3,1) both" }}>
+          <span style={{ display: "flex", alignItems: "center", gap: "10px", padding: "8px 14px", borderRadius: "999px", border: "1px solid rgba(245,185,113,.35)", background: "rgba(245,185,113,.08)", fontFamily: "'JetBrains Mono',monospace", fontSize: "13.5px", letterSpacing: ".2em", color: "#F5B971", animation: "nx-in 400ms cubic-bezier(.16,1,.3,1) both" }}>
             <span style={{ width: "10px", height: "10px", borderRadius: "50%", border: "1.5px solid #F5B971", borderTopColor: "transparent", animation: "nx-spin 800ms linear infinite" }}></span>
             {v.actionLabel}
           </span>
@@ -239,7 +231,7 @@ export default function Desktop({ v }: { v: any }) {
             <span style={{ fontSize: "20px", color: "#FDA4AF" }}>
               {v.errorTitle}
             </span>
-            <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgba(251,113,133,.7)" }}>
+            <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "13.5px", letterSpacing: ".2em", color: "rgba(251,113,133,.7)" }}>
               {v.errorDetail}
             </span>
           </div>
@@ -252,13 +244,13 @@ export default function Desktop({ v }: { v: any }) {
             {v.musicNow?.cover && <img src={v.musicNow.cover} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />}
           </button>
           <div style={{ flex: "1", minWidth: "0", display: "flex", flexDirection: "column", gap: "6px" }}>
-            <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", letterSpacing: ".2em", color: "#FDBA74" }}>
+            <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "12.5px", letterSpacing: ".2em", color: "#FDBA74" }}>
               {v.musicNow?.playing ? "SPOTIFY · REPRODUCIENDO" : "SPOTIFY · EN PAUSA"}
             </span>
             <span style={{ fontSize: "15px", fontWeight: "500", color: "#FFF6E9", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {v.musicNow?.title}
             </span>
-            <span style={{ fontSize: "12.5px", color: "rgba(226,218,240,.6)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+            <span style={{ fontSize: "14.5px", color: "rgba(226,218,240,.6)", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
               {v.musicNow?.artist}
             </span>
             <div style={{ height: "2px", borderRadius: "2px", background: "rgba(255,255,255,.1)", overflow: "hidden" }}>

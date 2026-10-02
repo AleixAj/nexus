@@ -54,6 +54,12 @@ export default function NewsPanel({ v }: { v: any }) {
 
       {/* stories */}
       <div style={{ flex: 1, minHeight: 0, overflow: 'auto', padding: '0 32px 28px' }}>
+        {v.newsFact && (
+          <div style={{ display: 'flex', gap: 18, alignItems: 'baseline', padding: '14px 18px', margin: '0 0 18px', borderRadius: 12, background: 'rgb(var(--acc) / .08)', border: '1px solid rgb(var(--acc2) / .16)', animation: 'nx-in 500ms both' }}>
+            <span style={{ flex: 'none', fontFamily: mono, fontSize: 11, letterSpacing: '.2em', color: 'rgb(var(--acc2) / .75)' }}>EN UN DÍA COMO HOY · {v.newsFact.year}</span>
+            <span style={{ fontSize: 15, lineHeight: 1.5, color: 'rgba(241,234,248,.85)', textWrap: 'pretty' } as any}>{v.newsFact.text}</span>
+          </div>
+        )}
         {!top && <span style={{ display: 'block', padding: '60px 0', textAlign: 'center', fontSize: 15, color: 'rgba(226,218,240,.5)' }}>{v.newsLoading ? 'Leyendo las noticias…' : v.newsEmpty ? 'No hay noticias nuevas de estos temas ahora mismo.' : ''}</span>}
         {top && (
           <div onClick={top.open} data-spot="1" style={{ display: 'grid', gridTemplateColumns: '440px minmax(0,1fr)', gap: 24, padding: 14, margin: '0 -14px 18px', borderRadius: 14, cursor: 'pointer', animation: `nx-in 500ms ${ease} 80ms both` }} className="nx-news">

@@ -18,6 +18,8 @@ export function newsView(app, c) {
   return {
     isNews: S.panel === 'news' && !S.overlay,
     newsHeader: `NOTICIAS · ${d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' })}${S.news ? ' · ' + S.news.length + ' TITULARES' : ''}`.toUpperCase(),
+    // today in history (Wikipedia), moved here from the desktop to keep it clean
+    newsFact: S.world && S.world.fact ? S.world.fact : null,
     newsTop: items[0] || null, newsRest: items.slice(1),
     newsLoading: !!S.newsLoading, newsEmpty: !!S.news && !items.length,
     newsTopics: (S.newsTopicList || []).map(t => ({ ...t, ...chip(on.has(t.id)), on: on.has(t.id), title: t.sources.join(', '), pick: () => app.toggleNewsTopic(t.id) })),

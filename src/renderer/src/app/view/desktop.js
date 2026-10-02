@@ -10,8 +10,6 @@ function worldView(w = {}, d) {
     wTemp: w.temp != null ? w.temp + '°' : '—',
     wPlace: ((w.city || 'SIN CONEXIÓN') + (w.sky ? ' · ' + w.sky : '')).toUpperCase(),
     wDetail: w.max != null ? `MÁX ${w.max}° · MÍN ${w.min}° · HUMEDAD ${w.humidity} %` : 'TIEMPO NO DISPONIBLE',
-    factYear: w.fact ? w.fact.year : '—',
-    factText: w.fact ? w.fact.text : 'Sin conexión con Wikipedia.',
   };
 }
 

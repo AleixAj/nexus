@@ -64,7 +64,7 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   la carátula y se mueve con el audio real del PC.
 - **Halo reactivo.** El núcleo y su halo se mueven con el sonido real: tu voz mientras escucha y la suya mientras habla.
 - **Personalidad.** Mayordomo británico, copiloto directo o sarcástico, con calidez y formalidad ajustables.
-- **Datos reales en el escritorio.** Hora, tiempo de tu ciudad y efeméride del día, a la derecha para no chocar con los iconos.
+- **Datos reales en el escritorio.** Hora y tiempo de tu ciudad, a la derecha para no chocar con los iconos. La efeméride del día («En un día como hoy») está en el panel de Noticias.
 - **Estado del equipo real.** CPU (con cada hilo), GPU NVIDIA (uso, VRAM, temperatura y ventilador), RAM, disco, red y
   procesos que más consumen. Se mide solo al abrir el panel (unos 2 s) o al pulsar *Actualizar*; nada en segundo plano.
 - **Temas y calidad gráfica.** Cinco temas de color y tres niveles de calidad; la primera vez elige el nivel solo según

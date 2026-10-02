@@ -6,13 +6,13 @@ export default function Dock({ v }: { v: any }) {
     <>
     {v.showDock && (<>
       {v.hasHover && (<>
-        <span style={{ position: "absolute", right: "calc(24px - var(--ex))", bottom: "104px", padding: "6px 12px", borderRadius: "8px", background: "rgba(7,5,14,.75)", border: "1px solid rgb(var(--acc) / .3)", fontFamily: "'JetBrains Mono',monospace", fontSize: "10.5px", letterSpacing: ".2em", color: "#FFF6E9", animation: "nx-in 220ms cubic-bezier(.16,1,.3,1) both" }}>
+        <span style={{ position: "absolute", right: "calc(24px - var(--ex))", bottom: "104px", padding: "6px 12px", borderRadius: "8px", background: "rgba(7,5,14,.75)", border: "1px solid rgb(var(--acc) / .3)", fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".2em", color: "#FFF6E9", animation: "nx-in 220ms cubic-bezier(.16,1,.3,1) both" }}>
           {v.hoverLabel}
         </span>
       </>)}
       {v.volOpen && (<>
         <div style={{ position: "absolute", right: "calc(24px - var(--ex))", bottom: "104px", width: "260px", padding: "16px 18px", display: "flex", flexDirection: "column", gap: "12px", background: "linear-gradient(rgba(7,5,14,.6),rgba(7,5,14,.6)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / 0) 60%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", animation: "nx-up 320ms cubic-bezier(.16,1,.3,1) both" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "'JetBrains Mono',monospace", fontSize: "10.5px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .7)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .7)" }}>
             <span>
               VOLUMEN
             </span>
