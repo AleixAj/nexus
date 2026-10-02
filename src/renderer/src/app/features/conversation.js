@@ -125,6 +125,7 @@ export const conversation = {
     this.setState({ ovState: 'idle' });
     if (res.error === 'ABORTED') return;
     if (res.error === 'NO_KEY') {
+      this.setSettingsTab('ai');
       this.openPanel('settings', true);
       this.say(`${cap(this.name())}, necesito una clave para pensar. Póngala en Ajustes; la de Groq es gratuita.`);
       return;

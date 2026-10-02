@@ -4,6 +4,22 @@ import { api, seg, toggleT } from '../util';
 
 const QUALITY = [['ultra', 'Ultra'], ['equilibrado', 'Equilibrado'], ['ahorro', 'Ahorro']];
 const QUALITY_NOTE = { ultra: '2 600 PARTÍCULAS · 60 FPS', equilibrado: '1 500 PARTÍCULAS · 60 FPS', ahorro: '700 PARTÍCULAS · SIN GRANO' };
+const QUALITY_HELP = {
+  ultra: 'Ultra: la galaxia completa (2.600 partículas). Para PCs con tarjeta gráfica.',
+  equilibrado: 'Equilibrado: 1.500 partículas. Va bien en casi cualquier PC.',
+  ahorro: 'Ahorro: 700 partículas y sin efectos de grano. Para portátiles o PCs justos.',
+};
+
+// the pages of Settings: name, what it holds (menu) and what it is for (top of the page)
+const TABS = [
+  ['ai', 'Inteligencia', 'IA, claves y cupo', 'Qué IA responde, sus claves y cuánto cupo gratis queda hoy.'],
+  ['agent', 'Permisos', 'Qué puede hacer en tu PC', 'Lo que NEXUS puede hacer por su cuenta. Lo que cambia algo en tu PC siempre te pide permiso antes.'],
+  ['voice', 'Audio', 'Micrófono y escucha', 'Con qué micrófono te oigo y cómo me llamas.'],
+  ['look', 'Apariencia', 'Tema, calidad y movimiento', 'Colores, calidad de la galaxia y opciones para leer mejor.'],
+  ['system', 'Sistema', 'Inicio y fondo de escritorio', 'Cómo arranca NEXUS y cómo se comporta en segundo plano.'],
+  ['accounts', 'Cuentas', 'Calendario y Spotify', 'Servicios que puedes conectar. Todo es opcional y se guarda cifrado en tu PC.'],
+  ['check', 'Diagnóstico', 'Comprobar que todo va bien', 'Si algo no funciona, empieza por aquí.'],
+];
 
 const GEMINI_TOGGLES = [
   ['tts', 'Voces premium', 'Aura, Zenit, Draco y Selene'],
@@ -24,9 +40,16 @@ export function settingsView(app, c) {
   const { S, kp } = c;
   const prov = S.providers[kp] || {};
   const hotkey = app.hotkeyLabel().toLowerCase();
+  const hasAnyKey = Object.values(S.providers || {}).some(p => p.needsKey && p.hasKey);
+  const tab = S.settingsTab || 'ai';
   return {
+    // the tabs
+    settingsTab: tab, version: '2.4.0',
+    settingsTabs: TABS.map(([id, label, desc, intro]) => ({ id, label, desc, intro, badge: id === 'ai' && !hasAnyKey ? 'Falta una clave' : '', pick: () => app.setSettingsTab(id) })),
+
     // AI service and its key
     providerOpts: ['Auto', ...Object.keys(S.providers)].map(p => ({ label: p, ...seg(S.provider === p), pick: () => app.pickProvider(p) })),
+    providerNote: providerInfo(S.provider).note, showModel: S.provider !== 'Auto',
     cycleModel: () => app.cycleModel(),
     keyInput: S.keyInput, keyType: S.showKey ? 'text' : 'password', keyDisabled: !prov.needsKey,
     keyPlaceholder: !prov.needsKey ? 'No necesaria · Ollama en http://localhost:11434' : prov.hasKey ? '•••••••••••• guardada · pegue otra para cambiarla' : 'Pegue aquí su clave de ' + kp,
@@ -44,15 +67,16 @@ export function settingsView(app, c) {
     geminiNote: S.provider === 'Gemini' ? 'Gemini es ahora su IA principal: cada pregunta usa su cupo.' : 'Su IA principal es ' + S.provider + '. Gemini solo se usa para lo que active aquí.',
 
     // system
-    sysToggles: [
-      { label: 'Fondo de escritorio', note: 'Nexus se pone detrás de sus iconos · hable con ' + hotkey + ' y vuelva desde la bandeja', on: false, toggle: () => api && api.setMode('wallpaper') },
-      { label: 'Iniciar con Windows', note: 'Se abre sola al encender el PC', on: S.autostart, toggle: () => app.setAutostart(!S.autostart) },
-      { label: `Escuchar «${S.wakeWord}» siempre`, note: S.wakeProgress != null ? `Descargando el modelo de voz… ${Math.round(S.wakeProgress * 100)} %` : 'Me despierto al oírlo. Se cambia en Voz y personalidad. Todo en tu PC: no se graba ni se envía nada', on: !!S.wakeListen, toggle: () => app.setWakeListen(!S.wakeListen) },
-      { label: 'Fondo quieto mientras usas otras apps', note: 'En modo fondo de escritorio solo se anima cuando miras el escritorio o te hablo. Ahorra batería y CPU', on: (S.bgMotion || 'desktop') !== 'always', toggle: () => { const v = (S.bgMotion || 'desktop') === 'always' ? 'desktop' : 'always'; app.setState({ bgMotion: v }, () => app.updatePower()); app.save({ bgMotion: v }); } },
-      { label: 'Resumen al encender', note: 'La primera vez que me abres cada día: tiempo, recordatorios y noticias', on: !!S.briefing, toggle: () => app.flip('briefing') },
-      { label: 'Subtítulos', note: 'Muestra bajo el núcleo lo que dice Nexus', on: !!S.subtitles, toggle: () => app.flip('subtitles') },
-      { label: 'Reducir movimiento', note: 'Sin parallax, estelas ni partículas extra', on: S.reduced, toggle: () => app.setReduced(!S.reduced) },
-    ].map(t => ({ ...t, ...toggleT(t.on) })),
+    toggles: Object.fromEntries([
+      { id: 'wallpaper', label: 'Fondo de escritorio', note: 'Nexus se pone detrás de sus iconos · hable con ' + hotkey + ' y vuelva desde la bandeja', on: false, toggle: () => api && api.setMode('wallpaper') },
+      { id: 'autostart', label: 'Iniciar con Windows', note: 'Se abre sola al encender el PC', on: S.autostart, toggle: () => app.setAutostart(!S.autostart) },
+      { id: 'wake', label: `Escuchar «${S.wakeWord}» siempre`, note: S.wakeProgress != null ? `Descargando el modelo de voz… ${Math.round(S.wakeProgress * 100)} %` : 'Me despierto al oírlo. Se cambia en Voz y personalidad. Todo en tu PC: no se graba ni se envía nada', on: !!S.wakeListen, toggle: () => app.setWakeListen(!S.wakeListen) },
+      { id: 'bgMotion', label: 'Fondo quieto mientras usas otras apps', note: 'En modo fondo de escritorio solo se anima cuando miras el escritorio o te hablo. Ahorra batería y CPU', on: (S.bgMotion || 'desktop') !== 'always', toggle: () => { const v = (S.bgMotion || 'desktop') === 'always' ? 'desktop' : 'always'; app.setState({ bgMotion: v }, () => app.updatePower()); app.save({ bgMotion: v }); } },
+      { id: 'briefing', label: 'Resumen al encender', note: 'La primera vez que me abres cada día: tiempo, recordatorios y noticias', on: !!S.briefing, toggle: () => app.flip('briefing') },
+      { id: 'subtitles', label: 'Subtítulos', note: 'Muestra bajo el núcleo lo que te digo, para leerlo además de oírlo', on: !!S.subtitles, toggle: () => app.flip('subtitles') },
+      { id: 'reduced', label: 'Reducir movimiento', note: 'Sin parallax, estelas ni partículas extra. Mejor si el movimiento te marea', on: S.reduced, toggle: () => app.setReduced(!S.reduced) },
+    ].map(t => [t.id, { ...t, ...toggleT(t.on) }])),
+    hotkeyKeys: app.hotkeyLabel().split(' + '),
     micName: app.micLabel(), cycleMic: () => app.cycleMic(),
 
     // self-test
@@ -72,8 +96,8 @@ export function settingsView(app, c) {
     openSpotifyDev: () => window.open('https://developer.spotify.com/dashboard'),
 
     // look
-    themeCards: Object.entries(THEMES).map(([id, t]) => ({ name: t.name, c1: t.c1, c2: t.c2, bg: S.theme === id ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.02)', border: S.theme === id ? t.c2 : 'rgba(196,181,253,.1)', pick: () => app.setTheme(id) })),
-    qualityOpts: QUALITY.map(([id, label]) => ({ label, ...seg(S.quality === id), pick: () => app.setQuality(id) })), qualityNote: QUALITY_NOTE[S.quality],
+    themeCards: Object.entries(THEMES).map(([id, t]) => ({ name: t.name, on: S.theme === id, c1: t.c1, c2: t.c2, bg: S.theme === id ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.02)', border: S.theme === id ? t.c2 : 'rgba(196,181,253,.1)', pick: () => app.setTheme(id) })),
+    qualityOpts: QUALITY.map(([id, label]) => ({ label, ...seg(S.quality === id), pick: () => app.setQuality(id) })), qualityNote: QUALITY_NOTE[S.quality], qualityHelp: QUALITY_HELP[S.quality],
     qualityChips: QUALITY.map(([id, label]) => ({ label, on: S.quality === id, pick: () => app.setQuality(id) })),
   };
 }

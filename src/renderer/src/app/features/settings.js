@@ -49,6 +49,12 @@ export const settings = {
   },
   hotkeyLabel() { return this.state.hotkey.replace('Control', 'Ctrl').replace('Space', 'Espacio').split('+').join(' + ').toUpperCase(); },
 
+  // which page of Settings is open (remembered between sessions)
+  setSettingsTab(id) {
+    this.setState({ settingsTab: id });
+    try { localStorage.setItem('nx-settings-tab', id); } catch { /* private storage off */ }
+  },
+
   // ---------- AI service and keys ----------
   pickProvider(p) {
     if (p === 'Auto') { this.setState({ provider: p, keyInput: '' }); this.save({ provider: p }); return; }
