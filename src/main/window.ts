@@ -90,7 +90,7 @@ export function createWindow(m: Mode, query: Record<string, string> = {}) {
     e.preventDefault()
     w.hide()
     if (!loadSettings().trayHinted) {
-      notify('NEXUS sigue activo', 'Está en la bandeja del sistema. Pulse Ctrl + Alt + Espacio para hablarle.')
+      notify('NEXUS sigue activo', 'Está en la bandeja del sistema. Pulsa Ctrl + Alt + Espacio para hablarle.')
       saveSettings({ trayHinted: true })
     }
   })

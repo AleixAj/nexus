@@ -27,21 +27,21 @@ export default function KeyCard({ v }: { v: any }) {
         animation: `nx-up 500ms ${ease} both`
       }}>
         <span style={{ fontFamily: mono, fontSize: 10.5, letterSpacing: '.22em', color: 'rgb(var(--acc2) / .75)' }}>{azure ? '◆' : '✦'} VOZ PREMIUM · {k.voiceName.toUpperCase()}</span>
-        <span style={{ fontSize: 26, fontWeight: 400, color: '#FFF6E9' }}>{azure ? 'Active las voces de Azure' : 'Active las voces premium'}</span>
+        <span style={{ fontSize: 26, fontWeight: 400, color: '#FFF6E9' }}>{azure ? 'Activa las voces de Azure' : 'Activa las voces premium'}</span>
         {azure ? (
           <span style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(226,218,240,.65)' }}>
-            Gratis hasta 500.000 caracteres al mes (unas 8 horas de voz). Al crear la cuenta de Azure le pedirán una tarjeta para verificar su identidad, pero el plan gratuito no cobra.
-            <br />1. Pulse <b style={b}>Conseguir clave</b> y cree un recurso «Speech» con el plan <b style={b}>Free F0</b>.
-            <br />2. En el recurso, abra <b style={b}>Claves y punto de conexión</b>: copie la <b style={b}>Clave 1</b> y elija aquí la misma <b style={b}>región</b>.
+            Gratis hasta 500.000 caracteres al mes (unas 8 horas de voz). Al crear la cuenta de Azure te pedirán una tarjeta para verificar tu identidad, pero el plan gratuito no cobra.
+            <br />1. Pulsa <b style={b}>Conseguir clave</b> y crea un recurso «Speech» con el plan <b style={b}>Free F0</b>.
+            <br />2. En el recurso, abre <b style={b}>Claves y punto de conexión</b>: copia la <b style={b}>Clave 1</b> y elige aquí la misma <b style={b}>región</b>.
           </span>
         ) : (
           <span style={{ fontSize: 14.5, lineHeight: 1.55, color: 'rgba(226,218,240,.65)' }}>
-            Las voces premium usan Gemini, de Google. Solo necesita una clave gratuita (sin tarjeta):
-            pulse <b style={b}>Conseguir clave</b>, inicie sesión con su cuenta de Google, pulse «Create API key» y péguela aquí.
+            Las voces premium usan Gemini, de Google. Solo necesitas una clave gratuita (sin tarjeta):
+            pulsa <b style={b}>Conseguir clave</b>, inicia sesión con tu cuenta de Google, pulsa «Create API key» y pégala aquí.
           </span>
         )}
         <div style={{ display: 'flex', gap: 8 }}>
-          <input type="password" autoFocus value={v.keyAskInput} onChange={v.keyAskChange} onKeyDown={v.keyAskKey} placeholder={azure ? 'Clave 1 del recurso Speech' : 'Pegue aquí su clave de Gemini'} spellCheck={false}
+          <input type="password" autoFocus value={v.keyAskInput} onChange={v.keyAskChange} onKeyDown={v.keyAskKey} placeholder={azure ? 'Clave 1 del recurso Speech' : 'Pega aquí tu clave de Gemini'} spellCheck={false}
             style={{ flex: 1, minWidth: 0, height: 46, padding: '0 16px', borderRadius: 10, background: 'rgba(0,0,0,.4)', border: '1px solid rgb(var(--acc2) / .3)', color: '#FFF6E9', fontFamily: mono, fontSize: 13, outline: 'none' }} />
           <button onClick={v.keyAskOpen} style={{ height: 46, padding: '0 16px', borderRadius: 10, border: '1px solid rgba(196,181,253,.2)', background: 'transparent', color: 'rgba(226,218,240,.85)', fontSize: 14, cursor: 'pointer' }}>Conseguir clave ↗</button>
         </div>

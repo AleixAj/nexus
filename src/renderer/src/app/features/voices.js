@@ -14,7 +14,7 @@ export const voices = {
   testVoice() {
     this.interrupt();
     const n = this.name(), N = cap(n);
-    const L = { butler: `${greeting()}, ${n}. Su escritorio está listo cuando usted lo esté.`, direct: `${N}: todo listo. Usted dirá.`, sarcastic: `Oh, ${n}, otra vez usted. Supongo que hoy tampoco hay ganas de trabajar.` };
+    const L = { butler: `${greeting()}, ${n}. Tu escritorio está listo cuando tú lo estés.`, direct: `${N}: todo listo. Tú dirás.`, sarcastic: `Oh, ${n}, otra vez tú. Supongo que hoy tampoco hay ganas de trabajar.` };
     this.say(L[this.state.persona] || L.butler);
   },
   playSample(id) {

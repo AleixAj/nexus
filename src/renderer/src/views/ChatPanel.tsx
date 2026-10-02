@@ -92,7 +92,7 @@ export default function ChatPanel({ v }: { v: any }) {
             </div>
           )}
           <div style={{ display: "flex", alignItems: "center", gap: "8px", height: "52px", padding: "0 8px 0 16px", borderRadius: "12px", background: "rgba(0,0,0,.35)", border: "1px solid rgba(196,181,253,.16)", transition: "border-color 250ms, box-shadow 250ms" }} className="dc12">
-            <input value={v.chatInput} onChange={v.onChatInput} onKeyDown={v.onChatKey} placeholder="Escriba a Nexus o pulse / para comandos" style={{ flex: "1", background: "none", border: "none", outline: "none", color: "#FFF6E9", fontSize: "15px" }} />
+            <input value={v.chatInput} onChange={v.onChatInput} onKeyDown={v.onChatKey} placeholder="Escribe a Nexus o pulsa / para comandos" style={{ flex: "1", background: "none", border: "none", outline: "none", color: "#FFF6E9", fontSize: "15px" }} />
             <button onClick={v.onMic} style={{ width: "38px", height: "38px", borderRadius: "9px", border: "none", background: "transparent", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc13">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">
                 <path d="M12 3a3 3 0 0 1 3 3v5a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3zM5 11a7 7 0 0 0 14 0M12 18v3" />

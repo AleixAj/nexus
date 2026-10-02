@@ -72,7 +72,7 @@ const DEFAULTS: Settings = {
   pitch: 0,
   volume: 64,
   warmth: 70,
-  formal: 85,
+  formal: 20,
   fx: 35,
   lang: 'es-ES',
   mode: 'window',

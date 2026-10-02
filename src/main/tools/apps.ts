@@ -54,7 +54,7 @@ function findApp(q: string) {
 
 export async function openApp(name: string) {
   const raw = norm(name)
-  if (raw.length < 2) return 'No entiendo qué aplicación quiere abrir.'
+  if (raw.length < 2) return 'No entiendo qué aplicación quieres abrir.'
   const q = ALIASES[raw] || raw
 
   apps ??= scanStartMenu()

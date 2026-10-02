@@ -17,7 +17,7 @@ export const conversation = {
         if (this.voiceWarned) return;
         this.voiceWarned = true;
         this.setState({ voiceDown: true });
-        this.notify('VOZ', 'No puedo hablar ahora mismo', 'Sin conexión con el servicio de voz · le respondo por escrito', '#FB7185');
+        this.notify('VOZ', 'No puedo hablar ahora mismo', 'Sin conexión con el servicio de voz · te respondo por escrito', '#FB7185');
       },
       onDone: () => {
         clearInterval(this.wordIv);
@@ -100,7 +100,7 @@ export const conversation = {
     this.ask(q);
   },
   async ask(text) {
-    if (!api) { this.fail('Abra NEXUS desde la aplicación de escritorio'); return; }
+    if (!api) { this.fail('Abre NEXUS desde la aplicación de escritorio'); return; }
     this.interrupt();
     const id = Date.now();
     this.reqId = id;
@@ -127,7 +127,7 @@ export const conversation = {
     if (res.error === 'NO_KEY') {
       this.setSettingsTab('ai');
       this.openPanel('settings', true);
-      this.say(`${cap(this.name())}, necesito una clave para pensar. Póngala en Ajustes; la de Groq es gratuita.`);
+      this.say(`${cap(this.name())}, necesito una clave para pensar. Ponla en Ajustes; la de Groq es gratuita.`);
       return;
     }
     this.fail('No puedo conectar con el modelo', res.error);
@@ -202,7 +202,7 @@ export const conversation = {
   },
   // on the wallpaper nothing can be clicked: ask out loud and listen for yes/no
   confirmByVoice(req) {
-    voice.say(`Necesito su permiso para esto: ${req.title}. ¿Lo hago?`, {
+    voice.say(`Necesito tu permiso para esto: ${req.title}. ¿Lo hago?`, {
       onLine: (l, d) => this.revealLine(l, d),
       onDone: () => {
         this.setCore('listening');

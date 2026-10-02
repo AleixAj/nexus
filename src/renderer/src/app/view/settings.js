@@ -12,7 +12,7 @@ const QUALITY_HELP = {
 
 // the pages of Settings: name, what it holds (menu) and what it is for (top of the page)
 const TABS = [
-  ['ai', 'Inteligencia', 'IA, claves y cupo', 'Qué IA responde, sus claves y cuánto cupo gratis queda hoy.'],
+  ['ai', 'Inteligencia', 'IA, claves y cupo', 'Qué IA responde, tus claves y cuánto cupo gratis queda hoy.'],
   ['agent', 'Permisos', 'Qué puede hacer en tu PC', 'Lo que NEXUS puede hacer por su cuenta. Lo que cambia algo en tu PC siempre te pide permiso antes.'],
   ['voice', 'Audio', 'Micrófono y escucha', 'Con qué micrófono te oigo y cómo me llamas.'],
   ['look', 'Apariencia', 'Tema, calidad y movimiento', 'Colores, calidad de la galaxia y opciones para leer mejor.'],
@@ -52,7 +52,7 @@ export function settingsView(app, c) {
     providerNote: providerInfo(S.provider).note, showModel: S.provider !== 'Auto',
     cycleModel: () => app.cycleModel(),
     keyInput: S.keyInput, keyType: S.showKey ? 'text' : 'password', keyDisabled: !prov.needsKey,
-    keyPlaceholder: !prov.needsKey ? 'No necesaria · Ollama en http://localhost:11434' : prov.hasKey ? '•••••••••••• guardada · pegue otra para cambiarla' : 'Pegue aquí su clave de ' + kp,
+    keyPlaceholder: !prov.needsKey ? 'No necesaria · Ollama en http://localhost:11434' : prov.hasKey ? '•••••••••••• guardada · pega otra para cambiarla' : 'Pega aquí tu clave de ' + kp,
     keyStatus: !prov.needsKey ? 'LOCAL' : prov.hasKey ? 'GUARDADA' : 'FALTA', keyColor: !prov.needsKey || prov.hasKey ? '#34D399' : '#F5B971',
     keyHelp: providerInfo(S.provider === 'Auto' ? kp : S.provider).help,
     keyTargets: S.provider === 'Auto' ? KEY_ORDER.map(p => ({ label: ((S.providers[p] || {}).hasKey ? '✓ ' : '') + p, on: kp === p, pick: () => app.setState({ keyTarget: p, keyInput: '' }) })) : null,
@@ -64,11 +64,11 @@ export function settingsView(app, c) {
     // what the agent may do, and what the Gemini key is used for
     agentToggles: AGENT_TOGGLES.map(([k, key, label, note]) => ({ label, note, ...toggleT(!!(S.agent || {})[k]), toggle: () => app.setAgent(k, key) })),
     geminiToggles: (S.providers.Gemini || {}).hasKey ? GEMINI_TOGGLES.map(([k, label, note]) => ({ label, note, ...toggleT(!!(S.gemini || {})[k]), toggle: () => app.setGemini(k, !(S.gemini || {})[k]) })) : [],
-    geminiNote: S.provider === 'Gemini' ? 'Gemini es ahora su IA principal: cada pregunta usa su cupo.' : 'Su IA principal es ' + S.provider + '. Gemini solo se usa para lo que active aquí.',
+    geminiNote: S.provider === 'Gemini' ? 'Gemini es ahora tu IA principal: cada pregunta usa su cupo.' : 'Tu IA principal es ' + S.provider + '. Gemini solo se usa para lo que actives aquí.',
 
     // system
     toggles: Object.fromEntries([
-      { id: 'wallpaper', label: 'Fondo de escritorio', note: 'Nexus se pone detrás de sus iconos · hable con ' + hotkey + ' y vuelva desde la bandeja', on: false, toggle: () => api && api.setMode('wallpaper') },
+      { id: 'wallpaper', label: 'Fondo de escritorio', note: 'Nexus se pone detrás de tus iconos · háblale con ' + hotkey + ' y vuelve desde la bandeja', on: false, toggle: () => api && api.setMode('wallpaper') },
       { id: 'autostart', label: 'Iniciar con Windows', note: 'Se abre sola al encender el PC', on: S.autostart, toggle: () => app.setAutostart(!S.autostart) },
       { id: 'wake', label: `Escuchar «${S.wakeWord}» siempre`, note: S.wakeProgress != null ? `Descargando el modelo de voz… ${Math.round(S.wakeProgress * 100)} %` : 'Me despierto al oírlo. Se cambia en Voz y personalidad. Todo en tu PC: no se graba ni se envía nada', on: !!S.wakeListen, toggle: () => app.setWakeListen(!S.wakeListen) },
       { id: 'bgMotion', label: 'Fondo quieto mientras usas otras apps', note: 'En modo fondo de escritorio solo se anima cuando miras el escritorio o te hablo. Ahorra batería y CPU', on: (S.bgMotion || 'desktop') !== 'always', toggle: () => { const v = (S.bgMotion || 'desktop') === 'always' ? 'desktop' : 'always'; app.setState({ bgMotion: v }, () => app.updatePower()); app.save({ bgMotion: v }); } },

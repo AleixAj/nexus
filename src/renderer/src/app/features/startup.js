@@ -36,7 +36,7 @@ export const startup = {
     this.interrupt(); const E = this.E(); if (!E) return;
     this.setState({ onb: true, onbStep: 0, uiIn: false, panel: null, overlay: false, words: [], micPerm: null, onbWallpaper: false });
     E.setState('idle'); E.snapCore(this.layout());
-    E.boot({ onDone: () => { this.setState({ onbStep: 1 }); this.say(`Hola. Soy Nexus, su asistente personal. Antes de empezar, ¿cómo quiere que le llame?`); } });
+    E.boot({ onDone: () => { this.setState({ onbStep: 1 }); this.say(`Hola. Soy Nexus, tu asistente personal. Antes de empezar, ¿cómo quieres que te llame?`); } });
   },
   onbNext() {
     const s = this.state.onbStep, n = this.name();
@@ -44,10 +44,10 @@ export const startup = {
       this.setState({ onbStep: s + 1 });
       if (s + 1 === 2) this.prepareSamples();
       const L = {
-        2: `${this.fem() ? 'Encantada' : 'Encantado'}, ${n}. Ahora elija cómo quiere que suene.`,
-        3: 'Perfecto. Elija también mi color.',
+        2: `${this.fem() ? 'Encantada' : 'Encantado'}, ${n}. Ahora elige cómo quieres que suene.`,
+        3: 'Perfecto. Elige también mi color.',
         4: 'Para pensar y para oírle necesito dos cosas.',
-        5: `Último paso, ${n}. ¿Cómo quiere tenerme?`,
+        5: `Último paso, ${n}. ¿Cómo quieres tenerme?`,
       };
       this.say(L[s + 1]);
       return;
@@ -58,7 +58,7 @@ export const startup = {
     const E = this.E(); E && E.disableMic();
     this.clearFlow();
     if (this.state.onbWallpaper && api) {
-      this.say(`Perfecto, ${n}. Me coloco en su escritorio. Llámeme con ${this.hotkeyLabel().toLowerCase()}.`, () => api.setMode('wallpaper'));
+      this.say(`Perfecto, ${n}. Me coloco en tu escritorio. Llámame con ${this.hotkeyLabel().toLowerCase()}.`, () => api.setMode('wallpaper'));
       return;
     }
     this.setState({ onb: false, uiIn: true, words: [] });
@@ -74,7 +74,7 @@ export const startup = {
       this.setState({ micPerm: 'ok' });
       this.countMics(); // names are visible now that permission was granted
       this.setCore('idle');
-      this.say(`Le oigo perfectamente, ${this.name()}.`);
+      this.say(`Te oigo perfectamente, ${this.name()}.`);
     } catch {
       this.setState({ micPerm: 'no' });
       this.setCore('idle');

@@ -69,7 +69,7 @@ export async function runDiagnostics(): Promise<Check[]> {
       return b.length > 1000 ? { status: 'ok', detail: 'Lista como respaldo' } : { status: 'warn', detail: 'Windows no tiene voces instaladas' }
     }),
     check('Voz', 'Entender lo que dices', async () => {
-      if (!getKey('Groq') && !(s.geminiStt && getKey('Gemini'))) return { status: 'fail', detail: 'Necesita la clave gratuita de Groq (o activar Gemini para entender la voz)' }
+      if (!getKey('Groq') && !(s.geminiStt && getKey('Gemini'))) return { status: 'fail', detail: 'Necesitas la clave gratuita de Groq (o activar Gemini para entender la voz)' }
       // a Windows voice says a phrase and the recogniser must understand it
       const wav = await windowsSpeak('Hola Nexus, qué hora es', 'es-ES')
       const text = await transcribe(wav.buffer.slice(wav.byteOffset, wav.byteOffset + wav.byteLength) as ArrayBuffer, 'es-ES')

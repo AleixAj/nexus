@@ -40,7 +40,7 @@ export function onboardingView(app, c) {
       label: n, on: S.userName === n, bg: S.userName === n ? 'rgb(var(--acc) / .22)' : 'rgba(255,255,255,.03)', border: S.userName === n ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.18)',
       pick: () => { app.setName(n); poke(); },
     })),
-    formalOpts: [['usted', 85], ['tú', 20]].map(([label, val]) => ({
+    formalOpts: [['tú', 20], ['usted', 85]].map(([label, val]) => ({
       label, on: label === 'usted' ? S.sliders.formal >= 50 : S.sliders.formal < 50,
       pick: () => { app.setState(s => ({ sliders: { ...s.sliders, formal: val } })); app.save({ formal: val }); },
     })),
@@ -58,7 +58,7 @@ export function onboardingView(app, c) {
     hotkeyText: app.hotkeyLabel(),
     onbToggles: [
       { name: 'Iniciar con Windows', note: 'Me abro sola al encender el PC', on: S.autostart, onClick: () => app.setAutostart(!S.autostart) },
-      { name: 'Fondo de escritorio', note: 'Me coloco detrás de sus iconos y me quedo en segundo plano', on: !!S.onbWallpaper, onClick: () => app.setState(s => ({ onbWallpaper: !s.onbWallpaper })) },
+      { name: 'Fondo de escritorio', note: 'Me coloco detrás de tus iconos y me quedo en segundo plano', on: !!S.onbWallpaper, onClick: () => app.setState(s => ({ onbWallpaper: !s.onbWallpaper })) },
     ],
   };
 }

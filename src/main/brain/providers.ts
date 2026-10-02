@@ -140,10 +140,10 @@ export async function callModel(all: Target[], body: (t: Target) => string, sign
   }
   if ((!res && lastLimit.daily) || (res && (res.status === 429 || (!res.ok && res.status >= 500)))) {
     throw new Error(lastLimit.daily
-      ? 'Se ha agotado el cupo gratuito de hoy de sus IA. Para seguir, active «Respaldo» (Gemini) en Ajustes o añada una clave gratuita de OpenRouter, o pruebe más tarde'
-      : 'Las IA gratuitas están saturadas ahora mismo; pruebe en un minuto')
+      ? 'Se ha agotado el cupo gratuito de hoy de tus IA. Para seguir, activa «Respaldo» (Gemini) en Ajustes o añade una clave gratuita de OpenRouter, o prueba más tarde'
+      : 'Las IA gratuitas están saturadas ahora mismo; prueba en un minuto')
   }
-  if (!res) throw new Error('No se pudo conectar con ninguna IA; revise las claves en Ajustes')
+  if (!res) throw new Error('No se pudo conectar con ninguna IA; revisa las claves en Ajustes')
   if (!res.ok || !res.body) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 200)}`)
   return { res, target: used }
 }

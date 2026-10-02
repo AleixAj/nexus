@@ -118,7 +118,7 @@ export default function VoicePanel({ v }: { v: any }) {
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <span style={{ fontSize: "14.5px", color: "rgba(241,234,248,.85)" }}>
-                  Cómo le llamo
+                  Cómo te llamo
                 </span>
                 <input value={v.userName} onChange={v.onName} style={{ height: "40px", padding: "0 14px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.16)", color: "#FFF6E9", fontSize: "14px", outline: "none" }} />
               </div>

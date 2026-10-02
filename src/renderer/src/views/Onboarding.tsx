@@ -68,14 +68,14 @@ export default function Onboarding({ v }: { v: any }) {
       {/* 1 · name */}
       {step === 1 && (
         <div key="s1" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <span style={{ ...title, animation: enter(40) }}>¿Cómo quiere que le llame?</span>
-          <input value={v.userName} onChange={v.onNameOnb} autoFocus maxLength={40} placeholder="Su nombre o un tratamiento"
+          <span style={{ ...title, animation: enter(40) }}>¿Cómo quieres que te llame?</span>
+          <input value={v.userName} onChange={v.onNameOnb} autoFocus maxLength={40} placeholder="Tu nombre o un tratamiento"
             style={{ height: 56, padding: '0 20px', borderRadius: 12, background: 'rgba(0,0,0,.35)', border: '1px solid rgb(var(--acc2) / .3)', color: '#FFF6E9', fontSize: 22, outline: 'none', animation: enter(100) }} />
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', animation: enter(160) }}>
             {(v.nameChips || []).map((c: any) => <Chip key={c.label} on={c.on} onClick={c.pick}>{c.label}</Chip>)}
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginTop: 4, animation: enter(220) }}>
-            <span style={{ ...text, marginRight: 4 }}>Quiero que me hable de</span>
+            <span style={{ ...text, marginRight: 4 }}>Quiero que me hables de</span>
             {(v.formalOpts || []).map((o: any) => <Chip key={o.label} on={o.on} onClick={o.pick}>{o.label}</Chip>)}
           </div>
         </div>
@@ -84,7 +84,7 @@ export default function Onboarding({ v }: { v: any }) {
       {/* 2 · voice and personality */}
       {step === 2 && (
         <div key="s2" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-          <span style={{ ...title, animation: enter(40) }}>Elija mi voz</span>
+          <span style={{ ...title, animation: enter(40) }}>Elige mi voz</span>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
             {(v.voiceCards || []).map((c: any, i: number) => (
               <button key={c.id} onClick={c.selectSay} style={{
@@ -107,7 +107,7 @@ export default function Onboarding({ v }: { v: any }) {
       {/* 3 · look */}
       {step === 3 && (
         <div key="s3" style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-          <span style={{ ...title, animation: enter(40) }}>Elija mi color</span>
+          <span style={{ ...title, animation: enter(40) }}>Elige mi color</span>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 10 }}>
             {(v.themeCards || []).map((t: any, i: number) => (
               <button key={t.name} onClick={t.pick} style={{
@@ -181,11 +181,11 @@ export default function Onboarding({ v }: { v: any }) {
       {/* 5 · how to keep me */}
       {step === 5 && (
         <div key="s5" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          <span style={{ ...title, animation: enter(40), marginBottom: 4 }}>¿Cómo quiere tenerme?</span>
+          <span style={{ ...title, animation: enter(40), marginBottom: 4 }}>¿Cómo quieres tenerme?</span>
           {(v.onbToggles || []).map((t: any, i: number) => (
             <Fragment key={t.name}><div style={{ animation: enter(100 + i * 60) }}><Toggle {...t} /></div></Fragment>
           ))}
-          <span style={{ ...text, fontSize: 13, animation: enter(260) }}>Hable conmigo en cualquier momento con <b style={{ color: '#FFF6E9', fontWeight: 500 }}>{v.hotkeyText}</b>.</span>
+          <span style={{ ...text, fontSize: 13, animation: enter(260) }}>Háblame en cualquier momento con <b style={{ color: '#FFF6E9', fontWeight: 500 }}>{v.hotkeyText}</b>.</span>
         </div>
       )}
 
