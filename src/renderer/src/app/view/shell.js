@@ -14,7 +14,7 @@ export function shellView(app, c) {
   const on = id => P === id && !S.overlay;
 
   return {
-    k: S.k, qualityAttr: S.quality, reducedAttr: S.reduced ? '1' : '0', acc: th.acc, acc2: th.acc2,
+    k: S.k, ex: Math.max(0, Math.round((innerWidth / S.k - 1920) / 2)), qualityAttr: S.quality, reducedAttr: S.reduced ? '1' : '0', acc: th.acc, acc2: th.acc2,
     bgFilter: S.overlay ? 'blur(12px) brightness(.3)' : P === 'music' ? 'brightness(.85)' : P === 'system' ? 'blur(3px) brightness(.78)' : P ? 'blur(6px) brightness(.7)' : 'none',
     overlay: S.overlay,
     showUI: S.uiIn && !S.overlay && !S.onb,
@@ -23,7 +23,7 @@ export function shellView(app, c) {
     closePanel: () => app.openPanel(null),
 
     // status pill
-    pillPointer: WALLPAPER ? 'none' : 'auto', dismissDisplay: WALLPAPER ? 'none' : 'grid',
+    pillPointer: WALLPAPER && S.wallClicks === false ? 'none' : 'auto', dismissDisplay: WALLPAPER && S.wallClicks === false ? 'none' : 'grid',
     pillLeft: L.x + 'px', pillText, pillDot: core === 'error' || live ? '#FB7185' : core === 'music' ? '#FDBA74' : '#34D399',
     pillAnim: live || core === 'error' ? 'nx-pulse 1.4s ease-in-out infinite' : 'none',
     onPill: () => core === 'error' ? app.retry() : core === 'music' && !live ? app.musicCtl('pause') : talkOrStop(),
@@ -34,7 +34,7 @@ export function shellView(app, c) {
     words: S.subtitles ? S.words : [], wordsColor: wk === 'nexus' ? '#FFE9D2' : 'rgba(255,246,233,.95)', wordsOpacity: wk === 'userDim' ? .45 : 1, wordsSize: wide ? '22px' : '30px',
     hasAction: !!S.actionLabel, actionLabel: S.actionLabel, hasError: core === 'error', errorTitle: S.errorTitle || 'No puedo conectar con el modelo', errorDetail: S.errorDetail || '',
     // invisible button over the core (only where the core is on screen and clickable)
-    coreHit: !WALLPAPER && S.uiIn && !S.overlay && !S.onb && (!P || P === 'chat') ? { x: L.x, y: L.y, r: 190 * L.s } : null,
+    coreHit: (!WALLPAPER || S.wallClicks !== false) && S.uiIn && !S.overlay && !S.onb && (!P || P === 'chat') ? { x: L.x, y: L.y, r: 190 * L.s } : null,
     onCore: talkOrStop, onMic: talkOrStop,
 
     // notifications: above the music card when it is visible
@@ -42,7 +42,7 @@ export function shellView(app, c) {
     notifPos: { top: 'auto', bottom: (WALLPAPER ? 150 : 128) + (c.musicCard ? 104 : 0) + 'px' },
 
     // dock
-    showDock: !WALLPAPER && S.uiIn && !S.onb && !S.overlay,
+    showDock: (!WALLPAPER || S.wallDock !== false) && S.uiIn && !S.onb && !S.overlay,
     dock: DOCK.map(([id, label]) => {
       const act = P === id || (id === 'volume' && S.volOpen);
       return {

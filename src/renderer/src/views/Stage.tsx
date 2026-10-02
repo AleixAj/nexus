@@ -20,9 +20,10 @@ import DiagnosticsCard from './DiagnosticsCard'
 export default function Stage({ v }: { v: any }) {
   return (
     <div onDragOver={v.onDragOver} onDragLeave={v.onDragLeave} onDrop={v.onDrop} style={{ position: 'fixed', inset: 0, background: '#05030A', overflow: 'hidden' }}>
-      {/* the galaxy fills the whole window (any aspect ratio); the UI stays a centred 16:9 stage */}
+      {/* the galaxy fills the whole window (any aspect ratio); the UI is a centred 16:9 stage whose
+          side-anchored parts reach out to the window edges (--ex) on wide and ultrawide screens */}
       <canvas data-nexus-main="bg" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", filter: v.bgFilter, transition: "filter 1000ms cubic-bezier(.16,1,.3,1)" }} />
-      <div data-reduced={v.reducedAttr} data-quality={v.qualityAttr} style={{ position: "absolute", left: "50%", top: "50%", width: "1920px", height: "1080px", marginLeft: "-960px", marginTop: "-540px", transform: `scale(${v.k})`, "--acc": v.acc, "--acc2": v.acc2, overflow: "hidden", fontFamily: "'Space Grotesk',system-ui,sans-serif", color: "#F1EAF8" }}>
+      <div data-reduced={v.reducedAttr} data-quality={v.qualityAttr} style={{ position: "absolute", left: "50%", top: "50%", width: "1920px", height: "1080px", marginLeft: "-960px", marginTop: "-540px", transform: `scale(${v.k})`, "--ex": v.ex + "px", "--acc": v.acc, "--acc2": v.acc2, overflow: "visible", fontFamily: "'Space Grotesk',system-ui,sans-serif", color: "#F1EAF8" }}>
         <Desktop v={v} />
         <ChatPanel v={v} />
         <VoicePanel v={v} />

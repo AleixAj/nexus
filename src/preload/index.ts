@@ -25,6 +25,7 @@ contextBridge.exposeInMainWorld('nexus', {
   setAutostart: (on: boolean) => ipcRenderer.invoke('app:autostart', on),
   setMode: (mode: 'window' | 'wallpaper') => ipcRenderer.invoke('app:mode', mode),
   onCovered: (fn: (covered: boolean) => void) => on('app:covered', fn),
+  onDeskPointer: (fn: (e: { kind: string; x: number; y: number; delta?: number }) => void) => on('desk:pointer', fn),
   onDelta: (fn: (id: number, t: string) => void) => on('brain:delta', fn),
   onAction: (fn: (id: number, label: string) => void) => on('brain:action', fn),
   onProgress: (fn: (id: number, label: string) => void) => on('brain:progress', fn),

@@ -14,8 +14,8 @@ export default function Desktop({ v }: { v: any }) {
     <canvas data-nexus-main="core" style={{ position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none" }} />
     {v.coreHit && <div onClick={v.onCore} className="nx-core-hit" title="Hablar con Nexus" style={{ position: "absolute", left: v.coreHit.x - v.coreHit.r, top: v.coreHit.y - v.coreHit.r, width: v.coreHit.r * 2, height: v.coreHit.r * 2, borderRadius: "50%", cursor: "pointer", transition: "left 1000ms cubic-bezier(.16,1,.3,1), top 1000ms cubic-bezier(.16,1,.3,1), width 1000ms cubic-bezier(.16,1,.3,1), height 1000ms cubic-bezier(.16,1,.3,1)" }} />}
     {v.showFrame && (<>
-      <div style={{ position: "absolute", inset: "14px", pointerEvents: "none", animation: "nx-in 1000ms cubic-bezier(.16,1,.3,1) both", background: "linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 0 / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 0 / 1px 26px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 0 / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 0 / 1px 26px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 100% / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 100% / 1px 26px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 100% / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 100% / 1px 26px no-repeat" }}></div>
-      <div style={{ position: "absolute", left: "64px", right: "64px", top: "12px", display: "flex", justifyContent: "space-between", pointerEvents: "none", fontFamily: "'JetBrains Mono',monospace", fontSize: "9.5px", letterSpacing: ".22em", color: "rgba(226,218,240,.4)", animation: "nx-down 900ms cubic-bezier(.16,1,.3,1) 300ms both" }}>
+      <div style={{ position: "absolute", inset: "14px calc(14px - var(--ex))", pointerEvents: "none", animation: "nx-in 1000ms cubic-bezier(.16,1,.3,1) both", background: "linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 0 / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 0 / 1px 26px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 0 / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 0 / 1px 26px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 100% / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 0 100% / 1px 26px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 100% / 26px 1px no-repeat, linear-gradient(rgb(var(--acc2) / .4),rgb(var(--acc2) / .4)) 100% 100% / 1px 26px no-repeat" }}></div>
+      <div style={{ position: "absolute", left: "calc(64px - var(--ex))", right: "calc(64px - var(--ex))", top: "12px", display: "flex", justifyContent: "space-between", pointerEvents: "none", fontFamily: "'JetBrains Mono',monospace", fontSize: "9.5px", letterSpacing: ".22em", color: "rgba(226,218,240,.4)", animation: "nx-down 900ms cubic-bezier(.16,1,.3,1) 300ms both" }}>
         <div style={{ display: "flex", gap: "22px" }}>
           <span data-scramble="1">
             NX-OS 2.4.0
@@ -58,13 +58,13 @@ export default function Desktop({ v }: { v: any }) {
           <span data-tele="hex" style={{ color: "#F5B971" }}></span>
         </div>
       </div>
-      <div style={{ position: "absolute", left: "22px", top: "300px", width: "14px", height: "480px", pointerEvents: "none", background: "repeating-linear-gradient(180deg, rgb(var(--acc2) / .4) 0 1px, transparent 1px 60px) 0 0 / 14px 100% no-repeat, repeating-linear-gradient(180deg, rgb(var(--acc2) / .22) 0 1px, transparent 1px 12px) 0 0 / 7px 100% no-repeat", animation: "nx-left 900ms cubic-bezier(.16,1,.3,1) 300ms both" }}></div>
-      <div style={{ position: "absolute", right: "22px", top: "300px", width: "14px", height: "480px", pointerEvents: "none", background: "repeating-linear-gradient(180deg, rgb(var(--acc2) / .4) 0 1px, transparent 1px 60px) 100% 0 / 14px 100% no-repeat, repeating-linear-gradient(180deg, rgb(var(--acc2) / .22) 0 1px, transparent 1px 12px) 100% 0 / 7px 100% no-repeat", animation: "nx-right 900ms cubic-bezier(.16,1,.3,1) 300ms both" }}></div>
+      <div style={{ position: "absolute", left: "calc(22px - var(--ex))", top: "300px", width: "14px", height: "480px", pointerEvents: "none", background: "repeating-linear-gradient(180deg, rgb(var(--acc2) / .4) 0 1px, transparent 1px 60px) 0 0 / 14px 100% no-repeat, repeating-linear-gradient(180deg, rgb(var(--acc2) / .22) 0 1px, transparent 1px 12px) 0 0 / 7px 100% no-repeat", animation: "nx-left 900ms cubic-bezier(.16,1,.3,1) 300ms both" }}></div>
+      <div style={{ position: "absolute", right: "calc(22px - var(--ex))", top: "300px", width: "14px", height: "480px", pointerEvents: "none", background: "repeating-linear-gradient(180deg, rgb(var(--acc2) / .4) 0 1px, transparent 1px 60px) 100% 0 / 14px 100% no-repeat, repeating-linear-gradient(180deg, rgb(var(--acc2) / .22) 0 1px, transparent 1px 12px) 100% 0 / 7px 100% no-repeat", animation: "nx-right 900ms cubic-bezier(.16,1,.3,1) 300ms both" }}></div>
     </>)}
     {v.showUI && (<>
       {/* top-left HUD */}
       {v.showHud && (<>
-        <div style={{ position: "absolute", left: "64px", top: "52px", display: "flex", flexDirection: "column", gap: "22px", width: "440px", ...v.hudPos }}>
+        <div style={{ position: "absolute", left: "calc(64px - var(--ex))", top: "52px", display: "flex", flexDirection: "column", gap: "22px", width: "440px", ...v.hudPos }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "6px", animation: "nx-left 800ms cubic-bezier(.16,1,.3,1) both" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "10px", fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", letterSpacing: ".24em", color: "rgb(var(--acc2) / .5)" }}>
               <span style={{ width: "6px", height: "6px", border: "1px solid rgb(var(--acc2) / .7)", transform: "rotate(45deg)" }}></span>
@@ -185,7 +185,7 @@ export default function Desktop({ v }: { v: any }) {
       </div>
       {/* notifications */}
       {v.showNotifs && (<>
-        <div style={{ position: "absolute", right: "40px", top: "40px", width: "360px", display: "flex", flexDirection: "column", gap: "10px", ...v.notifPos }}>
+        <div style={{ position: "absolute", right: "calc(40px - var(--ex))", top: "40px", width: "360px", display: "flex", flexDirection: "column", gap: "10px", ...v.notifPos }}>
           {(v.notifs || []).map((n, nIndex) => (<Fragment key={n?.id ?? nIndex}>
             <div data-spot="1" style={{ position: "relative", padding: "16px 18px", display: "flex", flexDirection: "column", gap: "6px", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07)", animation: "nx-right 700ms cubic-bezier(.16,1,.3,1) both" }} className="dc1">
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -247,7 +247,7 @@ export default function Desktop({ v }: { v: any }) {
       </div>
       {/* music mini card */}
       {v.showMusicMini && (<>
-        <div data-spot="1" style={{ position: "absolute", right: "24px", bottom: "112px", width: "360px", padding: "14px", display: "flex", gap: "14px", alignItems: "center", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgba(251,146,60,.45), rgb(var(--acc) / .1) 55%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07)", animation: "nx-up 700ms cubic-bezier(.16,1,.3,1) both" }} className="dc5">
+        <div data-spot="1" style={{ position: "absolute", right: "calc(24px - var(--ex))", bottom: "112px", width: "360px", padding: "14px", display: "flex", gap: "14px", alignItems: "center", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgba(251,146,60,.45), rgb(var(--acc) / .1) 55%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07)", animation: "nx-up 700ms cubic-bezier(.16,1,.3,1) both" }} className="dc5">
           <button onClick={v.openMusic} style={{ width: "64px", height: "64px", flex: "none", borderRadius: "10px", border: "none", padding: 0, overflow: "hidden", cursor: "pointer", background: "repeating-linear-gradient(135deg, rgba(255,255,255,.08) 0 2px, transparent 2px 8px), linear-gradient(135deg,#FB923C,#9333EA 60%,#1E1B4B)", boxShadow: "0 8px 24px " + v.musicGlow }}>
             {v.musicNow?.cover && <img src={v.musicNow.cover} alt="" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />}
           </button>

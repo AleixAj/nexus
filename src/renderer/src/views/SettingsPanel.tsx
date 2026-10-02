@@ -214,7 +214,7 @@ function Tab({ v }: { v: any }) {
     case 'system': return (
       <>
         <Group title="AL ENCENDER"><Toggles list={[t.autostart, t.briefing]} /></Group>
-        <Group title="FONDO DE ESCRITORIO"><Toggles list={[t.wallpaper, t.bgMotion]} /></Group>
+        <Group title="FONDO DE ESCRITORIO"><Toggles list={[t.wallpaper, t.wallDock, t.wallClicks, t.bgMotion]} /></Group>
       </>
     )
     case 'accounts': return <AccountsTab v={v} />
@@ -232,7 +232,7 @@ export default function SettingsPanel({ v }: { v: any }) {
   if (!v.isSettings) return null
   const tab = v.settingsTabs.find((x: any) => x.id === v.settingsTab) || v.settingsTabs[0]
   return (
-    <div role="dialog" aria-label="Ajustes" style={{ position: 'absolute', right: '24px', top: '24px', bottom: '112px', width: 'min(1180px, calc(100% - 48px))', display: 'flex', flexDirection: 'column', background: 'linear-gradient(rgba(7,5,14,.62),rgba(7,5,14,.62)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / .06) 45%, rgb(var(--acc) / 0)) border-box', border: '1px solid transparent', borderRadius: '14px', backdropFilter: 'blur(24px) saturate(1.2)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.07), 0 24px 70px rgba(0,0,0,.35)', animation: 'nx-right 600ms cubic-bezier(.16,1,.3,1) both' }} className="dc49 dc50">
+    <div role="dialog" aria-label="Ajustes" style={{ position: 'absolute', right: 'calc(24px - var(--ex))', top: '24px', bottom: '112px', width: 'min(1180px, calc(100% - 48px))', display: 'flex', flexDirection: 'column', background: 'linear-gradient(rgba(7,5,14,.62),rgba(7,5,14,.62)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / .06) 45%, rgb(var(--acc) / 0)) border-box', border: '1px solid transparent', borderRadius: '14px', backdropFilter: 'blur(24px) saturate(1.2)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.07), 0 24px 70px rgba(0,0,0,.35)', animation: 'nx-right 600ms cubic-bezier(.16,1,.3,1) both' }} className="dc49 dc50">
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '26px 32px 20px', borderBottom: `1px solid ${LINE}` }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <span data-scramble="1" style={{ fontFamily: mono, fontSize: '12px', letterSpacing: '.2em', color: 'rgb(var(--acc2) / .7)' }}>AJUSTES · NEXUS {v.version}</span>

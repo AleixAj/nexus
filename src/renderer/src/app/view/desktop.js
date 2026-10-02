@@ -25,7 +25,7 @@ export function desktopView(app, c) {
     clockDigits: [dig(hh[0]), dig(hh[1]), { sep: true, num: false }, dig(mm[0]), dig(mm[1])],
     dateStr: d.toLocaleDateString('es-ES', { weekday: 'long', day: 'numeric', month: 'long' }).toUpperCase(),
     // info on the right: desktop icons live on the left (same layout as the wallpaper mode)
-    hudPos: { left: 'auto', right: '64px', alignItems: 'flex-end', textAlign: 'right' },
+    hudPos: { left: 'auto', right: 'calc(64px - var(--ex))', alignItems: 'flex-end', textAlign: 'right' },
     indicators: [{ label: 'IA', color: S.error ? '#FB7185' : '#34D399' }, { label: 'LOCAL', color: '#34D399' }, { label: 'VOZ', color: S.voiceDown ? '#FB7185' : '#34D399' }],
     // reminders and calendar events together, the next three
     upcoming: [

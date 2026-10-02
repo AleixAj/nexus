@@ -14,11 +14,30 @@ export const power = {
     this.restT = setTimeout(() => this.updatePower(), 45500);
     if (wasResting) this.updatePower();
   },
+  // a click or wheel turn made on the bare desktop while NEXUS is the wallpaper (Windows sends
+  // none to a window behind the icons, so the main process passes them on): do the same here
+  onDeskPointer({ kind, x, y, delta }) {
+    if (!WALLPAPER || this.state.wallClicks === false) return;
+    const el = document.elementFromPoint(x, y);
+    if (!el) return;
+    this.noteActivity();
+    if (kind === 'wheel') {
+      for (let n = el; n && n !== document.body; n = n.parentElement) {
+        const o = getComputedStyle(n).overflowY;
+        if ((o === 'auto' || o === 'scroll') && n.scrollHeight > n.clientHeight) { n.scrollBy({ top: -(delta || 0), behavior: 'smooth' }); return; }
+      }
+      return;
+    }
+    const opts = { bubbles: true, cancelable: true, clientX: x, clientY: y, button: 0, view: window };
+    for (const type of ['pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click']) {
+      el.dispatchEvent(type.startsWith('pointer') ? new PointerEvent(type, { ...opts, pointerType: 'mouse', isPrimary: true }) : new MouseEvent(type, opts));
+    }
+  },
   // what is in front of the wallpaper: 'desktop', 'app' or 'covered' (sent by the main process)
   onScreenState(state) { this.screenState = state; this.updatePower(); },
   updatePower() {
     const E = this.E(); if (!E) return;
-    const S = this.state, live = LIVE_STATES.includes(S.core) || !!S.intro || S.onb;
+    const S = this.state, live = LIVE_STATES.includes(S.core) || !!S.intro || S.onb || !!this.booting;
     const motion = S.bgMotion || 'desktop', front = this.screenState || 'desktop';
     const paused = document.hidden || front === 'covered'
       || (!live && WALLPAPER && motion !== 'always' && front === 'app')

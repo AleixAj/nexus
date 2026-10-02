@@ -1,6 +1,6 @@
 // Settings panel: AI service and keys, agent permissions, Gemini switches, system and look.
 import { KEY_ORDER, PERSONAS, THEMES, providerInfo, voiceById } from '../constants';
-import { api, seg, toggleT } from '../util';
+import { WALLPAPER, api, seg, toggleT } from '../util';
 
 const QUALITY = [['ultra', 'Ultra'], ['equilibrado', 'Equilibrado'], ['ahorro', 'Ahorro']];
 const QUALITY_NOTE = { ultra: '2 600 PARTÍCULAS · 60 FPS', equilibrado: '1 500 PARTÍCULAS · 60 FPS', ahorro: '700 PARTÍCULAS · SIN GRANO' };
@@ -68,9 +68,11 @@ export function settingsView(app, c) {
 
     // system
     toggles: Object.fromEntries([
-      { id: 'wallpaper', label: 'Fondo de escritorio', note: 'Nexus se pone detrás de tus iconos · háblale con ' + hotkey + ' y vuelve desde la bandeja', on: false, toggle: () => api && api.setMode('wallpaper') },
+      { id: 'wallpaper', label: 'Fondo de escritorio', note: 'NEXUS se pone detrás de tus iconos y se queda ahí. Háblale con ' + hotkey + '; para volver a ventana, apágalo aquí o desde la bandeja', on: WALLPAPER, toggle: () => api && api.setMode(WALLPAPER ? 'window' : 'wallpaper') },
       { id: 'autostart', label: 'Iniciar con Windows', note: 'Se abre sola al encender el PC', on: S.autostart, toggle: () => app.setAutostart(!S.autostart) },
       { id: 'wake', label: `Escuchar «${S.wakeWord}» siempre`, note: S.wakeProgress != null ? `Descargando el modelo de voz… ${Math.round(S.wakeProgress * 100)} %` : 'Me despierto al oírlo. Se cambia en Voz y personalidad. Todo en tu PC: no se graba ni se envía nada', on: !!S.wakeListen, toggle: () => app.setWakeListen(!S.wakeListen) },
+      { id: 'wallDock', label: 'Barra de abajo en el fondo', note: 'Con NEXUS de fondo de escritorio, sigue viéndose la barra con el chat, la música, los ajustes…', on: S.wallDock !== false, toggle: () => app.flip('wallDock') },
+      { id: 'wallClicks', label: 'Pulsar en el fondo', note: 'Toca el núcleo para hablar y usa la barra aunque esté detrás de los iconos. Solo cuenta lo que pulsas en el escritorio vacío', on: S.wallClicks !== false, toggle: () => app.flip('wallClicks') },
       { id: 'bgMotion', label: 'Fondo quieto mientras usas otras apps', note: 'En modo fondo de escritorio solo se anima cuando miras el escritorio o te hablo. Ahorra batería y CPU', on: (S.bgMotion || 'desktop') !== 'always', toggle: () => { const v = (S.bgMotion || 'desktop') === 'always' ? 'desktop' : 'always'; app.setState({ bgMotion: v }, () => app.updatePower()); app.save({ bgMotion: v }); } },
       { id: 'briefing', label: 'Resumen al encender', note: 'La primera vez que me abres cada día: tiempo, recordatorios y noticias', on: !!S.briefing, toggle: () => app.flip('briefing') },
       { id: 'subtitles', label: 'Subtítulos', note: 'Muestra bajo el núcleo lo que te digo, para leerlo además de oírlo', on: !!S.subtitles, toggle: () => app.flip('subtitles') },

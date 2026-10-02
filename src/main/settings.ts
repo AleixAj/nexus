@@ -36,6 +36,9 @@ export type Settings = {
   briefing: boolean
   wakeListen: boolean
   bgMotion: string
+  // wallpaper mode: show the bottom bar, and answer clicks on the desktop
+  wallDock: boolean
+  wallClicks: boolean
   wakeWord: string
   spotifyClientId: string
   lastBriefing: string
@@ -103,6 +106,8 @@ const DEFAULTS: Settings = {
   wakeListen: false,
   // the wallpaper animates only while you look at the desktop ('desktop'), always, or never
   bgMotion: 'desktop',
+  wallDock: true,
+  wallClicks: true,
   // the phrase that wakes it: whatever the user likes ("Oye Jarvis", "Hola Viernes"…)
   wakeWord: 'Hey Nexus',
   // the user's own app at developer.spotify.com (for playlists by name)

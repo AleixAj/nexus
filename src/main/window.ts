@@ -2,7 +2,7 @@
 import { app, BrowserWindow, Menu, Notification, Tray, ipcMain, nativeImage, screen, shell } from 'electron'
 import { join } from 'path'
 import { loadSettings, saveSettings } from './settings'
-import { attachToDesktop, refreshWallpaper, stopWatching, watchCovered } from './wallpaper'
+import { attachToDesktop, refreshWallpaper, stopDesktop } from './wallpaper'
 
 export type Mode = 'window' | 'wallpaper'
 
@@ -51,6 +51,21 @@ export function notify(title: string, body: string) {
   if (Notification.isSupported()) new Notification({ title, body, icon: ICON }).show()
 }
 
+// Behind the icons: report what is in front of the wallpaper (so it can rest) and, if the
+// user allows it, the clicks made on the desktop
+function attachWall(w: BrowserWindow) {
+  const send = (ch: string, data: unknown) => { if (!w.isDestroyed()) w.webContents.send(ch, data) }
+  return attachToDesktop(w, {
+    onFront: state => send('app:covered', state),
+    onPointer: loadSettings().wallClicks ? e => send('desk:pointer', e) : undefined,
+  })
+}
+
+/** The "answer clicks on the wallpaper" switch changed: restart the helper with or without the mouse. */
+export function wallClicksChanged() {
+  if (mode === 'wallpaper' && win && !win.isDestroyed()) attachWall(win).catch(err => console.warn('[wallpaper]', err.message))
+}
+
 export function createWindow(m: Mode, query: Record<string, string> = {}) {
   mode = m
   const wall = m === 'wallpaper'
@@ -78,7 +93,7 @@ export function createWindow(m: Mode, query: Record<string, string> = {}) {
     if (!wall) { if (BACKGROUND) { BACKGROUND = false; return } if (SECONDARY) w.showInactive(); else w.show(); return }
     w.showInactive()
     try {
-      await attachToDesktop(w)
+      await attachWall(w)
     } catch (err: any) {
       console.warn('[wallpaper]', err.message)
       switchMode('window', { notice: 'wallpaper-failed' })
@@ -106,9 +121,6 @@ export function createWindow(m: Mode, query: Record<string, string> = {}) {
   // dropping a file or link on the window must not navigate away from the app
   w.webContents.on('will-navigate', e => e.preventDefault())
 
-  // the wallpaper rests while you use other apps; a normal window does not need it (Chromium
-  // already stops drawing hidden or covered windows, and focus changes are seen in the page)
-  if (wall) w.webContents.once('did-finish-load', () => watchCovered(w, state => { if (!w.isDestroyed()) w.webContents.send('app:covered', state) }))
 
   const q = { mode: m, ...(BACKGROUND ? { quiet: '1' } : {}), ...query }
   if (isDev) w.loadURL(process.env.ELECTRON_RENDERER_URL! + '?' + new URLSearchParams(q))
@@ -127,7 +139,7 @@ export async function switchMode(m: Mode, query: Record<string, string> = {}) {
   if (switching) return
   switching = true
   const was = mode
-  stopWatching()
+  stopDesktop()
   win?.destroy()
   win = null
   if (was === 'wallpaper') await refreshWallpaper()
@@ -173,7 +185,7 @@ export function createTray() {
 /** Before quitting: give the desktop its normal wallpaper back. Returns true if quitting must wait. */
 export function beforeQuit(done: () => void) {
   quitting = true
-  stopWatching()
+  stopDesktop()
   if (mode !== 'wallpaper' || !win) return false
   mode = 'window'
   win.destroy()

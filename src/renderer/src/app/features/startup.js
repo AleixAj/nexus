@@ -15,7 +15,11 @@ export const startup = {
     this.clearFlow(); const E = this.E(); if (!E) return;
     this.setState({ uiIn: false, panel: null, overlay: false, onb: false, words: [], actionLabel: '' });
     E.setState('idle'); E.snapCore(CORE_LAYOUT.home);
+    // the boot animation always plays to the end, even as a wallpaper behind another app
+    // (otherwise it would wait, black and without the bar, until you look at the desktop)
+    this.booting = true; this.updatePower();
     E.boot({ onUI: () => this.setState({ uiIn: true }), onDone: () => {
+      this.booting = false; this.updatePower();
       if (!QUIET) this.greetOrBrief();
       if (NOTICE === 'wallpaper-failed') this.notify('FONDO DE ESCRITORIO', 'No he podido ponerme de fondo', 'Windows no lo ha permitido · sigo en modo ventana', '#FB7185');
       const p = this.state.providers[this.state.provider];

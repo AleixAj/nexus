@@ -152,13 +152,18 @@ escuchando el atajo **Ctrl + Alt + Espacio**. Para cerrarla del todo, usa *Salir
 
 En **modo fondo de escritorio** la animación sustituye a tu fondo de pantalla, detrás de los iconos:
 
-- No se puede hacer clic en ella, así que desaparecen el dock y los botones. El reloj y el tiempo pasan a la derecha para no chocar con los iconos.
-- Se le habla con **Ctrl + Alt + Espacio**. Para configurarla, *Abrir ventana* en la bandeja.
+- Sigue viéndose la barra de abajo y se puede pulsar: toca el núcleo para hablar o abre cualquier panel. Como
+  Wallpaper Engine, NEXUS escucha los clics que caen en el escritorio vacío (nunca los de otras apps) y los
+  aplica sobre sí misma. Escribir no se puede: para el chat, háblale o vuelve a modo ventana.
+- Las dos cosas se apagan en Ajustes → Sistema (*Barra de abajo en el fondo* y *Pulsar en el fondo*).
+- También se le habla con **Ctrl + Alt + Espacio**. Para volver a ventana, Ajustes → Sistema o la bandeja.
+- Ponerse de fondo tarda menos de un segundo: el ayudante de Windows se compila una sola vez y se guarda.
 - Se pausa sola mientras una aplicación maximizada o a pantalla completa (un juego, por ejemplo) tapa el escritorio.
 - Al salir se restaura tu fondo de pantalla normal.
 - Con **Iniciar con Windows** activado, arranca en el último modo que usaste.
 
-Funciona en el monitor principal y en cualquier proporción (también ultrapanorámicos). Por dentro usa la
+Funciona en el monitor principal y en cualquier proporción. En pantallas anchas y ultrapanorámicas el núcleo
+queda centrado y el reloj, la barra, los marcos y los paneles se pegan a los bordes reales de la pantalla. Por dentro usa la
 misma técnica que Lively Wallpaper: la ventana se coloca dentro de la capa *WorkerW* del escritorio mediante
 llamadas a Win32 hechas desde un pequeño script de PowerShell, sin módulos nativos que compilar.
 

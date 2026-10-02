@@ -14,7 +14,7 @@ import { systemSnapshot } from './sysinfo'
 import { cancelReminders, listReminders } from './reminders'
 import { addFact, approveFact, clearMemory, deleteExchange, deleteFact, getMemory } from './memory'
 import { currentExtra, currentMedia, mediaControl } from './media'
-import { HOTKEY, isDev, switchMode } from './window'
+import { HOTKEY, isDev, switchMode, wallClicksChanged } from './window'
 import { typeText } from './dictation'
 import { ensureModel, feedWakeWord, modelReady, startWakeWord, stopWakeWord } from './wakeword'
 import { broadcast } from './window'
@@ -60,7 +60,12 @@ export function registerIpc() {
     autostart: app.getLoginItemSettings().openAtLogin,
     providers: Object.fromEntries(Object.entries(PROVIDERS).map(([k, p]) => [k, { models: p.models, needsKey: p.needsKey, hasKey: !!getKey(k) }]))
   }))
-  handle('settings:set', (_e, patch) => saveSettings(patch && typeof patch === 'object' ? patch : {}))
+  handle('settings:set', (_e, patch) => {
+    const p = patch && typeof patch === 'object' ? patch : {}
+    const out = saveSettings(p)
+    if ('wallClicks' in p) wallClicksChanged()
+    return out
+  })
   handle('key:set', (_e, provider, key) => setKey(str(provider, 40), str(key, 400)))
   handle('key:test', (_e, provider, key, region) => testKey(str(provider, 40), str(key, 400).trim(), str(region, 40)))
   handle('app:autostart', (_e, on) => app.setLoginItemSettings({ openAtLogin: on === true }))

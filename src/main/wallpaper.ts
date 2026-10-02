@@ -1,22 +1,29 @@
 // Desktop wallpaper mode for Windows.
 // The window is re-parented behind the desktop icons (the WorkerW trick used by
 // Lively Wallpaper). Win32 calls go through a small PowerShell + C# helper, so
-// no native Node module has to be compiled.
-import { app, BrowserWindow } from 'electron'
+// no native Node module has to be compiled. The C# is compiled once and kept as a
+// DLL in the app data folder: compiling it every time took several seconds.
+//
+// Behind the icons Windows sends no clicks to the window, so the helper also listens to the
+// mouse (a low-level hook, like Wallpaper Engine) and reports clicks and wheel turns that land
+// on the bare desktop; the page then acts as if they had been made on it.
+import { app, BrowserWindow, screen } from 'electron'
 import { execFile, spawn, type ChildProcess } from 'child_process'
-import { writeFileSync } from 'fs'
+import { existsSync, writeFileSync } from 'fs'
 import { join } from 'path'
 
-const HELPER = String.raw`
-param([string]$Action, [string]$Hwnd = '0', [int]$ParentPid = 0)
-$ErrorActionPreference = 'Stop'
-Add-Type -TypeDefinition @"
+// bump when the C# changes, so the cached DLL is rebuilt
+const VERSION = 2
+
+const CSHARP = String.raw`
 using System;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 
 public static class NxDesk {
   delegate bool EnumProc(IntPtr h, IntPtr l);
+  delegate IntPtr HookProc(int code, IntPtr w, IntPtr l);
   [DllImport("user32.dll")] static extern bool SetProcessDPIAware();
   [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern IntPtr FindWindow(string c, string n);
   [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern IntPtr FindWindowEx(IntPtr p, IntPtr after, string c, string n);
@@ -33,8 +40,17 @@ public static class NxDesk {
   [DllImport("user32.dll")] static extern IntPtr MonitorFromWindow(IntPtr h, uint f);
   [DllImport("user32.dll")] static extern bool GetMonitorInfo(IntPtr m, ref MONITORINFO mi);
   [DllImport("user32.dll", CharSet = CharSet.Unicode)] static extern bool SystemParametersInfo(uint a, uint p, StringBuilder s, uint f);
+  [DllImport("user32.dll")] static extern IntPtr WindowFromPoint(POINT p);
+  [DllImport("user32.dll")] static extern IntPtr GetAncestor(IntPtr h, uint flags);
+  [DllImport("user32.dll")] static extern IntPtr SetWindowsHookEx(int id, HookProc f, IntPtr mod, uint thread);
+  [DllImport("user32.dll")] static extern IntPtr CallNextHookEx(IntPtr h, int code, IntPtr w, IntPtr l);
+  [DllImport("user32.dll")] static extern int GetMessage(out MSG m, IntPtr h, uint min, uint max);
+  [DllImport("kernel32.dll", CharSet = CharSet.Unicode)] static extern IntPtr GetModuleHandle(string name);
 
   [StructLayout(LayoutKind.Sequential)] public struct RECT { public int L, T, R, B; }
+  [StructLayout(LayoutKind.Sequential)] public struct POINT { public int X, Y; }
+  [StructLayout(LayoutKind.Sequential)] public struct MSG { public IntPtr h; public uint msg; public IntPtr w, l; public uint time; public POINT pt; }
+  [StructLayout(LayoutKind.Sequential)] struct MOUSEHOOK { public POINT pt; public uint data, flags, time; public IntPtr extra; }
   [StructLayout(LayoutKind.Sequential)] public struct MONITORINFO { public int cbSize; public RECT rcMonitor; public RECT rcWork; public uint dwFlags; }
 
   static MONITORINFO Info(IntPtr mon) {
@@ -43,6 +59,7 @@ public static class NxDesk {
     GetMonitorInfo(mon, ref mi);
     return mi;
   }
+  static string ClassOf(IntPtr h) { StringBuilder c = new StringBuilder(64); GetClassName(h, c, 64); return c.ToString(); }
 
   public static string Attach(long hwnd) {
     SetProcessDPIAware();
@@ -83,9 +100,7 @@ public static class NxDesk {
   public static int Covered(long ours) {
     IntPtr fg = GetForegroundWindow();
     if (fg == IntPtr.Zero || fg == new IntPtr(ours) || IsIconic(fg)) return 0;
-    StringBuilder c = new StringBuilder(64);
-    GetClassName(fg, c, 64);
-    string cls = c.ToString();
+    string cls = ClassOf(fg);
     if (cls == "Progman" || cls == "WorkerW" || cls == "Shell_TrayWnd") return 0;
     IntPtr mon = MonitorFromWindow(fg, 2);
     if (mon != MonitorFromWindow(new IntPtr(ours), 2)) return 1;
@@ -95,6 +110,45 @@ public static class NxDesk {
     return (r.L <= mi.rcMonitor.L && r.T <= mi.rcMonitor.T && r.R >= mi.rcMonitor.R && r.B >= mi.rcMonitor.B) ? 2 : 1;
   }
 
+  // ---------- clicks on the desktop ----------
+  static IntPtr ours, hook;
+  static HookProc keep; // the delegate must outlive the hook
+
+  static IntPtr OnMouse(int code, IntPtr w, IntPtr l) {
+    int msg = w.ToInt32();
+    // left button released, or the wheel
+    if (code >= 0 && (msg == 0x0202 || msg == 0x020A)) {
+      try {
+        MOUSEHOOK m = (MOUSEHOOK)Marshal.PtrToStructure(l, typeof(MOUSEHOOK));
+        // only what lands on the bare desktop (icons layer or wallpaper), never on an app
+        string root = ClassOf(GetAncestor(WindowFromPoint(m.pt), 2));
+        if (root == "Progman" || root == "WorkerW") {
+          RECT r; GetWindowRect(ours, out r);
+          if (m.pt.X >= r.L && m.pt.X < r.R && m.pt.Y >= r.T && m.pt.Y < r.B) {
+            int x = m.pt.X - r.L, y = m.pt.Y - r.T;
+            if (msg == 0x0202) Console.Out.WriteLine("click " + x + " " + y);
+            else Console.Out.WriteLine("wheel " + x + " " + y + " " + (short)(m.data >> 16));
+            Console.Out.Flush();
+          }
+        }
+      } catch { }
+    }
+    return CallNextHookEx(hook, code, w, l);
+  }
+
+  /** Listens to the mouse on its own thread (low-level hooks need a message loop). */
+  public static void ListenMouse(long hwnd) {
+    ours = new IntPtr(hwnd);
+    Thread t = new Thread(delegate () {
+      keep = new HookProc(OnMouse);
+      hook = SetWindowsHookEx(14, keep, GetModuleHandle(null), 0);
+      MSG m;
+      while (GetMessage(out m, IntPtr.Zero, 0, 0) > 0) { }
+    });
+    t.IsBackground = true;
+    t.Start();
+  }
+
   // re-apply the current wallpaper so the desktop does not keep our last frame
   public static void Refresh() {
     StringBuilder p = new StringBuilder(520);
@@ -102,11 +156,22 @@ public static class NxDesk {
     SystemParametersInfo(0x0014, 0, p, 3);
   }
 }
-"@
+`
 
-if ($Action -eq 'attach') { [NxDesk]::Attach([long]$Hwnd) }
-elseif ($Action -eq 'refresh') { [NxDesk]::Refresh() }
-elseif ($Action -eq 'watch') {
+const HELPER = String.raw`
+param([string]$Action, [string]$Hwnd = '0', [int]$ParentPid = 0, [string]$Dll, [int]$Mouse = 0)
+$ErrorActionPreference = 'Stop'
+# compiled once; later runs just load the DLL (much faster)
+if (-not (Test-Path $Dll)) {
+  $src = Get-Content -Raw -LiteralPath ($Dll -replace '\.dll$', '.cs')
+  Add-Type -TypeDefinition $src -OutputAssembly $Dll -OutputType Library
+}
+Add-Type -LiteralPath $Dll
+
+if ($Action -eq 'refresh') { [NxDesk]::Refresh(); exit }
+if ($Action -eq 'run') {
+  [Console]::Out.WriteLine('attach ' + [NxDesk]::Attach([long]$Hwnd)); [Console]::Out.Flush()
+  if ($Mouse) { [NxDesk]::ListenMouse([long]$Hwnd) }
   $last = -1
   while ($true) {
     if ($ParentPid -and -not (Get-Process -Id $ParentPid -ErrorAction SilentlyContinue)) { exit }
@@ -117,28 +182,66 @@ elseif ($Action -eq 'watch') {
 }
 `
 
-let helperPath = ''
+let files: { ps1: string; dll: string } | null = null
 function helper() {
-  if (!helperPath) {
-    helperPath = join(app.getPath('userData'), 'nexus-desktop.ps1')
-    writeFileSync(helperPath, HELPER, 'utf8')
+  if (!files) {
+    const dir = app.getPath('userData')
+    const dll = join(dir, `nexus-desktop-${VERSION}.dll`)
+    const ps1 = join(dir, 'nexus-desktop.ps1')
+    writeFileSync(ps1, HELPER, 'utf8')
+    if (!existsSync(dll)) writeFileSync(dll.replace(/\.dll$/, '.cs'), CSHARP, 'utf8')
+    files = { ps1, dll }
   }
-  return helperPath
+  return files
 }
 
-const args = (action: string, hwnd = '0') =>
-  ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', helper(), '-Action', action, '-Hwnd', hwnd, '-ParentPid', String(process.pid)]
+const args = (action: string, hwnd = '0', mouse = false) => {
+  const { ps1, dll } = helper()
+  return ['-NoProfile', '-NonInteractive', '-ExecutionPolicy', 'Bypass', '-File', ps1, '-Action', action, '-Hwnd', hwnd, '-ParentPid', String(process.pid), '-Dll', dll, '-Mouse', mouse ? '1' : '0']
+}
 
 const handleOf = (win: BrowserWindow) => win.getNativeWindowHandle().readBigUInt64LE(0).toString()
 
-/** Puts the window behind the desktop icons, covering the primary monitor. */
-export function attachToDesktop(win: BrowserWindow): Promise<void> {
+export type Front = 'desktop' | 'app' | 'covered'
+export type DeskEvents = {
+  onFront: (state: Front) => void
+  /** a click or wheel turn on the bare desktop, in page pixels */
+  onPointer?: (e: { kind: 'click' | 'wheel'; x: number; y: number; delta?: number }) => void
+}
+
+let helperProc: ChildProcess | null = null
+
+/**
+ * Puts the window behind the desktop icons (primary monitor) and keeps one helper running
+ * that reports what is in front of it and, if wanted, clicks on the desktop.
+ */
+export function attachToDesktop(win: BrowserWindow, ev: DeskEvents): Promise<void> {
+  stopDesktop()
   return new Promise((resolve, reject) => {
-    execFile('powershell', args('attach', handleOf(win)), { windowsHide: true, timeout: 20000 }, (err, out) => {
-      if (err) return reject(err)
-      const msg = out.trim()
-      msg.endsWith('ok') ? resolve() : reject(new Error(msg || 'sin respuesta'))
+    const p = spawn('powershell', args('run', handleOf(win), !!ev.onPointer), { windowsHide: true })
+    helperProc = p
+    const scale = screen.getPrimaryDisplay().scaleFactor || 1
+    let buf = '', settled = false
+    const fail = (msg: string) => { if (!settled) { settled = true; stopDesktop(); reject(new Error(msg)) } }
+    const timer = setTimeout(() => fail('sin respuesta'), 20000)
+    p.stdout!.on('data', d => {
+      buf += d
+      const lines = buf.split(/\r?\n/)
+      buf = lines.pop() || ''
+      for (const l of lines) {
+        if (l.startsWith('attach ')) {
+          clearTimeout(timer)
+          if (l.endsWith('ok')) { settled = true; resolve() } else fail(l.slice(7))
+        } else if (l.startsWith('covered ')) ev.onFront(l.endsWith('2') ? 'covered' : l.endsWith('1') ? 'app' : 'desktop')
+        else if (ev.onPointer && (l.startsWith('click ') || l.startsWith('wheel '))) {
+          const [kind, x, y, delta] = l.split(' ')
+          ev.onPointer({ kind: kind as 'click' | 'wheel', x: +x / scale, y: +y / scale, delta: delta ? +delta : undefined })
+        }
+      }
     })
+    p.stderr!.on('data', d => { if (!settled) console.warn('[wallpaper]', String(d).slice(0, 300)) })
+    p.on('error', e => fail(e.message))
+    p.on('exit', () => fail('el ayudante se ha cerrado'))
   })
 }
 
@@ -147,25 +250,7 @@ export function refreshWallpaper() {
   return new Promise<void>(resolve => execFile('powershell', args('refresh'), { windowsHide: true, timeout: 15000 }, () => resolve()))
 }
 
-let watcher: ChildProcess | null = null
-
-/** Reports when a maximized/fullscreen app hides our window, so drawing can pause. */
-/** What is in front of the wallpaper: 'desktop', 'app' or 'covered' (maximized or fullscreen). */
-export function watchCovered(win: BrowserWindow, onChange: (state: 'desktop' | 'app' | 'covered') => void) {
-  stopWatching()
-  const p = spawn('powershell', args('watch', handleOf(win)), { windowsHide: true })
-  let buf = ''
-  p.stdout.on('data', d => {
-    buf += d
-    const lines = buf.split(/\r?\n/)
-    buf = lines.pop() || ''
-    for (const l of lines) if (l.startsWith('covered ')) onChange(l.endsWith('2') ? 'covered' : l.endsWith('1') ? 'app' : 'desktop')
-  })
-  p.on('error', () => {})
-  watcher = p
-}
-
-export function stopWatching() {
-  watcher?.kill()
-  watcher = null
+export function stopDesktop() {
+  helperProc?.kill()
+  helperProc = null
 }

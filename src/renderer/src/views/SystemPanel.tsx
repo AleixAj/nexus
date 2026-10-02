@@ -5,7 +5,7 @@ export default function SystemPanel({ v }: { v: any }) {
   return (
     <>
     {v.isSystem && (<>
-      <div style={{ position: "absolute", left: "64px", top: "48px", display: "flex", flexDirection: "column", gap: "8px", animation: "nx-left 700ms cubic-bezier(.16,1,.3,1) both" }}>
+      <div style={{ position: "absolute", left: "calc(64px - var(--ex))", top: "48px", display: "flex", flexDirection: "column", gap: "8px", animation: "nx-left 700ms cubic-bezier(.16,1,.3,1) both" }}>
         <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
           {v.sysHeader}
         </span>
@@ -19,7 +19,7 @@ export default function SystemPanel({ v }: { v: any }) {
           {v.sysTaken}
         </span>
       </div>
-      <button onClick={v.closePanel} style={{ position: "absolute", right: "64px", top: "56px", width: "40px", height: "40px", borderRadius: "10px", border: "1px solid rgba(196,181,253,.14)", background: "rgba(7,5,14,.4)", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc31">
+      <button onClick={v.closePanel} style={{ position: "absolute", right: "calc(64px - var(--ex))", top: "56px", width: "40px", height: "40px", borderRadius: "10px", border: "1px solid rgba(196,181,253,.14)", background: "rgba(7,5,14,.4)", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc31">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>
@@ -51,7 +51,7 @@ export default function SystemPanel({ v }: { v: any }) {
           </div>
         </div>
       </Fragment>))}
-      <div style={{ position: "absolute", left: "64px", top: "190px", width: "400px", padding: "22px", display: "flex", flexDirection: "column", gap: "14px", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07)", animation: "nx-left 700ms cubic-bezier(.16,1,.3,1) 120ms both" }} className="dc32">
+      <div style={{ position: "absolute", left: "calc(64px - var(--ex))", top: "190px", width: "400px", padding: "22px", display: "flex", flexDirection: "column", gap: "14px", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07)", animation: "nx-left 700ms cubic-bezier(.16,1,.3,1) 120ms both" }} className="dc32">
         <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
           PROCESOS QUE MÁS CONSUMEN
         </span>
@@ -91,7 +91,7 @@ export default function SystemPanel({ v }: { v: any }) {
           </div>
         </div>
       </div>
-      <div style={{ position: "absolute", right: "64px", top: "190px", width: "380px", padding: "22px", display: "flex", flexDirection: "column", gap: "4px", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(205deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07)", animation: "nx-right 700ms cubic-bezier(.16,1,.3,1) 120ms both" }} className="dc33">
+      <div style={{ position: "absolute", right: "calc(64px - var(--ex))", top: "190px", width: "380px", padding: "22px", display: "flex", flexDirection: "column", gap: "4px", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(205deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07)", animation: "nx-right 700ms cubic-bezier(.16,1,.3,1) 120ms both" }} className="dc33">
         <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)", marginBottom: "10px" }}>
           EQUIPO
         </span>

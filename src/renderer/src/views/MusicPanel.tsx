@@ -19,7 +19,7 @@ export default function MusicPanel({ v }: { v: any }) {
   if (!v.isMusic) return null
   const m = v.musicNow
   const close = (
-    <button onClick={v.closePanel} style={{ position: 'absolute', right: 64, top: 56, width: 40, height: 40, borderRadius: 10, border: '1px solid rgba(196,181,253,.14)', background: 'rgba(7,5,14,.4)', color: 'rgba(226,218,240,.7)', display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
+    <button onClick={v.closePanel} style={{ position: 'absolute', right: 'calc(64px - var(--ex))', top: 56, width: 40, height: 40, borderRadius: 10, border: '1px solid rgba(196,181,253,.14)', background: 'rgba(7,5,14,.4)', color: 'rgba(226,218,240,.7)', display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
       <Icon d="M6 6l12 12M18 6L6 18" size={16} />
     </button>
   )

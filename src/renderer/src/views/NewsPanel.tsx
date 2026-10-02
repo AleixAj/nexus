@@ -26,7 +26,7 @@ export default function NewsPanel({ v }: { v: any }) {
   if (!v.isNews) return null
   const top = v.newsTop
   return (
-    <div style={{ position: 'absolute', right: 24, top: 24, bottom: 112, width: 1080, display: 'flex', flexDirection: 'column', background: 'linear-gradient(rgba(7,5,14,.55),rgba(7,5,14,.55)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / .06) 45%, rgb(var(--acc) / 0)) border-box', border: '1px solid transparent', borderRadius: 14, backdropFilter: 'blur(24px) saturate(1.2)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.07), 0 24px 70px rgba(0,0,0,.35)', animation: `nx-right 600ms ${ease} both` }}>
+    <div style={{ position: 'absolute', right: 'calc(24px - var(--ex))', top: 24, bottom: 112, width: 1080, display: 'flex', flexDirection: 'column', background: 'linear-gradient(rgba(7,5,14,.55),rgba(7,5,14,.55)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / .06) 45%, rgb(var(--acc) / 0)) border-box', border: '1px solid transparent', borderRadius: 14, backdropFilter: 'blur(24px) saturate(1.2)', boxShadow: 'inset 0 1px 0 rgba(255,255,255,.07), 0 24px 70px rgba(0,0,0,.35)', animation: `nx-right 600ms ${ease} both` }}>
       {/* header */}
       <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', padding: '26px 32px 16px' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>

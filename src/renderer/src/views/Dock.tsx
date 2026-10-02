@@ -6,12 +6,12 @@ export default function Dock({ v }: { v: any }) {
     <>
     {v.showDock && (<>
       {v.hasHover && (<>
-        <span style={{ position: "absolute", right: "24px", bottom: "104px", padding: "6px 12px", borderRadius: "8px", background: "rgba(7,5,14,.75)", border: "1px solid rgb(var(--acc) / .3)", fontFamily: "'JetBrains Mono',monospace", fontSize: "10.5px", letterSpacing: ".2em", color: "#FFF6E9", animation: "nx-in 220ms cubic-bezier(.16,1,.3,1) both" }}>
+        <span style={{ position: "absolute", right: "calc(24px - var(--ex))", bottom: "104px", padding: "6px 12px", borderRadius: "8px", background: "rgba(7,5,14,.75)", border: "1px solid rgb(var(--acc) / .3)", fontFamily: "'JetBrains Mono',monospace", fontSize: "10.5px", letterSpacing: ".2em", color: "#FFF6E9", animation: "nx-in 220ms cubic-bezier(.16,1,.3,1) both" }}>
           {v.hoverLabel}
         </span>
       </>)}
       {v.volOpen && (<>
-        <div style={{ position: "absolute", right: "24px", bottom: "104px", width: "260px", padding: "16px 18px", display: "flex", flexDirection: "column", gap: "12px", background: "linear-gradient(rgba(7,5,14,.6),rgba(7,5,14,.6)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / 0) 60%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", animation: "nx-up 320ms cubic-bezier(.16,1,.3,1) both" }}>
+        <div style={{ position: "absolute", right: "calc(24px - var(--ex))", bottom: "104px", width: "260px", padding: "16px 18px", display: "flex", flexDirection: "column", gap: "12px", background: "linear-gradient(rgba(7,5,14,.6),rgba(7,5,14,.6)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / 0) 60%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", animation: "nx-up 320ms cubic-bezier(.16,1,.3,1) both" }}>
           <div style={{ display: "flex", justifyContent: "space-between", fontFamily: "'JetBrains Mono',monospace", fontSize: "10.5px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .7)" }}>
             <span>
               VOLUMEN
@@ -27,7 +27,7 @@ export default function Dock({ v }: { v: any }) {
           </div>
         </div>
       </>)}
-      <div data-spot="1" style={{ position: "absolute", right: "24px", bottom: "28px", display: "flex", alignItems: "center", gap: "2px", padding: "8px", borderRadius: "18px", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / .05) 60%) border-box", border: "1px solid transparent", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07), 0 20px 60px rgba(0,0,0,.4)", animation: "nx-up 800ms cubic-bezier(.16,1,.3,1) 350ms both" }} className="dc61">
+      <div data-spot="1" style={{ position: "absolute", right: "calc(24px - var(--ex))", bottom: "28px", display: "flex", alignItems: "center", gap: "2px", padding: "8px", borderRadius: "18px", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / .05) 60%) border-box", border: "1px solid transparent", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07), 0 20px 60px rgba(0,0,0,.4)", animation: "nx-up 800ms cubic-bezier(.16,1,.3,1) 350ms both" }} className="dc61">
         {(v.dock || []).map((it, itIndex) => (<Fragment key={it?.id ?? itIndex}>
           {it.sep && (<>
             <span style={{ width: "1px", height: "26px", margin: "0 6px", background: "rgba(196,181,253,.16)" }}></span>
