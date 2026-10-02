@@ -1,5 +1,5 @@
 // Settings panel: AI service and keys, agent permissions, Gemini switches, system and look.
-import { KEY_ORDER, THEMES, providerInfo } from '../constants';
+import { KEY_ORDER, PERSONAS, THEMES, providerInfo, voiceById } from '../constants';
 import { api, seg, toggleT } from '../util';
 
 const QUALITY = [['ultra', 'Ultra'], ['equilibrado', 'Equilibrado'], ['ahorro', 'Ahorro']];
@@ -14,7 +14,7 @@ const QUALITY_HELP = {
 const TABS = [
   ['ai', 'Inteligencia', 'IA, claves y cupo', 'Qué IA responde, tus claves y cuánto cupo gratis queda hoy.'],
   ['agent', 'Permisos', 'Qué puede hacer en tu PC', 'Lo que NEXUS puede hacer por su cuenta. Lo que cambia algo en tu PC siempre te pide permiso antes.'],
-  ['voice', 'Audio', 'Micrófono y escucha', 'Con qué micrófono te oigo y cómo me llamas.'],
+  ['voice', 'Voz y audio', 'Mi voz, micrófono y escucha', 'Cómo sueno, con qué micrófono te oigo y cómo me llamas.'],
   ['look', 'Apariencia', 'Tema, calidad y movimiento', 'Colores, calidad de la galaxia y opciones para leer mejor.'],
   ['system', 'Sistema', 'Inicio y fondo de escritorio', 'Cómo arranca NEXUS y cómo se comporta en segundo plano.'],
   ['accounts', 'Cuentas', 'Calendario y Spotify', 'Servicios que puedes conectar. Todo es opcional y se guarda cifrado en tu PC.'],
@@ -77,6 +77,9 @@ export function settingsView(app, c) {
       { id: 'reduced', label: 'Reducir movimiento', note: 'Sin parallax, estelas ni partículas extra. Mejor si el movimiento te marea', on: S.reduced, toggle: () => app.setReduced(!S.reduced) },
     ].map(t => [t.id, { ...t, ...toggleT(t.on) }])),
     hotkeyKeys: app.hotkeyLabel().split(' + '),
+    // the voice itself is chosen (and heard) in the Voice panel
+    voiceNow: `${voiceById(S.voiceSel).name} · ${(PERSONAS.find(p => p.id === S.persona) || PERSONAS[0]).name}`,
+    openVoice: () => app.openPanel('voice', true),
     micName: app.micLabel(), cycleMic: () => app.cycleMic(),
 
     // self-test

@@ -43,7 +43,7 @@ export function greeting() {
 }
 
 /** Colours of an on/off switch. */
-export const toggleT = on => ({ tBg: on ? 'rgb(var(--acc) / .85)' : 'rgba(255,255,255,.06)', tBorder: on ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.2)', tLeft: on ? '18px' : '2px' });
+export const toggleT = on => ({ tBg: on ? 'rgb(var(--acc) / .85)' : 'rgba(255,255,255,.06)', tBorder: on ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.2)', tLeft: on ? '18px' : '2px', tOn: !!on });
 /** Colours of a segmented-control option. */
 export const seg = active => ({ bg: active ? 'rgb(var(--acc) / .28)' : 'transparent', color: active ? '#FFF6E9' : 'rgba(226,218,240,.6)' });
 /** Colours of a selectable card. */

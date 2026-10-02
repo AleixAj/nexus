@@ -41,8 +41,8 @@ const Row = ({ label, note, children }: { label: string; note?: string; children
 )
 
 const Switch = ({ t }: { t: any }) => (
-  <button onClick={t.toggle} role="switch" aria-checked={!!t.on} aria-label={t.label} style={{ flex: 'none', position: 'relative', width: '48px', height: '28px', borderRadius: '999px', border: `1px solid ${t.tBorder}`, background: t.tBg, cursor: 'pointer', padding: 0, transition: 'background 250ms, border-color 250ms' }}>
-    <span style={{ position: 'absolute', top: '3px', left: t.on ? '23px' : '3px', width: '20px', height: '20px', borderRadius: '50%', background: '#FFF6E9', transition: 'left 320ms cubic-bezier(.34,1.3,.64,1)' }} />
+  <button onClick={t.toggle} role="switch" aria-checked={t.tOn} aria-label={t.label} style={{ flex: 'none', position: 'relative', width: '48px', height: '28px', borderRadius: '999px', border: `1px solid ${t.tBorder}`, background: t.tBg, cursor: 'pointer', padding: 0, transition: 'background 250ms, border-color 250ms' }}>
+    <span style={{ position: 'absolute', top: '3px', left: t.tOn ? '23px' : '3px', width: '20px', height: '20px', borderRadius: '50%', background: '#FFF6E9', transition: 'left 320ms cubic-bezier(.34,1.3,.64,1)' }} />
   </button>
 )
 
@@ -167,6 +167,11 @@ function Tab({ v }: { v: any }) {
     case 'agent': return <Group title="LO QUE PUEDE HACER EN TU PC"><Toggles list={v.agentToggles} /></Group>
     case 'voice': return (
       <>
+        <Group title="MI VOZ">
+          <Row label={v.voiceNow} note="Voz, personalidad, velocidad, tono y la frase con la que me despiertas">
+            <button onClick={v.openVoice} style={mainBtn}>Cambiar voz</button>
+          </Row>
+        </Group>
         <Group title="MICRÓFONO">
           <Picker value={v.micName} onClick={v.cycleMic} />
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
