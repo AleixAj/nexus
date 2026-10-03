@@ -150,6 +150,34 @@ function AiTab({ v }: { v: any }) {
 }
 
 /** Settings → Funciones: every feature as a card; a click opens what it does, how to ask for it and its switch. */
+/** "Enséñame tu frase": the phrase said three times, so the wake word works with this voice and mic. */
+function WakeTraining({ v }: { v: any }) {
+  const t = v.wakeTrain
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', padding: '16px 18px', borderRadius: '14px', border: `1px solid ${LINE}`, background: 'rgba(255,255,255,.025)' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+        <div style={{ flex: '1', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+          <span style={{ fontSize: '16px', color: TEXT }}>Enséñame tu frase {v.wakeTrained && !t && <span style={{ fontSize: '13px', color: '#34D399' }}>· ✓ entrenada</span>}</span>
+          <span style={{ fontSize: '14px', lineHeight: 1.5, color: NOTE }}>Pulsa grabar y di «{v.wakePhrase}» con tu voz normal, tres veces. Así aprendo cómo te oigo por tu micrófono y te reconozco mucho mejor.</span>
+        </div>
+        <button onClick={v.trainWake} disabled={t?.busy} style={{ ...mainBtn, flex: 'none', minWidth: '190px', opacity: t?.busy ? .75 : 1, background: t?.recording ? 'rgba(251,113,133,.35)' : mainBtn.background }}>
+          {t ? t.label : v.wakeTrained ? 'Volver a entrenar' : 'Grabar (1 de 3)'}
+        </button>
+      </div>
+      {t && t.heard.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
+          {t.heard.map((h: string, i: number) => (
+            <span key={i} style={{ fontSize: '14px', color: h ? TEXT : '#FDA4AF' }}>{i + 1}. {h ? <>He oído «{h}»</> : 'No he oído nada: acércate al micrófono o revisa cuál está elegido'}</span>
+          ))}
+        </div>
+      )}
+      {t?.done && <span style={{ fontSize: '14px', color: t.ok ? '#34D399' : '#FDA4AF' }}>{t.ok ? '✓ Listo: la escucha está activada con tu voz. Prueba a decir la frase.' : 'No he podido aprenderla. Revisa el micrófono y vuelve a probar.'}</span>}
+      {t?.error && <span style={{ fontSize: '14px', color: '#FDA4AF' }}>{t.error}</span>}
+      {v.wakeHeard && <span style={{ fontSize: '13.5px', color: NOTE }}>Ahora mismo oigo: <span style={{ color: TEXT }}>«{v.wakeHeard}»</span></span>}
+    </div>
+  )
+}
+
 function FeaturesTab({ v }: { v: any }) {
   return (
     <>
@@ -271,6 +299,7 @@ function Tab({ v }: { v: any }) {
         </Group>
         <Group title="ESCUCHA Y ATAJOS">
           <Toggles list={[t.wake]} />
+          <WakeTraining v={v} />
           {[
             ['Hablar con NEXUS', 'Desde cualquier aplicación, aunque NEXUS esté detrás', v.hotkeyKeys],
             ['Preguntar por escrito', 'Una barra pequeña encima de lo que estés haciendo', ['CTRL', 'ALT', 'A'], v.tryBar],

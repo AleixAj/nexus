@@ -17,7 +17,7 @@ import { addFact, approveFact, clearMemory, deleteExchange, deleteFact, getMemor
 import { currentExtra, currentMedia, mediaControl } from './media'
 import { HOTKEY, closeExtras, extrasRefresh, isDev, openExtras, switchMode, wallClicksChanged } from './window'
 import { typeText } from './dictation'
-import { ensureModel, feedWakeWord, modelReady, startWakeWord, stopWakeWord } from './wakeword'
+import { ensureModel, feedWakeWord, modelReady, startWakeWord, stopWakeWord, transcribeWake } from './wakeword'
 import { broadcast } from './window'
 import { listApprovals, revoke } from './approvals'
 import { runDiagnostics } from './diagnostics'
@@ -106,9 +106,16 @@ export function registerIpc() {
   handle('wake:start', async (_e, phrase) => {
     // the first time, the Spanish model is downloaded (the window shows the progress)
     if (!modelReady()) await ensureModel(p => broadcast('wake:progress', p))
-    startWakeWord(str(phrase, 60) || 'Hey Nexus', () => broadcast('wake:detected'))
+    const s = loadSettings()
+    startWakeWord(str(phrase, 60) || s.wakeWord || 'Hey Nexus', s.wakeLearnt || [], () => broadcast('wake:detected'), text => broadcast('wake:heard', text))
   })
   handle('wake:stop', () => stopWakeWord())
+  // training: what the recogniser understands when the user says the phrase (downloads the model first if needed)
+  handle('wake:enroll', async (_e, data) => {
+    if (!(data instanceof Float32Array) || data.length > 16000 * 8) throw new Error('Audio no válido')
+    if (!modelReady()) await ensureModel(p => broadcast('wake:progress', p))
+    return transcribeWake(data)
+  })
   ipcMain.on('wake:audio', (e, data) => { if (trusted(e as any) && data instanceof Float32Array) feedWakeWord(data) })
   handle('dictation:type', (_e, text) => typeText(str(text, 20000)))
   handle('stt:transcribe', (_e, audio) => {

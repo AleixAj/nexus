@@ -47,17 +47,16 @@ export function ensureModel(onProgress: (p: number) => void) {
 
 let recognizer: any = null
 let stream: any = null
-let phrase = ''
+let phrases: string[] = []
 let onWake: () => void = () => {}
+let onHeard: (text: string) => void = () => {}
 let cooldownUntil = 0
 let lastChecked = ''
 let lastFeed = 0
+let lastHeard = 0
 
-/** Starts listening for `p` (the model must be ready). Changing the phrase needs no restart. */
-export function startWakeWord(p: string, cb: () => void) {
-  phrase = p
-  onWake = cb
-  if (recognizer) return
+function ensureRecognizer() {
+  if (recognizer) return recognizer
   // eslint-disable-next-line @typescript-eslint/no-require-imports
   const sherpa = require('sherpa-onnx-node')
   const d = dir()
@@ -68,11 +67,34 @@ export function startWakeWord(p: string, cb: () => void) {
     // a pause of ~0.8 s closes a sentence; the text so far is checked continuously anyway
     enableEndpoint: 1, rule1MinTrailingSilence: 1.2, rule2MinTrailingSilence: 0.8, rule3MinUtteranceLength: 12
   })
-  stream = recognizer.createStream()
+  return recognizer
+}
+
+/**
+ * Starts listening for the phrase and the ways the recogniser wrote it while training with the
+ * user's own voice ("oye harvis"…). Changing them needs no restart.
+ */
+export function startWakeWord(phrase: string, learnt: string[], cb: () => void, heard: (text: string) => void = () => {}) {
+  phrases = [phrase, ...learnt].map(p => p.trim()).filter(Boolean)
+  onWake = cb
+  onHeard = heard
+  ensureRecognizer()
+  stream ??= recognizer.createStream()
 }
 
 export function stopWakeWord() {
   if (recognizer) stream = recognizer.createStream() // forget what it had heard
+}
+
+/** What the recogniser understands in a short recording (training: "say your phrase"). */
+export function transcribeWake(samples: Float32Array): string {
+  const r = ensureRecognizer()
+  const s = r.createStream()
+  s.acceptWaveform({ samples, sampleRate: 16000 })
+  s.acceptWaveform({ samples: new Float32Array(16000 * 0.8), sampleRate: 16000 }) // a little silence to close it
+  s.inputFinished()
+  while (r.isReady(s)) r.decode(s)
+  return String(r.getResult(s).text || '').trim().toLowerCase()
 }
 
 /** A piece of microphone audio (mono, 16 kHz). */
@@ -87,8 +109,11 @@ export function feedWakeWord(samples: Float32Array) {
   // check as soon as words appear, so it answers before the sentence ends
   if (text && text !== lastChecked) {
     lastChecked = text
-    if (soundsLike(text, phrase) && Date.now() > cooldownUntil) {
+    // what it hears, for Settings (a few times a second at most)
+    if (Date.now() - lastHeard > 250) { lastHeard = Date.now(); onHeard(text.toLowerCase()) }
+    if (phrases.some(p => soundsLike(text, p)) && Date.now() > cooldownUntil) {
       cooldownUntil = Date.now() + 3000
+      onHeard(text.toLowerCase())
       recognizer.reset(stream); lastChecked = ''
       onWake()
       return

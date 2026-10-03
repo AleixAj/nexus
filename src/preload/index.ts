@@ -84,6 +84,8 @@ contextBridge.exposeInMainWorld('nexus', {
   wakeStop: () => ipcRenderer.invoke('wake:stop'),
   wakeAudio: (samples: Float32Array) => ipcRenderer.send('wake:audio', samples),
   onWake: (fn: () => void) => on('wake:detected', fn),
+  onWakeHeard: (fn: (text: string) => void) => on('wake:heard', fn),
+  wakeEnroll: (samples: Float32Array) => ipcRenderer.invoke('wake:enroll', samples),
   onVisionPreview: (fn: (p: { src: string; source: string }) => void) => on('vision:preview', fn),
   onCameraSnap: (fn: (id: number) => void) => on('camera:snap', fn),
   answer: (id: number, value: unknown) => ipcRenderer.send('window:answer', id, value),

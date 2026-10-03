@@ -42,6 +42,10 @@ export type Settings = {
   // wallpaper mode: the galaxy (without the core) also on the other monitors
   wallExtend: boolean
   wakeWord: string
+  // how the recogniser writes the phrase in the user's own voice (training), and the loudness
+  // from which the microphone sound is worth recognising (0 = automatic)
+  wakeLearnt: string[]
+  wakeGate: number
   spotifyClientId: string
   lastBriefing: string
   newsAvoid: string
@@ -121,6 +125,8 @@ const DEFAULTS: Settings = {
   wallExtend: false,
   // the phrase that wakes it: whatever the user likes ("Oye Jarvis", "Hola Viernes"…)
   wakeWord: 'Hey Nexus',
+  wakeLearnt: [],
+  wakeGate: 0,
   // the user's own app at developer.spotify.com (for playlists by name)
   spotifyClientId: '',
   lastBriefing: '',

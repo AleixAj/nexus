@@ -100,6 +100,7 @@ export default class NexusApp extends Component {
     on(api.onHotkey, () => this.talk());
     on(api.onDictate, () => this.toggleDictation());
     on(api.onWake, () => this.onWakeWord());
+    on(api.onWakeHeard, t => this.onWakeHeard(t));
     on(api.onVisionPreview, p => this.onVisionPreview(p));
     on(api.onCameraSnap, id => this.onCameraSnap(id));
     on(api.onWakeProgress, p => this.onWakeProgress(p));

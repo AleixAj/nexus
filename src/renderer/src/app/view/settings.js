@@ -103,6 +103,15 @@ export function settingsView(app, c) {
       { id: 'reduced', label: 'Reducir movimiento', note: 'Sin parallax, estelas ni partículas extra. Mejor si el movimiento te marea', on: S.reduced, toggle: () => app.setReduced(!S.reduced) },
     ].map(t => [t.id, { ...t, ...toggleT(t.on) }])),
     hotkeyKeys: app.hotkeyLabel().split(' + '),
+    // training the wake phrase with the user's voice
+    wakePhrase: S.wakeWord || 'Hey Nexus',
+    wakeTrained: (S.wakeLearnt || []).length > 0,
+    wakeTrain: S.wakeTrain ? {
+      ...S.wakeTrain, step: (S.wakeTrain.heard || []).length,
+      label: S.wakeTrain.recording ? '● Grabando… di la frase' : S.wakeTrain.busy ? 'Escuchando lo que has dicho…' : S.wakeTrain.done ? 'Repetir el entrenamiento' : `Grabar (${(S.wakeTrain.heard || []).length + 1} de 3)`,
+    } : null,
+    trainWake: () => (S.wakeTrain && S.wakeTrain.done ? (app.resetTrain(), app.trainWake()) : app.trainWake()),
+    wakeHeard: S.wakeListen && S.wakeHeard && Date.now() - (S.wakeHeardAt || 0) < 15000 ? S.wakeHeard : '',
     eveningTimes: ['20:00', '21:00', '21:30', '22:00', '23:00'].map(t => ({ label: t, ...seg((S.eveningAt || '21:30') === t), pick: () => { app.setState({ eveningAt: t }); app.save({ eveningAt: t }); } })),
     showEveningTime: S.eveningReview !== false,
     tryBar: () => api && api.openBar(),

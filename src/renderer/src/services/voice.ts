@@ -553,7 +553,35 @@ export function stopLoopback() {
 // in the main process (on the PC: nothing is recorded or sent online).
 let wake: { stream: MediaStream; ctx: AudioContext; node: ScriptProcessorNode } | null = null
 
-export async function startWakeMic(onChunk: (samples: Float32Array) => void) {
+/**
+ * A few seconds of microphone audio at 16 kHz (the wake phrase training), and how loud the
+ * voice was in it (the average of the loudest parts), to tune the listening gate to this mic.
+ */
+export async function recordSamples(ms = 2600): Promise<{ samples: Float32Array; voice: number }> {
+  const stream = await openMic()
+  const c = new AudioContext({ sampleRate: 16000 })
+  const src = c.createMediaStreamSource(stream)
+  const node = c.createScriptProcessor(2048, 1, 1)
+  const parts: Float32Array[] = [], levels: number[] = []
+  node.onaudioprocess = e => {
+    const x = new Float32Array(e.inputBuffer.getChannelData(0))
+    let sum = 0
+    for (let i = 0; i < x.length; i++) sum += x[i] * x[i]
+    levels.push(Math.sqrt(sum / x.length))
+    parts.push(x)
+  }
+  src.connect(node); node.connect(c.destination)
+  await new Promise(r => setTimeout(r, ms))
+  node.disconnect(); src.disconnect(); stream.getTracks().forEach(t => t.stop()); c.close()
+  const samples = new Float32Array(parts.reduce((n, p) => n + p.length, 0))
+  let o = 0
+  for (const p of parts) { samples.set(p, o); o += p.length }
+  const loud = [...levels].sort((a, b) => b - a).slice(0, Math.max(1, Math.round(levels.length * 0.25)))
+  return { samples, voice: loud.reduce((a, b) => a + b, 0) / loud.length }
+}
+
+/** `gate`: loudness from which sound goes to the recogniser (0 = the default, for most mics). */
+export async function startWakeMic(onChunk: (samples: Float32Array) => void, gate = 0) {
   if (wake) return
   const stream = await openMic()
   const c = new AudioContext({ sampleRate: 16000 })
@@ -561,7 +589,9 @@ export async function startWakeMic(onChunk: (samples: Float32Array) => void) {
   const node = c.createScriptProcessor(2048, 1, 1)
   // Only sound that may be speech goes to the recogniser: silence and room noise cost nothing.
   // A short pre-roll keeps the start of the phrase; the gate stays open 1.5 s after the voice.
-  let floor = 0.01, openUntil = 0
+  // A quiet microphone gets a lower gate from the training, or its voice would never pass.
+  const minGate = gate > 0 ? gate : 0.012
+  let floor = Math.min(0.01, minGate), openUntil = 0
   const preroll: Float32Array[] = []
   node.onaudioprocess = e => {
     const x = new Float32Array(e.inputBuffer.getChannelData(0))
@@ -570,7 +600,7 @@ export async function startWakeMic(onChunk: (samples: Float32Array) => void) {
     const rms = Math.sqrt(sum / x.length), now = performance.now()
     // the noise floor follows the room slowly (faster downwards)
     floor = rms < floor ? floor * 0.9 + rms * 0.1 : floor * 0.995 + rms * 0.005
-    if (rms > Math.max(0.012, floor * 2.5)) {
+    if (rms > Math.max(minGate, floor * 2.5)) {
       if (now > openUntil) preroll.splice(0).forEach(onChunk)
       openUntil = now + 1500
     }
