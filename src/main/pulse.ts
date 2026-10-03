@@ -21,6 +21,7 @@ const said = new Set<string>() // each warning once
 let calCache: { at: number; list: CalEvent[] } | null = null
 let cpuPrev = cpus(), cpuHigh = 0
 let eveningDone = ''
+let lastBattery = 0, lastDisk = 0, lastBusyCheck = 0
 
 const today = () => new Date().toDateString()
 const quiet = () => { const h = new Date().getHours(); return h >= QUIET_FROM || h < QUIET_TO }
@@ -75,13 +76,15 @@ async function tick() {
   if (cpuHigh >= 5) notice('cpu' + Math.floor(now / 7200e3), 'El PC va al límite', 'Lleva 5 minutos con la CPU por encima del 90 %. Pregúntame «¿qué está consumiendo?» y te lo digo.')
 
   // battery (laptops), checked every 5 minutes only while unplugged
-  if (powerMonitor.isOnBatteryPower() && new Date().getMinutes() % 5 === 0) {
+  if (powerMonitor.isOnBatteryPower() && now - lastBattery >= 5 * 60e3) {
+    lastBattery = now
     const pct = Number((await powershell('(Get-CimInstance Win32_Battery | Select-Object -First 1).EstimatedChargeRemaining', 8000).catch(() => '')).trim())
     if (pct > 0 && pct <= 15) notice('bat' + today() + (pct <= 7 ? 'b' : 'a'), 'Batería baja', `Queda un ${pct} %. Enchufa el portátil pronto.`, pct <= 7)
   }
 
   // the main disk almost full, once a day
-  if (new Date().getMinutes() === 0) {
+  if (now - lastDisk >= 3600e3) {
+    lastDisk = now
     const st = await statfs(process.env.SystemDrive ? process.env.SystemDrive + '\\' : 'C:\\').catch(() => null)
     if (st && st.bavail / st.blocks < 0.05) notice('disk' + today(), 'Disco casi lleno', `Queda menos del 5 % libre en ${process.env.SystemDrive || 'C:'}. Pregúntame qué carpetas ocupan más.`)
   }
@@ -90,7 +93,9 @@ async function tick() {
   if (s.eveningReview && eveningDone !== today()) {
     const [h, m] = (s.eveningAt || '21:30').split(':').map(Number)
     const at = new Date(); at.setHours(h, m || 0, 0, 0)
-    if (now >= at.getTime()) {
+    // asking Windows if you are busy costs a little: at most every 5 minutes
+    if (now >= at.getTime() && now - lastBusyCheck >= 5 * 60e3) {
+      lastBusyCheck = now
       if (!(await userBusy())) { eveningDone = today(); out?.evening() }
       // playing or presenting: a silent note, and it speaks if you are free before midnight
       else notice('evening' + today(), 'Resumen de la noche', 'Cuando termines, dime «resumen de la noche» y te lo cuento.')

@@ -54,6 +54,8 @@ export function startReminders(due: typeof onDue, changed: typeof onChange) {
 export const listReminders = () => [...load()].sort((a, b) => a.at - b.at)
 
 export function addReminder(text: string, at: number, alarm = false, repeat: Repeat = 'none') {
+  // "de lunes a viernes" set on a Friday night or a weekend: the first one is on Monday
+  if (repeat === 'weekdays') { const d = new Date(at); while (d.getDay() === 0 || d.getDay() === 6) d.setDate(d.getDate() + 1); at = d.getTime() }
   const r: Reminder = { id: Date.now() * 10 + Math.floor(Math.random() * 10), at, text: text.trim().slice(0, 200), alarm, repeat }
   save([...load(), r])
   scheduleWakeup(r.id, r.at)

@@ -6,6 +6,7 @@ import { BrowserWindow, clipboard, ipcMain, screen } from 'electron'
 import { join } from 'path'
 import { powershell } from './lib/powershell'
 import { typeText } from './dictation'
+import { restoreClipboard, saveClipboard } from './lib/clipboard'
 import { isDev } from './window'
 
 export const BAR_HOTKEY = 'Control+Alt+A'
@@ -47,17 +48,17 @@ export async function openBar(selection = '') {
 
 /**
  * The text selected in the app in front: Ctrl + C is sent once the hotkey's own keys are
- * released, and the clipboard gets its old text back afterwards.
+ * released, and the clipboard gets back exactly what it had (an image too).
  */
 export async function copySelection(): Promise<string> {
-  const before = await clipboard.readText().catch(() => '')
+  const before = await saveClipboard()
   await clipboard.writeText('')
   await powershell(
     "Add-Type -AssemblyName System.Windows.Forms; $n = 0; while ([System.Windows.Forms.Control]::ModifierKeys -ne 'None' -and $n -lt 40) { Start-Sleep -Milliseconds 25; $n++ }; [System.Windows.Forms.SendKeys]::SendWait('^c')",
     8000)
   let text = ''
   for (let i = 0; i < 8 && !text; i++) { await new Promise(r => setTimeout(r, 60)); text = await clipboard.readText().catch(() => '') }
-  if (before) await clipboard.writeText(before)
+  await restoreClipboard(before)
   return text.trim()
 }
 

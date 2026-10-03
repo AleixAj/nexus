@@ -56,7 +56,7 @@ export const conversation = {
     if (!wasMusic) this.setCore(this.state.music ? 'music' : 'idle');
   },
   notify(app, title, body, dot = '#C4B5FD') {
-    const n = { id: Date.now(), app, time: hm(), title, body, dot };
+    const n = { id: Date.now() + Math.random(), app, time: hm(), title, body, dot };
     this.setState(s => ({ notifs: [n, ...s.notifs].slice(0, 3) }));
     // on the wallpaper nobody can close them
     if (WALLPAPER) setTimeout(() => this.setState(s => ({ notifs: s.notifs.filter(x => x.id !== n.id) })), 15000);
@@ -123,7 +123,8 @@ export const conversation = {
     this.setState({ ovLabel: 'NEXUS · ' + hm() });
     if (res.ok) { voice.endSpeech(); this.loadMemory(); return; }
     this.setState({ ovState: 'idle' });
-    if (res.error === 'ABORTED') return;
+    // stopped from somewhere else (the floating bar asked something meanwhile): do not stay "thinking"
+    if (res.error === 'ABORTED') { voice.stopSpeech(); this.settle(); return; }
     if (res.error === 'NO_KEY') {
       this.setSettingsTab('ai');
       this.openPanel('settings', true);

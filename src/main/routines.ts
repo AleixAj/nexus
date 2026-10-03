@@ -43,7 +43,11 @@ export function routineFor(text: string) {
   const t = norm(text)
   const cmd = /^\/?rutina (.+)$/.exec(t)
   if (cmd) return findRoutine(cmd[1]) || null
-  return load().find(r => r.enabled && r.phrase && (t === norm(r.phrase) || t.includes(norm(r.phrase)))) || null
+  // the phrase alone, or with a couple of words around it ("oye, modo trabajo"); a sentence that
+  // talks about routines ("cambia la rutina modo trabajo…") is a request, not the trigger
+  if (/\brutinas?\b/.test(t)) return null
+  const words = (x: string) => x.split(' ').filter(Boolean).length
+  return load().find(r => r.enabled && r.phrase && (t === norm(r.phrase) || (t.includes(norm(r.phrase)) && words(t) - words(norm(r.phrase)) <= 2))) || null
 }
 
 /** What the agent is told to do when a routine runs. */

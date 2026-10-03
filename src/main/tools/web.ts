@@ -2,6 +2,8 @@
 import { getKey, loadSettings } from '../settings'
 import { clip, htmlToText, short } from '../lib/text'
 import { str, type Tool } from './define'
+import { isIP } from 'net'
+import { lookup } from 'dns/promises'
 
 const BROWSER_UA = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140 Safari/537.36'
 
@@ -84,17 +86,66 @@ async function webSearch(query: string) {
   return ddgSearch(query)
 }
 
+// Only the public internet: a web page or a file could tell the agent to "read" the router,
+// another program on this PC (localhost) or the local network, and send what it finds online.
+function privateIp(ip: string) {
+  const v4 = ip.replace(/^::ffff:/, '')
+  if (isIP(v4) === 4) {
+    const [a, b] = v4.split('.').map(Number)
+    return a === 10 || a === 127 || a === 0 || (a === 169 && b === 254) || (a === 172 && b >= 16 && b <= 31) || (a === 192 && b === 168) || (a === 100 && b >= 64 && b <= 127) || a >= 224
+  }
+  const low = ip.toLowerCase()
+  return low === '::1' || low === '::' || low.startsWith('fc') || low.startsWith('fd') || low.startsWith('fe80')
+}
+async function publicHost(host: string) {
+  const h = host.replace(/^\[|\]$/g, '')
+  if (/^localhost$|\.local$|\.internal$|\.lan$/i.test(h)) return false
+  if (isIP(h)) return !privateIp(h)
+  try { return (await lookup(h, { all: true })).every(a => !privateIp(a.address)) } catch { return false }
+}
+
+const MAX_PAGE = 3_000_000 // a "page" bigger than this is not read whole
+
 export async function readWebpage(url: string) {
   let u: URL
   try { u = new URL(url) } catch { return 'URL no válida' }
-  if (!['http:', 'https:'].includes(u.protocol)) return 'Solo páginas http(s)'
-  const res = await fetch(u, { signal: AbortSignal.timeout(15000), headers: { 'User-Agent': BROWSER_UA + ' NEXUS', 'Accept-Language': 'es-ES,es;q=0.9,en;q=0.6' } })
+  // redirects are followed by hand, so each hop is checked too
+  let res: Response | null = null
+  for (let hop = 0; hop < 6; hop++) {
+    if (!['http:', 'https:'].includes(u.protocol)) return 'Solo páginas http(s)'
+    if (!(await publicHost(u.hostname))) return 'Por seguridad no abro direcciones de tu red local ni de este PC.'
+    try {
+      res = await fetch(u, { redirect: 'manual', signal: AbortSignal.timeout(15000), headers: { 'User-Agent': BROWSER_UA + ' NEXUS', 'Accept-Language': 'es-ES,es;q=0.9,en;q=0.6' } })
+    } catch (e: any) {
+      return e?.name === 'TimeoutError' ? 'La página tarda demasiado en responder' : 'No he podido conectar con esa página'
+    }
+    const next = res.status >= 300 && res.status < 400 ? res.headers.get('location') : null
+    if (!next) break
+    u = new URL(next, u)
+    res = null
+  }
+  if (!res) return 'Demasiadas redirecciones'
   if (!res.ok) return `No se pudo abrir (HTTP ${res.status})`
   const type = res.headers.get('content-type') || ''
   if (!/text|json|xml/.test(type)) return `No es una página de texto (${type})`
-  const body = await res.text()
+  const body = await readCapped(res)
   const title = body.match(/<title[^>]*>([^<]*)/i)?.[1]?.trim()
   return clip((title ? `# ${title}\n` : '') + (type.includes('html') ? htmlToText(body) : body), 7000)
+}
+
+/** The page's text, stopping after MAX_PAGE bytes. */
+async function readCapped(res: Response) {
+  if (!res.body) return ''
+  const reader = res.body.getReader(), dec = new TextDecoder()
+  let out = '', size = 0
+  for (;;) {
+    const { done, value } = await reader.read()
+    if (done) break
+    size += value.byteLength
+    out += dec.decode(value, { stream: true })
+    if (size > MAX_PAGE) { reader.cancel().catch(() => {}); break }
+  }
+  return out + dec.decode()
 }
 
 async function wikipedia(topic: string) {

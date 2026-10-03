@@ -2,16 +2,17 @@
 // The window records (it has the microphone); here the text is pasted into the app in front.
 import { clipboard } from 'electron'
 import { powershell } from './lib/powershell'
+import { restoreClipboard, saveClipboard } from './lib/clipboard'
 
 export const DICTATE_HOTKEY = 'Control+Alt+D'
 
-/** Pastes `text` into the focused app and gives the clipboard its old text back. */
+/** Pastes `text` into the focused app and gives the clipboard back exactly as it was (images too). */
 export async function typeText(text: string) {
   if (!text.trim()) return false
-  const before = await clipboard.readText().catch(() => '')
+  const before = await saveClipboard()
   await clipboard.writeText(text)
   await powershell("(New-Object -ComObject WScript.Shell).SendKeys('^v')", 8000)
   // the target app reads the clipboard right after Ctrl+V: wait before restoring it
-  setTimeout(() => { if (before) clipboard.writeText(before).catch(() => {}) }, 800)
+  setTimeout(() => { restoreClipboard(before) }, 800)
   return true
 }

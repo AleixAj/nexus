@@ -18,7 +18,15 @@ export const startup = {
     // the boot animation always plays to the end, even as a wallpaper behind another app
     // (otherwise it would wait, black and without the bar, until you look at the desktop)
     this.booting = true; this.updatePower();
+    // a maximized app in front of the wallpaper pauses drawing (to save power), so the animation
+    // cannot finish: the clock, the bar and the rest come anyway after a few seconds
+    clearTimeout(this.bootGuard);
+    this.bootGuard = setTimeout(() => {
+      if (!this.state.uiIn) this.setState({ uiIn: true });
+      if (this.booting) { this.booting = false; this.updatePower(); }
+    }, 5000);
     E.boot({ onUI: () => this.setState({ uiIn: true }), onDone: () => {
+      clearTimeout(this.bootGuard);
       // a little longer, so the last frame before resting has the full galaxy and colours
       setTimeout(() => { this.booting = false; this.updatePower(); }, 2000);
       if (!QUIET) this.greetOrBrief();

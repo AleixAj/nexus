@@ -1,5 +1,5 @@
 // The agent loop: question → model → tools → model … → answer, streamed to the window.
-import { loadSettings } from '../settings'
+import { getKey, loadSettings } from '../settings'
 import { getMemory, logExchange } from '../memory'
 import { findTool, hasTopic, pickTools, runTool, toolDefs, type ToolResult } from '../tools'
 import { contextNote, systemPrompt } from './prompt'
@@ -33,6 +33,7 @@ const MAX_ROUNDS = 8
 const MAX_HISTORY = 10
 const KEEP_TOOL_CHARS = 400
 const KEEP_ANSWER_CHARS = 900
+const KEEP_QUESTION_CHARS = 1500
 const MAX_ANSWER_TOKENS = 1200
 const SIMPLE_ANSWER_TOKENS = 700
 const REPORT_TOKENS = 2600 // a deep research report
@@ -56,8 +57,12 @@ function trim(h: Msg[]) {
   const first = out.findIndex(m => m.role === 'user')
   out = first < 0 ? [] : out.slice(first)
   const cut = (m: Msg, n: number) => (m.content && m.content.length > n ? { ...m, content: m.content.slice(0, n) + ' …' } : m)
-  return out.map(m => (m.role === 'tool' ? cut(m, KEEP_TOOL_CHARS) : m.role === 'assistant' ? cut(m, KEEP_ANSWER_CHARS) : m))
+  // a long question (a selected text, a pasted document) is not sent again whole on every turn
+  return out.map(m => (m.role === 'tool' ? cut(m, KEEP_TOOL_CHARS) : m.role === 'assistant' ? cut(m, KEEP_ANSWER_CHARS) : cut(m, KEEP_QUESTION_CHARS)))
 }
+
+/** What is kept of a question in the saved conversations: a selected text is not stored, only what was asked. */
+const forLog = (text: string) => text.includes('\n\nTexto seleccionado:') ? text.split('\n\nTexto seleccionado:')[0] + ' [sobre un texto seleccionado]' : text
 
 // After a restart, the last exchanges of a recent conversation come back as context
 function restoreHistory() {
@@ -140,7 +145,7 @@ async function runQuick(q: Quick, text: string, h: Handlers, ctl: AbortControlle
   h.onDelta(reply)
   restoreHistory()
   history = trim([...history, { role: 'user', content: text }, { role: 'assistant', content: reply }])
-  if (!loadSettings().privateMode) logExchange(text, reply)
+  if (!loadSettings().privateMode) logExchange(forLog(text), reply)
   return reply
 }
 
@@ -190,6 +195,7 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
   const tools = toolDefs(s, only)
   let full = ''
   let report = false
+  let usedTools = false
 
   for (let round = 0; round < MAX_ROUNDS; round++) {
     const last = round === MAX_ROUNDS - 1
@@ -223,6 +229,7 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
     })
     // tools that only read (search, look, list…) run at the same time; anything that changes the
     // PC runs one by one, in order (idea from JARVIS-OS: _execute_tool_batch)
+    usedTools = true
     if (calls.some(c => c.call.function.name === 'deep_research')) report = true
     const parallel = calls.length > 1 && calls.every(({ call }) => findTool(call.function.name)?.readOnly)
     const results = parallel
@@ -237,13 +244,18 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
   }
 
   if (ctl.signal.aborted) throw aborted()
+  // the model ended without a word (it happens with free models under load): say so, never silence
+  if (!full.trim()) {
+    full = usedTools ? 'Hecho.' : 'No me ha llegado respuesta de la IA. ¿Me lo repites?'
+    h.onDelta(full)
+  }
   // one warning a day when the free quota is nearly gone
   const ids = all.filter(t => t.name !== 'Ollama').map(targetId)
   if (warnedDay !== new Date().toDateString() && ids.length && leftToday(ids) < 0.2) {
     warnedDay = new Date().toDateString()
-    h.onAction('Queda poco cupo gratis hoy · activa «Respaldo» (Gemini) en Ajustes')
+    h.onAction(!s.geminiFallback && getKey('Gemini') ? 'Queda poco cupo gratis hoy · activa «Respaldo» (Gemini) en Ajustes' : 'Queda poco cupo gratis hoy · añade otra clave gratuita en Ajustes')
   }
   history = trim(turn)
-  if (full.trim() && !loadSettings().privateMode) logExchange(text, full)
+  if (!loadSettings().privateMode) logExchange(forLog(text), full)
   return full
 }

@@ -29,7 +29,7 @@ textarea#f{padding:10px 14px}
 #f::placeholder{color:rgb(226 218 240 / .45)}
 </style></head><body>${field}<script>
 const f = document.getElementById('f')
-f.value = ${JSON.stringify(r.value)}
+f.value = ${JSON.stringify(r.value).replace(/</g, '\\u003c')}
 f.focus(); f.setSelectionRange(f.value.length, f.value.length)
 f.addEventListener('input', () => nxEdit.change(f.value))
 f.addEventListener('keydown', e => {

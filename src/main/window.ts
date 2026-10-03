@@ -124,6 +124,7 @@ export function createWindow(m: Mode, query: Record<string, string> = {}) {
     }
   })
   w.on('closed', () => {
+    if (wall) stopDesktop(w) // its helper must not outlive it
     if (win === w) win = null
     // Explorer restarted and took the desktop layer with it: come back
     if (wall && !quitting && !switching) setTimeout(() => { if (!win) createWindow('wallpaper', { quiet: '1' }) }, 3000)
@@ -183,6 +184,7 @@ export function openExtras() {
       webPreferences: { preload: join(__dirname, '../preload/index.js'), sandbox: true, spellcheck: false, backgroundThrottling: false }
     })
     extras.push(w)
+    w.on('closed', () => stopDesktop(w))
     w.once('ready-to-show', async () => {
       w.showInactive()
       try {
