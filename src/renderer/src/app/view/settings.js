@@ -143,7 +143,7 @@ export function settingsView(app, c) {
     openSpotifyDev: () => window.open('https://developer.spotify.com/dashboard'),
 
     // look
-    themeCards: Object.entries(THEMES).map(([id, t]) => ({ name: t.name, on: S.theme === id, c1: t.c1, c2: t.c2, bg: S.theme === id ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.02)', border: S.theme === id ? t.c2 : 'rgba(196,181,253,.1)', pick: () => app.setTheme(id) })),
+    themeCards: Object.entries(THEMES).map(([id, t]) => ({ name: t.name, on: S.theme === id, c1: t.c1, c2: t.c2, bg: S.theme === id ? 'rgba(255,255,255,.05)' : 'rgba(255,255,255,.02)', border: S.theme === id ? t.c2 : 'rgb(var(--acc2) / .1)', pick: () => app.setTheme(id) })),
     qualityOpts: QUALITY.map(([id, label]) => ({ label, ...seg(S.quality === id), pick: () => app.setQuality(id) })), qualityNote: QUALITY_NOTE[S.quality], qualityHelp: QUALITY_HELP[S.quality],
     qualityChips: QUALITY.map(([id, label]) => ({ label, on: S.quality === id, pick: () => app.setQuality(id) })),
   };

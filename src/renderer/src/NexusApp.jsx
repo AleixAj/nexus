@@ -28,7 +28,7 @@ export default class NexusApp extends Component {
 
   state = {
     // stage and core
-    k: .5, theme: 'nexus', quality: 'ultra', reduced: false,
+    k: .5, theme: 'solar', quality: 'ultra', reduced: false,
     now: Date.now(), uiIn: false, core: 'idle', panel: null, overlay: false, error: false,
     settingsTab: (() => { try { return localStorage.getItem('nx-settings-tab') || 'features'; } catch { return 'features'; } })(),
     words: [], wordsKind: null, actionLabel: '', notifs: [],

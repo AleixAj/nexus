@@ -23,7 +23,7 @@
     solar:   { a: [249, 115, 22], b: [254, 215, 170], m: [234, 88, 12], w: [255, 248, 232], g: [253, 224, 71], n: [[130, 48, 12], [160, 34, 64], [44, 20, 54], [150, 104, 40]] },
   };
   const clone = t => JSON.parse(JSON.stringify(t));
-  let THEME = clone(THEMES.nexus), THEME_T = THEMES.nexus;
+  let THEME = clone(THEMES.solar), THEME_T = THEMES.solar;
   const CORAL = [251, 113, 133], WARM = [255, 208, 168];
 
   const ST = {
@@ -65,7 +65,7 @@
       orb: OD.map((o, i) => ({ ...o, ph: r() * TAU, crr: o.rr, cinc: o.inc * D2R, cnode: o.node * D2R })),
       NB: mini ? 96 : 168, bars: null, bv: null, sparks: [], shocks: [], r1: 0, r2: 0, r3: 0,
       p: { ...ST.idle }, au: { bass: 0, mid: 0, high: 0 }, state: 'idle', ignite: 1, wakeAge: 9, poke: 0,
-      tint: [139, 92, 246], tintT: null, tintK: 0, loop: 0, act: null, bursts: [] };
+      tint: [249, 115, 22], tintT: null, tintK: 0, loop: 0, act: null, bursts: [] };
     S.bars = new Float32Array(S.NB); S.bv = new Float32Array(S.NB);
     for (let i = 0; i < n; i++) {
       const rr = Math.pow(r(), 1.7) * .84 + .02, arm = r() < .5 ? 0 : Math.PI, sp = (r() - .5) * (.9 * (1 - rr) + .3);
@@ -749,7 +749,7 @@
     // full | idle | calm (see POWER)
     setPower(p) { if (POWER[p]) power = p; },
     getPower() { return paused ? 'pause' : power; },
-    setTheme(n) { THEME_T = THEMES[n] || THEMES.nexus; },
+    setTheme(n) { THEME_T = THEMES[n] || THEMES.solar; },
     setQuality(q) { if (!QF[q] || q === QUALITY) return; QUALITY = q; if (M.S) { const st = M.S.state; M.S = makeSim(QF[q].parts, 42, false); M.S.state = st; } },
     setReduced(b) { REDUCED = !!b; },
     setTint(rgb) { if (M.S) M.S.tintT = rgb; },

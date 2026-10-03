@@ -1,5 +1,5 @@
 // Real data for the desktop HUD: approximate location, weather and "on this day".
-// Free services without keys: ipapi.co, Open-Meteo and Wikipedia.
+// Free services without keys: ipapi.co (or ipwho.is when it is rate-limited), Open-Meteo and Wikipedia.
 
 type Place = { city: string; lat: number; lon: number }
 export type World = {
@@ -32,10 +32,12 @@ let fact: { day: string; data: World['fact'] } | null = null
 
 async function getPlace(): Promise<Place> {
   if (place) return place
-  const j = await get('https://ipapi.co/json/')
-  if (typeof j.latitude !== 'number') throw new Error('Sin ubicación')
-  place = { city: j.city || j.region || '', lat: j.latitude, lon: j.longitude }
-  return place
+  // ipapi.co limits requests per IP (shared IPs hit it often): ipwho.is as a backup
+  for (const url of ['https://ipapi.co/json/', 'https://ipwho.is/']) {
+    const j = await get(url).catch(() => null)
+    if (j && typeof j.latitude === 'number') return (place = { city: j.city || j.region || '', lat: j.latitude, lon: j.longitude })
+  }
+  throw new Error('Sin ubicación')
 }
 
 async function getWeather(p: Place) {

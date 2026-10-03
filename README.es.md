@@ -85,7 +85,7 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 - **Datos reales en el escritorio.** Hora y tiempo de tu ciudad, a la derecha para no chocar con los iconos. La efeméride del día («En un día como hoy») está en el panel de Noticias.
 - **Estado del equipo real.** CPU (con cada hilo), GPU NVIDIA (uso, VRAM, temperatura y ventilador), RAM, disco, red y
   procesos que más consumen. Se mide solo al abrir el panel (unos 2 s) o al pulsar *Actualizar*; nada en segundo plano.
-- **Temas y calidad gráfica.** Cinco temas de color y tres niveles de calidad; la primera vez elige el nivel solo según
+- **Temas y calidad gráfica.** Cinco temas de color (por defecto *Solar*, naranja) y tres niveles de calidad; la primera vez elige el nivel solo según
   tu tarjeta gráfica, memoria y procesador.
 - **Cupo que no se acaba.** Órdenes sencillas sin IA, solo las herramientas necesarias en cada pregunta, cinco
   servicios gratis en rotación y un medidor de lo que queda hoy (más abajo, en Requisitos).
@@ -302,7 +302,7 @@ scripts/                    conversor del diseño e icono
 
 **Tecnologías:** Electron, React, TypeScript, Vite (electron-vite) y Canvas 2D.
 **Servicios externos, todos gratuitos:** Groq, Mistral, OpenRouter, Cerebras o Gemini (IA y voz a texto), DuckDuckGo (búsqueda sin clave), Microsoft Edge TTS (voz),
-Open-Meteo (tiempo), Wikipedia (efemérides), ipapi.co (ciudad aproximada), iTunes (carátulas) y LRCLIB (letras).
+Open-Meteo (tiempo), Wikipedia (efemérides), ipapi.co o ipwho.is (ciudad aproximada), iTunes (carátulas) y LRCLIB (letras).
 
 ### Rendimiento (pensado para estar siempre encendida)
 

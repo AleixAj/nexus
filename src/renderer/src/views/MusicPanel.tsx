@@ -19,7 +19,7 @@ export default function MusicPanel({ v }: { v: any }) {
   if (!v.isMusic) return null
   const m = v.musicNow
   const close = (
-    <button onClick={v.closePanel} style={{ position: 'absolute', right: 'calc(64px - var(--ex))', top: 56, width: 40, height: 40, borderRadius: 10, border: '1px solid rgba(196,181,253,.14)', background: 'rgba(7,5,14,.4)', color: 'rgba(226,218,240,.7)', display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
+    <button onClick={v.closePanel} style={{ position: 'absolute', right: 'calc(64px - var(--ex))', top: 56, width: 40, height: 40, borderRadius: 10, border: '1px solid rgb(var(--acc2) / .14)', background: 'rgba(7,5,14,.4)', color: 'rgba(226,218,240,.7)', display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
       <Icon d="M6 6l12 12M18 6L6 18" size={16} />
     </button>
   )
@@ -34,7 +34,7 @@ export default function MusicPanel({ v }: { v: any }) {
           <span style={{ fontSize: 15.5, lineHeight: 1.55, color: 'rgba(226,218,240,.6)' }}>{v.spotifyHint.text}</span>
           <div style={{ display: 'flex', gap: 10, marginTop: 6 }}>
             <button onClick={v.spotifyOpen} style={{ height: 44, padding: '0 20px', borderRadius: 10, border: '1px solid rgba(255,255,255,.18)', background: 'linear-gradient(180deg, rgb(var(--acc) / .95), rgb(var(--acc) / .7))', color: '#fff', fontSize: 14.5, cursor: 'pointer' }}>Abrir Spotify</button>
-            <button onClick={v.spotifyLiked} style={{ height: 44, padding: '0 18px', borderRadius: 10, border: '1px solid rgba(196,181,253,.2)', background: 'rgba(0,0,0,.3)', color: 'rgba(241,234,248,.85)', fontSize: 14.5, cursor: 'pointer' }}>Mis Me gusta</button>
+            <button onClick={v.spotifyLiked} style={{ height: 44, padding: '0 18px', borderRadius: 10, border: '1px solid rgb(var(--acc2) / .2)', background: 'rgba(0,0,0,.3)', color: 'rgba(241,234,248,.85)', fontSize: 14.5, cursor: 'pointer' }}>Mis Me gusta</button>
           </div>
         </div>
       </>

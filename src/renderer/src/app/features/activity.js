@@ -10,7 +10,7 @@ export const activity = {
   async undoActivity(id) {
     if (!api) return;
     const msg = await api.undoActivity(id).catch(e => String(e));
-    this.notify('ACTIVIDAD', 'Deshacer', msg, '#C4B5FD');
+    this.notify('ACTIVIDAD', 'Deshacer', msg, 'rgb(var(--acc2))');
   },
   // stop: NEXUS keeps answering, but changes nothing on the PC until resumed
   setPauseAll(on) {

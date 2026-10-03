@@ -5,7 +5,7 @@ import { useEffect, useRef, useState, type ReactNode } from 'react'
 const mono = "'JetBrains Mono',monospace"
 const TEXT = 'rgba(241,234,248,.92)'
 const NOTE = 'rgba(226,218,240,.6)'
-const LINE = 'rgba(196,181,253,.16)'
+const LINE = 'rgb(var(--acc2) / .16)'
 
 const ICONS: Record<string, string> = {
   features: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
@@ -59,7 +59,7 @@ const Segments = ({ opts }: { opts: any[] }) => (
 )
 
 const field = { height: '46px', padding: '0 14px', borderRadius: '10px', background: 'rgba(0,0,0,.3)', border: `1px solid ${LINE}`, outline: 'none', color: '#FFF6E9', fontSize: '15px' } as const
-const ghostBtn = { height: '40px', padding: '0 16px', borderRadius: '9px', border: '1px solid rgba(196,181,253,.25)', background: 'transparent', color: 'rgba(226,218,240,.85)', fontSize: '14.5px', cursor: 'pointer' } as const
+const ghostBtn = { height: '40px', padding: '0 16px', borderRadius: '9px', border: '1px solid rgb(var(--acc2) / .25)', background: 'transparent', color: 'rgba(226,218,240,.85)', fontSize: '14.5px', cursor: 'pointer' } as const
 const mainBtn = { height: '40px', padding: '0 18px', borderRadius: '9px', border: '1px solid rgb(var(--acc2) / .45)', background: 'rgb(var(--acc) / .4)', color: '#FFF6E9', fontSize: '14.5px', cursor: 'pointer' } as const
 const Help = ({ children }: { children: ReactNode }) => <span style={{ fontSize: '14px', lineHeight: 1.55, color: NOTE }}>{children}</span>
 
@@ -110,7 +110,7 @@ function AiTab({ v }: { v: any }) {
         {v.keyTargets && (
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
             {v.keyTargets.map((o: any) => (
-              <button key={o.label} onClick={o.pick} style={{ height: '36px', padding: '0 16px', borderRadius: '999px', cursor: 'pointer', fontSize: '14.5px', border: `1px solid ${o.on ? 'rgb(var(--acc2) / .6)' : 'rgba(196,181,253,.2)'}`, background: o.on ? 'rgb(var(--acc) / .28)' : 'rgba(255,255,255,.03)', color: TEXT }}>{o.label}</button>
+              <button key={o.label} onClick={o.pick} style={{ height: '36px', padding: '0 16px', borderRadius: '999px', cursor: 'pointer', fontSize: '14.5px', border: `1px solid ${o.on ? 'rgb(var(--acc2) / .6)' : 'rgb(var(--acc2) / .2)'}`, background: o.on ? 'rgb(var(--acc) / .28)' : 'rgba(255,255,255,.03)', color: TEXT }}>{o.label}</button>
             ))}
           </div>
         )}
@@ -130,7 +130,7 @@ function AiTab({ v }: { v: any }) {
           {v.quota.map((q: any) => (
             <div key={q.label} style={{ display: 'grid', gridTemplateColumns: '200px minmax(0,1fr) 110px', alignItems: 'center', gap: '14px' }}>
               <span style={{ fontSize: '15px', color: TEXT }}>{q.label}</span>
-              <span style={{ height: '6px', borderRadius: '3px', background: 'rgba(196,181,253,.12)', overflow: 'hidden' }}>
+              <span style={{ height: '6px', borderRadius: '3px', background: 'rgb(var(--acc2) / .12)', overflow: 'hidden' }}>
                 <span style={{ display: 'block', height: '100%', width: q.w + '%', background: q.color, borderRadius: '3px' }} />
               </span>
               <span style={{ fontFamily: mono, fontSize: '13px', color: NOTE, textAlign: 'right' }}>{q.text}</span>
@@ -291,7 +291,7 @@ function Tab({ v }: { v: any }) {
           <Select label="Micrófono" value={v.micName} options={v.micOptions} onOpen={v.refreshMics} />
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span style={{ fontSize: '14px', color: NOTE }}>Nivel</span>
-            <div style={{ flex: '1', height: '6px', borderRadius: '4px', background: 'rgba(196,181,253,.1)', overflow: 'hidden' }}>
+            <div style={{ flex: '1', height: '6px', borderRadius: '4px', background: 'rgb(var(--acc2) / .1)', overflow: 'hidden' }}>
               <div data-nexus-meter="1" style={{ height: '100%', width: '100%', transformOrigin: '0 50%', transform: 'scaleX(0)', background: 'linear-gradient(90deg,#34D399,rgb(var(--acc2)))' }} />
             </div>
           </div>
@@ -309,7 +309,7 @@ function Tab({ v }: { v: any }) {
             <Row key={label} label={label} note={note}>
               <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
                 {test && <button onClick={test} style={{ ...ghostBtn, height: '32px', padding: '0 12px', fontSize: '13px', marginRight: '6px' }}>Probar</button>}
-                {keys.map((k: string) => <span key={k} style={{ padding: '6px 11px', borderRadius: '7px', border: '1px solid rgba(196,181,253,.3)', borderBottomWidth: '2px', fontFamily: mono, fontSize: '13px', color: '#FFF6E9' }}>{k.toUpperCase()}</span>)}
+                {keys.map((k: string) => <span key={k} style={{ padding: '6px 11px', borderRadius: '7px', border: '1px solid rgb(var(--acc2) / .3)', borderBottomWidth: '2px', fontFamily: mono, fontSize: '13px', color: '#FFF6E9' }}>{k.toUpperCase()}</span>)}
               </div>
             </Row>
           ))}
@@ -370,7 +370,7 @@ export default function SettingsPanel({ v }: { v: any }) {
           <span data-scramble="1" style={{ fontFamily: mono, fontSize: '12px', letterSpacing: '.2em', color: 'rgb(var(--acc2) / .7)' }}>AJUSTES · NEXUS {v.version}</span>
           <span style={{ fontSize: '32px', fontWeight: 400 }}>Configuración</span>
         </div>
-        <button onClick={v.closePanel} aria-label="Cerrar ajustes" style={{ width: '44px', height: '44px', borderRadius: '10px', border: '1px solid rgba(196,181,253,.14)', background: 'rgba(255,255,255,.02)', color: 'rgba(226,218,240,.7)', display: 'grid', placeItems: 'center', cursor: 'pointer' }} className="dc51">
+        <button onClick={v.closePanel} aria-label="Cerrar ajustes" style={{ width: '44px', height: '44px', borderRadius: '10px', border: '1px solid rgb(var(--acc2) / .14)', background: 'rgba(255,255,255,.02)', color: 'rgba(226,218,240,.7)', display: 'grid', placeItems: 'center', cursor: 'pointer' }} className="dc51">
           <Icon d="M6 6l12 12M18 6L6 18" size={18} />
         </button>
       </div>
@@ -380,7 +380,7 @@ export default function SettingsPanel({ v }: { v: any }) {
             const on = x.id === tab.id
             return (
               <button key={x.id} role="tab" aria-selected={on} onClick={x.pick} style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '12px 14px', borderRadius: '11px', cursor: 'pointer', textAlign: 'left', border: `1px solid ${on ? 'rgb(var(--acc2) / .4)' : 'transparent'}`, background: on ? 'rgb(var(--acc) / .22)' : 'transparent', color: on ? '#FFF6E9' : 'rgba(226,218,240,.75)', transition: 'background 200ms, border-color 200ms' }} className="dc51">
-                <span style={{ flex: 'none', color: on ? 'rgb(var(--acc2))' : 'rgba(196,181,253,.6)' }}><Icon d={ICONS[x.id]} /></span>
+                <span style={{ flex: 'none', color: on ? 'rgb(var(--acc2))' : 'rgb(var(--acc2) / .6)' }}><Icon d={ICONS[x.id]} /></span>
                 <span style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
                   <span style={{ fontSize: '16px' }}>{x.label}</span>
                   <span style={{ fontSize: '12.5px', color: on ? 'rgba(241,234,248,.7)' : 'rgba(226,218,240,.45)' }}>{x.desc}</span>

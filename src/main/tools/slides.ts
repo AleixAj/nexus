@@ -22,7 +22,7 @@ export async function buildDeck(title: string, subtitle: string, slides: Slide[]
   pptx.layout = 'LAYOUT_WIDE' // 13.33 × 7.5 in
   pptx.title = title
   pptx.author = 'NEXUS'
-  const [acc, acc2] = THEMES[loadSettings().theme] || THEMES.nexus
+  const [acc, acc2] = THEMES[loadSettings().theme] || THEMES.solar
   const BG = '0B0816', TEXT = 'F1EAF8', DIM = 'A79FBF'
   pptx.defineSlideMaster({
     title: 'NX', background: { color: BG },

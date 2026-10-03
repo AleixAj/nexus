@@ -30,8 +30,8 @@ export default function BarScreen() {
   const field = useRef<HTMLInputElement>(null)
   const current = useRef(0)
   // the colours of the user's theme
-  const [th, setTh] = useState(THEMES.nexus)
-  useEffect(() => { api?.getSettings().then((s: any) => setTh((THEMES as any)[s.theme] || THEMES.nexus)).catch(() => {}) }, [])
+  const [th, setTh] = useState(THEMES.solar)
+  useEffect(() => { api?.getSettings().then((s: any) => setTh((THEMES as any)[s.theme] || THEMES.solar)).catch(() => {}) }, [])
 
   // the window is as tall as what it shows
   useLayoutEffect(() => {
@@ -45,7 +45,7 @@ export default function BarScreen() {
     if (!api) return
     const offs = [
       api.onBarOpen(({ selection: sel }: { selection: string }) => {
-        api.getSettings().then((s: any) => setTh((THEMES as any)[s.theme] || THEMES.nexus)).catch(() => {}); setSelection(sel || ''); setInput(''); setAnswer(''); setStatus(''); setConfirm(null); setBusy(false); setCopied(false)
+        api.getSettings().then((s: any) => setTh((THEMES as any)[s.theme] || THEMES.solar)).catch(() => {}); setSelection(sel || ''); setInput(''); setAnswer(''); setStatus(''); setConfirm(null); setBusy(false); setCopied(false)
         current.current = 0
         setTimeout(() => field.current?.focus(), 30)
       }),
@@ -78,7 +78,7 @@ export default function BarScreen() {
   const text = plain(answer)
 
   return (
-    <div ref={root} style={{ fontFamily: "'Space Grotesk',system-ui,sans-serif", color: '#F1EAF8', padding: 10 }}>
+    <div ref={root} style={{ ['--acc' as string]: th.acc, ['--acc2' as string]: th.acc2, fontFamily: "'Space Grotesk',system-ui,sans-serif", color: '#F1EAF8', padding: 10 }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12, padding: '14px 16px', borderRadius: 16, background: 'rgba(10,7,20,.94)', border: `1px solid rgb(${th.acc2} / .3)`, boxShadow: '0 18px 50px rgba(0,0,0,.55), 0 0 0 1px rgba(0,0,0,.4)', backdropFilter: 'blur(20px)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           <span style={{ flex: 'none', width: 12, height: 12, borderRadius: '50%', background: busy ? '#F5B971' : th.c2, boxShadow: `0 0 12px ${busy ? '#F5B971' : th.c2}` }} />
@@ -106,7 +106,7 @@ export default function BarScreen() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', borderRadius: 10, background: 'rgba(245,185,113,.1)', border: '1px solid rgba(245,185,113,.35)' }}>
             <span style={{ flex: 1, fontSize: 14.5 }}>¿Permites: {confirm.title}?</span>
             <button onClick={() => reply(true)} style={{ height: 32, padding: '0 14px', borderRadius: 8, border: 'none', background: th.c1, color: '#fff', cursor: 'pointer' }}>Sí</button>
-            <button onClick={() => reply(false)} style={{ height: 32, padding: '0 14px', borderRadius: 8, border: '1px solid rgba(196,181,253,.3)', background: 'transparent', color: '#FFF6E9', cursor: 'pointer' }}>No</button>
+            <button onClick={() => reply(false)} style={{ height: 32, padding: '0 14px', borderRadius: 8, border: '1px solid rgb(var(--acc2) / .3)', background: 'transparent', color: '#FFF6E9', cursor: 'pointer' }}>No</button>
           </div>
         )}
         {(busy || text) && (
@@ -115,7 +115,7 @@ export default function BarScreen() {
             {text && <div style={{ fontSize: 16, lineHeight: 1.6, whiteSpace: 'pre-wrap', color: '#FFF6E9', maxHeight: 420, overflow: 'auto' }}>{text}</div>}
             {text && !busy && (
               <div style={{ display: 'flex', gap: 8 }}>
-                <button onClick={() => { api?.barCopy(text); setCopied(true) }} style={{ height: 34, padding: '0 14px', borderRadius: 8, border: '1px solid rgba(196,181,253,.3)', background: 'transparent', color: '#FFF6E9', fontSize: 14, cursor: 'pointer' }}>{copied ? '✓ Copiado' : 'Copiar'}</button>
+                <button onClick={() => { api?.barCopy(text); setCopied(true) }} style={{ height: 34, padding: '0 14px', borderRadius: 8, border: '1px solid rgb(var(--acc2) / .3)', background: 'transparent', color: '#FFF6E9', fontSize: 14, cursor: 'pointer' }}>{copied ? '✓ Copiado' : 'Copiar'}</button>
                 {selection && <button onClick={() => api?.barPaste(text)} title="Sustituye el texto seleccionado en la app donde estaba" style={{ height: 34, padding: '0 14px', borderRadius: 8, border: 'none', background: th.c1, color: '#fff', fontSize: 14, cursor: 'pointer' }}>Pegar en su sitio</button>}
               </div>
             )}

@@ -15,15 +15,15 @@ export default function MemoryPanel({ v }: { v: any }) {
               Lo que Nexus recuerda
             </span>
           </div>
-          <button onClick={v.closePanel} style={{ width: "40px", height: "40px", borderRadius: "10px", border: "1px solid rgba(196,181,253,.14)", background: "rgba(255,255,255,.02)", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc44">
+          <button onClick={v.closePanel} style={{ width: "40px", height: "40px", borderRadius: "10px", border: "1px solid rgb(var(--acc2) / .14)", background: "rgba(255,255,255,.02)", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc44">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
           </button>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "0 32px 18px" }}>
-          <div style={{ flex: "1", display: "flex", alignItems: "center", gap: "10px", height: "44px", padding: "0 14px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.16)" }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(196,181,253,.6)" strokeWidth="1.5">
+          <div style={{ flex: "1", display: "flex", alignItems: "center", gap: "10px", height: "44px", padding: "0 14px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgb(var(--acc2) / .16)" }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgb(var(--acc2) / .6)" strokeWidth="1.5">
               <path d="M11 5a6 6 0 1 0 0 12a6 6 0 1 0 0-12M20 20l-4.5-4.5" />
             </svg>
             <input value={v.memQuery} onChange={v.onMemQuery} placeholder="Buscar en conversaciones y recuerdos" style={{ flex: "1", background: "none", border: "none", outline: "none", color: "#FFF6E9", fontSize: "14.5px" }} />
@@ -74,7 +74,7 @@ export default function MemoryPanel({ v }: { v: any }) {
             </span>
             <div style={{ flex: "1", overflow: "auto", display: "flex", flexDirection: "column", gap: "8px" }}>
               {(v.factItems || []).map((f, fIndex) => (<Fragment key={f?.id ?? fIndex}>
-                <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", padding: "12px 14px", borderRadius: "12px", background: "rgba(255,255,255,.025)", border: "1px solid rgba(196,181,253,.1)", animation: "nx-in 500ms cubic-bezier(.16,1,.3,1) both", animationDelay: f.delay }}>
+                <div style={{ display: "flex", alignItems: "flex-start", gap: "10px", padding: "12px 14px", borderRadius: "12px", background: "rgba(255,255,255,.025)", border: "1px solid rgb(var(--acc2) / .1)", animation: "nx-in 500ms cubic-bezier(.16,1,.3,1) both", animationDelay: f.delay }}>
                   <div style={{ flex: "1", display: "flex", flexDirection: "column", gap: "5px" }}>
                     <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "9.5px", letterSpacing: ".2em", color: "rgba(245,185,113,.8)" }}>
                       {f.cat}
@@ -94,12 +94,12 @@ export default function MemoryPanel({ v }: { v: any }) {
               {v.factsEmpty && <span style={{ padding: "18px 4px", fontSize: "13.5px", lineHeight: "1.5", color: "rgba(226,218,240,.5)" }}>{v.factsEmptyText}</span>}
             </div>
             <div style={{ display: "flex", gap: "8px" }}>
-              <input value={v.factInput} onChange={v.onFactInput} onKeyDown={v.onFactKey} placeholder="Añadir algo que deba recordar" style={{ flex: "1", minWidth: "0", height: "40px", padding: "0 12px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.16)", outline: "none", color: "#FFF6E9", fontSize: "13.5px" }} />
+              <input value={v.factInput} onChange={v.onFactInput} onKeyDown={v.onFactKey} placeholder="Añadir algo que deba recordar" style={{ flex: "1", minWidth: "0", height: "40px", padding: "0 12px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgb(var(--acc2) / .16)", outline: "none", color: "#FFF6E9", fontSize: "13.5px" }} />
               <button onClick={v.addFact} title="Guardar" style={{ width: "40px", height: "40px", borderRadius: "10px", border: "1px solid rgb(var(--acc2) / .35)", background: "rgb(var(--acc) / .18)", color: "#FFF6E9", display: "grid", placeItems: "center", cursor: "pointer" }}>
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"><path d="M12 5v14M5 12h14" /></svg>
               </button>
             </div>
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 2px", borderTop: "1px solid rgba(196,181,253,.08)" }}>
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "12px 2px", borderTop: "1px solid rgb(var(--acc2) / .08)" }}>
               <span style={{ fontSize: "14px", color: "rgba(241,234,248,.85)" }}>
                 Aprender de las conversaciones
               </span>

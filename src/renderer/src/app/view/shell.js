@@ -6,7 +6,7 @@ import { DOCK_FEATURE } from '../featureCatalog';
 
 export function shellView(app, c) {
   const { S, P, L, core, live } = c;
-  const th = THEMES[S.theme] || THEMES.nexus;
+  const th = THEMES[S.theme] || THEMES.solar;
   const wide = ['voice', 'routines', 'memory', 'news', 'settings'].includes(P);
   const wk = S.wordsKind;
   const stateColor = core === 'error' ? '#FB7185' : core === 'thinking' || core === 'action' ? '#F5B971' : core === 'speaking' ? '#FFE4C4' : core === 'music' ? '#FDBA74' : 'rgb(var(--acc2) / .75)';

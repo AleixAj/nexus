@@ -43,10 +43,10 @@ export function greeting() {
 }
 
 /** Colours of an on/off switch. */
-export const toggleT = on => ({ tBg: on ? 'rgb(var(--acc) / .85)' : 'rgba(255,255,255,.06)', tBorder: on ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.2)', tLeft: on ? '18px' : '2px', tOn: !!on });
+export const toggleT = on => ({ tBg: on ? 'rgb(var(--acc) / .85)' : 'rgba(255,255,255,.06)', tBorder: on ? 'rgb(var(--acc2) / .5)' : 'rgb(var(--acc2) / .2)', tLeft: on ? '18px' : '2px', tOn: !!on });
 /** Colours of a segmented-control option. */
 export const seg = active => ({ bg: active ? 'rgb(var(--acc) / .28)' : 'transparent', color: active ? '#FFF6E9' : 'rgba(226,218,240,.6)' });
 /** Colours of a selectable card. */
-export const card = sel => ({ bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.1)' });
+export const card = sel => ({ bg: sel ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: sel ? 'rgb(var(--acc2) / .45)' : 'rgb(var(--acc2) / .1)' });
 /** Colours of a chip. */
-export const chip = on => ({ bg: on ? 'rgb(var(--acc) / .22)' : 'rgba(255,255,255,.03)', border: on ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.16)' });
+export const chip = on => ({ bg: on ? 'rgb(var(--acc) / .22)' : 'rgba(255,255,255,.03)', border: on ? 'rgb(var(--acc2) / .5)' : 'rgb(var(--acc2) / .16)' });

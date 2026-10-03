@@ -138,7 +138,7 @@ const DEFAULTS: Settings = {
   disabled: [],
   eveningReview: true,
   eveningAt: '21:30',
-  theme: 'nexus',
+  theme: 'solar',
   quality: 'ultra',
   reduced: false
 }

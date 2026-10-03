@@ -15,7 +15,7 @@ export default function ActivityPanel({ v }: { v: any }) {
           <button onClick={v.togglePause} title={v.paused ? 'Vuelve a dejarle hacer cambios' : 'Para todo: sigue respondiendo, pero no cambia nada en tu PC'} style={{ height: 40, padding: '0 16px', borderRadius: 10, cursor: 'pointer', fontSize: 14.5, border: `1px solid ${v.paused ? 'rgba(52,211,153,.5)' : 'rgba(251,113,133,.55)'}`, background: v.paused ? 'rgba(52,211,153,.14)' : 'rgba(251,113,133,.14)', color: '#FFF6E9' }}>
             {v.paused ? '▶ Quitar la pausa' : '⏸ Pausa total'}
           </button>
-          <button onClick={v.closePanel} aria-label="Cerrar" style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid rgba(196,181,253,.14)', background: 'rgba(255,255,255,.02)', color: 'rgba(226,218,240,.7)', display: 'grid', placeItems: 'center', cursor: 'pointer' }} className="dc51">
+          <button onClick={v.closePanel} aria-label="Cerrar" style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid rgb(var(--acc2) / .14)', background: 'rgba(255,255,255,.02)', color: 'rgba(226,218,240,.7)', display: 'grid', placeItems: 'center', cursor: 'pointer' }} className="dc51">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
         </div>
@@ -30,7 +30,7 @@ export default function ActivityPanel({ v }: { v: any }) {
         {v.activityRows.map((r: any) => r.head ? (
           <span key={r.id} style={{ display: 'block', margin: '18px 0 6px', fontFamily: mono, fontSize: 12, letterSpacing: '.2em', color: 'rgb(var(--acc2) / .65)' }}>{r.head}</span>
         ) : (
-          <div key={r.id} style={{ display: 'grid', gridTemplateColumns: '64px minmax(0,1fr) auto', alignItems: 'center', gap: 14, padding: '10px 0', borderBottom: '1px solid rgba(196,181,253,.08)' }}>
+          <div key={r.id} style={{ display: 'grid', gridTemplateColumns: '64px minmax(0,1fr) auto', alignItems: 'center', gap: 14, padding: '10px 0', borderBottom: '1px solid rgb(var(--acc2) / .08)' }}>
             <span style={{ fontFamily: mono, fontSize: 13, color: 'rgba(226,218,240,.6)' }}>{r.time}</span>
             <span title={r.label} style={{ fontSize: 15, color: r.undone ? 'rgba(226,218,240,.45)' : 'rgba(241,234,248,.92)', textDecoration: r.undone ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.label}</span>
             {r.undone ? <span style={{ fontFamily: mono, fontSize: 11.5, letterSpacing: '.15em', color: 'rgba(226,218,240,.5)' }}>DESHECHO</span>

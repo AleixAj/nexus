@@ -43,7 +43,7 @@ export default function KeyCard({ v }: { v: any }) {
         <div style={{ display: 'flex', gap: 8 }}>
           <input type="password" autoFocus value={v.keyAskInput} onChange={v.keyAskChange} onKeyDown={v.keyAskKey} placeholder={azure ? 'Clave 1 del recurso Speech' : 'Pega aquí tu clave de Gemini'} spellCheck={false}
             style={{ flex: 1, minWidth: 0, height: 46, padding: '0 16px', borderRadius: 10, background: 'rgba(0,0,0,.4)', border: '1px solid rgb(var(--acc2) / .3)', color: '#FFF6E9', fontFamily: mono, fontSize: 13, outline: 'none' }} />
-          <button onClick={v.keyAskOpen} style={{ height: 46, padding: '0 16px', borderRadius: 10, border: '1px solid rgba(196,181,253,.2)', background: 'transparent', color: 'rgba(226,218,240,.85)', fontSize: 14, cursor: 'pointer' }}>Conseguir clave ↗</button>
+          <button onClick={v.keyAskOpen} style={{ height: 46, padding: '0 16px', borderRadius: 10, border: '1px solid rgb(var(--acc2) / .2)', background: 'transparent', color: 'rgba(226,218,240,.85)', fontSize: 14, cursor: 'pointer' }}>Conseguir clave ↗</button>
         </div>
         {azure && (
           <select value={k.region} onChange={v.keyAskRegion}
@@ -54,7 +54,7 @@ export default function KeyCard({ v }: { v: any }) {
         {k.error && <span style={{ fontFamily: mono, fontSize: 11, letterSpacing: '.14em', color: '#FB7185' }}>{k.error}</span>}
         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
           <span style={{ flex: 1, fontSize: 12.5, color: 'rgba(226,218,240,.45)' }}>Se guarda cifrada en este PC</span>
-          <button onClick={v.keyAskCancel} style={{ height: 44, padding: '0 20px', borderRadius: 10, border: '1px solid rgba(196,181,253,.2)', background: 'rgba(0,0,0,.3)', color: 'rgba(241,234,248,.85)', fontSize: 14.5, cursor: 'pointer' }}>Ahora no</button>
+          <button onClick={v.keyAskCancel} style={{ height: 44, padding: '0 20px', borderRadius: 10, border: '1px solid rgb(var(--acc2) / .2)', background: 'rgba(0,0,0,.3)', color: 'rgba(241,234,248,.85)', fontSize: 14.5, cursor: 'pointer' }}>Ahora no</button>
           <button onClick={v.keyAskSave} disabled={k.saving} style={{ height: 44, padding: '0 24px', borderRadius: 10, border: '1px solid rgba(255,255,255,.18)', background: 'linear-gradient(180deg, rgb(var(--acc) / .95), rgb(var(--acc) / .7))', color: '#fff', fontSize: 14.5, fontWeight: 500, cursor: 'pointer', boxShadow: '0 0 24px rgb(var(--acc) / .45)', opacity: k.saving ? .6 : 1 }}>{k.saving ? 'Comprobando…' : 'Activar voz'}</button>
         </div>
       </div>

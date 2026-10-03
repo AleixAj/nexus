@@ -30,7 +30,7 @@ export function routinesView(app, c) {
       const act = running && S.runStep === i, done = running && S.runStep > i;
       return {
         notFirst: i > 0, icon: stepIcon(st), kind: 'PASO ' + (i + 1), title: st, detail: '', delay: (160 + i * 60) + 'ms',
-        bg: act ? 'rgba(245,185,113,.12)' : done ? 'rgba(52,211,153,.06)' : 'rgba(10,7,20,.7)', border: act ? 'rgba(245,185,113,.6)' : done ? 'rgba(52,211,153,.35)' : 'rgba(196,181,253,.14)',
+        bg: act ? 'rgba(245,185,113,.12)' : done ? 'rgba(52,211,153,.06)' : 'rgba(10,7,20,.7)', border: act ? 'rgba(245,185,113,.6)' : done ? 'rgba(52,211,153,.35)' : 'rgb(var(--acc2) / .14)',
         glow: act ? '0 0 30px rgba(245,185,113,.25)' : 'none', iconColor: act ? '#F5B971' : done ? '#34D399' : 'rgb(var(--acc2))',
       };
     }),

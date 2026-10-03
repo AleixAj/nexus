@@ -18,7 +18,7 @@ export default function RoutinesPanel({ v }: { v: any }) {
           </div>
           <div style={{ display: "flex", gap: "10px" }}>
           <button onClick={v.newRoutine} style={{ height: "40px", padding: "0 16px", borderRadius: "10px", border: "1px solid rgb(var(--acc2) / .35)", background: "rgb(var(--acc) / .18)", color: "#FFF6E9", fontSize: "14px", cursor: "pointer" }}>+ Nueva rutina</button>
-          <button onClick={v.closePanel} style={{ width: "40px", height: "40px", borderRadius: "10px", border: "1px solid rgba(196,181,253,.14)", background: "rgba(255,255,255,.02)", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc26">
+          <button onClick={v.closePanel} style={{ width: "40px", height: "40px", borderRadius: "10px", border: "1px solid rgb(var(--acc2) / .14)", background: "rgba(255,255,255,.02)", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc26">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
@@ -48,7 +48,7 @@ export default function RoutinesPanel({ v }: { v: any }) {
             </span>
             {v.approvalsEmpty && <span style={{ padding: "8px 2px", fontSize: "12.5px", lineHeight: "1.5", color: "rgba(226,218,240,.45)" }}>Nada todavía. Lo que permitas con «Permitir siempre» aparecerá aquí, y puedes quitarlo con el interruptor.</span>}
             {(v.approvalRows || []).map((p, pIndex) => (<Fragment key={p?.id ?? pIndex}>
-              <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "9px 2px", borderBottom: "1px solid rgba(196,181,253,.07)" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "12px", padding: "9px 2px", borderBottom: "1px solid rgb(var(--acc2) / .07)" }}>
                 <div style={{ flex: "1", display: "flex", flexDirection: "column", gap: "3px" }}>
                   <span style={{ fontSize: "14px", color: "rgba(241,234,248,.88)" }}>
                     {p.label}
@@ -63,7 +63,7 @@ export default function RoutinesPanel({ v }: { v: any }) {
               </div>
             </Fragment>))}
           </div>
-          <div style={{ display: "flex", flexDirection: "column", minHeight: "0", borderRadius: "12px", border: "1px solid rgba(196,181,253,.1)", background: "radial-gradient(circle at 1px 1px, rgba(196,181,253,.09) 1px, transparent 0) 0 0 / 22px 22px, rgba(0,0,0,.22)" }}>
+          <div style={{ display: "flex", flexDirection: "column", minHeight: "0", borderRadius: "12px", border: "1px solid rgb(var(--acc2) / .1)", background: "radial-gradient(circle at 1px 1px, rgb(var(--acc2) / .09) 1px, transparent 0) 0 0 / 22px 22px, rgba(0,0,0,.22)" }}>
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "20px 24px" }}>
               <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
                 <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "10.5px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
@@ -107,8 +107,8 @@ export default function RoutinesPanel({ v }: { v: any }) {
                   </span>
                 </div>
               </Fragment>))}
-              <div style={{ width: "2px", height: "22px", background: "rgba(196,181,253,.15)" }}></div>
-              {v.hasRoutine && <button onClick={v.editRoutine} style={{ display: "flex", alignItems: "center", gap: "8px", height: "36px", padding: "0 16px", borderRadius: "999px", border: "1px dashed rgba(196,181,253,.3)", background: "transparent", color: "rgba(226,218,240,.7)", fontSize: "13px", cursor: "pointer" }} className="dc30">
+              <div style={{ width: "2px", height: "22px", background: "rgb(var(--acc2) / .15)" }}></div>
+              {v.hasRoutine && <button onClick={v.editRoutine} style={{ display: "flex", alignItems: "center", gap: "8px", height: "36px", padding: "0 16px", borderRadius: "999px", border: "1px dashed rgb(var(--acc2) / .3)", background: "transparent", color: "rgba(226,218,240,.7)", fontSize: "13px", cursor: "pointer" }} className="dc30">
                 Cambiar pasos con Nexus
               </button>}
             </div>

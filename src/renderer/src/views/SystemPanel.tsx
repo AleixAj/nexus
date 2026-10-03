@@ -19,7 +19,7 @@ export default function SystemPanel({ v }: { v: any }) {
           {v.sysTaken}
         </span>
       </div>
-      <button onClick={v.closePanel} style={{ position: "absolute", right: "calc(64px - var(--ex))", top: "56px", width: "40px", height: "40px", borderRadius: "10px", border: "1px solid rgba(196,181,253,.14)", background: "rgba(7,5,14,.4)", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc31">
+      <button onClick={v.closePanel} style={{ position: "absolute", right: "calc(64px - var(--ex))", top: "56px", width: "40px", height: "40px", borderRadius: "10px", border: "1px solid rgb(var(--acc2) / .14)", background: "rgba(7,5,14,.4)", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc31">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M6 6l12 12M18 6L6 18" />
         </svg>
@@ -61,7 +61,7 @@ export default function SystemPanel({ v }: { v: any }) {
               <span style={{ fontSize: "14px", color: "rgba(241,234,248,.9)" }}>
                 {p.name}
               </span>
-              <div style={{ height: "2px", background: "rgba(196,181,253,.1)", borderRadius: "2px" }}>
+              <div style={{ height: "2px", background: "rgb(var(--acc2) / .1)", borderRadius: "2px" }}>
                 <div style={{ height: "100%", width: p.pct, background: "rgb(var(--acc2) / .8)", borderRadius: "2px", transition: "width 900ms cubic-bezier(.16,1,.3,1)" }}></div>
               </div>
             </div>
@@ -82,9 +82,9 @@ export default function SystemPanel({ v }: { v: any }) {
               {v.coreNote}
             </span>
           </div>
-          <div style={{ height: "70px", display: "flex", alignItems: "flex-end", gap: "3px", borderBottom: "1px solid rgba(196,181,253,.12)" }}>
+          <div style={{ height: "70px", display: "flex", alignItems: "flex-end", gap: "3px", borderBottom: "1px solid rgb(var(--acc2) / .12)" }}>
             {(v.coreBars || []).map((b, i) => (
-              <div key={i} title={b.tip} style={{ flex: "1", height: "100%", display: "flex", alignItems: "flex-end", background: "rgba(196,181,253,.05)", borderRadius: "2px 2px 0 0" }}>
+              <div key={i} title={b.tip} style={{ flex: "1", height: "100%", display: "flex", alignItems: "flex-end", background: "rgb(var(--acc2) / .05)", borderRadius: "2px 2px 0 0" }}>
                 <div style={{ width: "100%", height: b.h, background: b.color, borderRadius: "2px 2px 0 0", boxShadow: `0 0 8px ${b.color}`, transformOrigin: "bottom", animation: `nxi-bar 700ms cubic-bezier(.16,1,.3,1) ${i * 25}ms both` }} />
               </div>
             ))}
@@ -102,7 +102,7 @@ export default function SystemPanel({ v }: { v: any }) {
             </span>
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               <span style={{ width: "8px", height: "8px", marginTop: "5px", borderRadius: "50%", background: a.dot, boxShadow: `0 0 10px ${a.dot}` }}></span>
-              <span style={{ flex: "1", width: "1px", background: "rgba(196,181,253,.12)" }}></span>
+              <span style={{ flex: "1", width: "1px", background: "rgb(var(--acc2) / .12)" }}></span>
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: "3px", paddingBottom: "18px", opacity: a.op }}>
               <span style={{ fontSize: "15px", color: "#FFF6E9" }}>

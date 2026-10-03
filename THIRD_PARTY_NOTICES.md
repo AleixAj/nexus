@@ -27,7 +27,7 @@ NEXUS is MIT-licensed (see `LICENSE`). It uses, or took ideas from, the followin
 ## Online services (free tiers, the user's own keys)
 
 Groq, Google Gemini, Cerebras, Mistral, OpenRouter and Ollama (AI); Microsoft Edge TTS (voices);
-DuckDuckGo (search); [Open-Meteo](https://open-meteo.com) (weather, CC BY 4.0); Wikipedia (CC BY-SA 4.0);
+DuckDuckGo (search); [Open-Meteo](https://open-meteo.com) (weather, CC BY 4.0); Wikipedia (CC BY-SA 4.0); ipapi.co and ipwho.is (approximate city);
 [LRCLIB](https://lrclib.net) (lyrics); iTunes Search (album art); Spotify Web API; public RSS feeds (news).
 
 ## Ideas adapted (no code copied)

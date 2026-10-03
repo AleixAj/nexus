@@ -23,7 +23,7 @@ export const power = {
       if (!el || ['range', 'checkbox', 'radio'].includes(el.type) || el.disabled) return;
       el.dataset.nxEdit ||= Math.random().toString(36).slice(2);
       const r = el.getBoundingClientRect(), k = this.state.k || 1;
-      const accent = getComputedStyle(el).getPropertyValue('--acc2').trim() || '196 181 253';
+      const accent = getComputedStyle(el).getPropertyValue('--acc2').trim() || '254 215 170';
       api.wallEdit({
         id: el.dataset.nxEdit, x: r.left, y: r.top, w: r.width, h: r.height, value: el.value, placeholder: el.placeholder || '',
         secret: el.type === 'password', multiline: el.tagName === 'TEXTAREA', fontSize: (parseFloat(getComputedStyle(el).fontSize) || 15) * k, accent,

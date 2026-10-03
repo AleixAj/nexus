@@ -35,10 +35,10 @@ export default function NewsPanel({ v }: { v: any }) {
         </div>
         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
           <button onClick={v.readNews} style={{ height: 40, padding: '0 16px', borderRadius: 10, border: '1px solid rgba(255,255,255,.18)', background: 'linear-gradient(180deg, rgb(var(--acc) / .95), rgb(var(--acc) / .7))', color: '#fff', fontSize: 14, cursor: 'pointer' }}>▶ Resumen en voz</button>
-          <button onClick={v.refreshNews} title="Actualizar" style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid rgba(196,181,253,.14)', background: 'rgba(255,255,255,.02)', color: 'rgba(226,218,240,.75)', display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
+          <button onClick={v.refreshNews} title="Actualizar" style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid rgb(var(--acc2) / .14)', background: 'rgba(255,255,255,.02)', color: 'rgba(226,218,240,.75)', display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" style={{ animation: v.newsLoading ? 'nx-spin 1s linear infinite' : 'none' }}><path d="M20 12a8 8 0 1 1-2.3-5.6M20 4v5h-5" /></svg>
           </button>
-          <button onClick={v.closePanel} style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid rgba(196,181,253,.14)', background: 'rgba(255,255,255,.02)', color: 'rgba(226,218,240,.7)', display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
+          <button onClick={v.closePanel} style={{ width: 40, height: 40, borderRadius: 10, border: '1px solid rgb(var(--acc2) / .14)', background: 'rgba(255,255,255,.02)', color: 'rgba(226,218,240,.7)', display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><path d="M6 6l12 12M18 6L6 18" /></svg>
           </button>
         </div>
@@ -47,9 +47,9 @@ export default function NewsPanel({ v }: { v: any }) {
       {/* filters */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '0 32px 16px', flexWrap: 'wrap' }}>
         {v.newsTopics.map((t: any) => <Chip key={t.id} c={t} title={t.title}>{t.on ? '✓ ' : ''}{t.label}</Chip>)}
-        <span style={{ width: 1, height: 22, background: 'rgba(196,181,253,.16)', margin: '0 4px' }} />
+        <span style={{ width: 1, height: 22, background: 'rgb(var(--acc2) / .16)', margin: '0 4px' }} />
         <Chip c={v.noPolitics}>{v.noPolitics.on ? '⊘ Sin política' : 'Con política'}</Chip>
-        <input value={v.newsAvoidInput} onChange={v.onNewsAvoid} placeholder="Evitar también… (fútbol, famosos)" style={{ flex: '1 1 180px', minWidth: 160, height: 32, padding: '0 12px', borderRadius: 999, background: 'rgba(0,0,0,.3)', border: '1px solid rgba(196,181,253,.16)', outline: 'none', color: '#FFF6E9', fontSize: 13 }} />
+        <input value={v.newsAvoidInput} onChange={v.onNewsAvoid} placeholder="Evitar también… (fútbol, famosos)" style={{ flex: '1 1 180px', minWidth: 160, height: 32, padding: '0 12px', borderRadius: 999, background: 'rgba(0,0,0,.3)', border: '1px solid rgb(var(--acc2) / .16)', outline: 'none', color: '#FFF6E9', fontSize: 13 }} />
       </div>
 
       {/* stories */}

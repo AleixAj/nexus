@@ -31,13 +31,13 @@ export function onboardingView(app, c) {
   return {
     intro: !!S.intro, ...(S.intro ? introView(app, S) : null),
     onbCard: S.onb && step > 0, onbStep: step, onbTotal: STEPS,
-    onbDots: [1, 2, 3, 4, 5].map(i => ({ w: i === step ? '28px' : '10px', c: i <= step ? 'rgb(var(--acc2))' : 'rgba(196,181,253,.2)' })),
+    onbDots: [1, 2, 3, 4, 5].map(i => ({ w: i === step ? '28px' : '10px', c: i <= step ? 'rgb(var(--acc2))' : 'rgb(var(--acc2) / .2)' })),
     onbBack: () => app.setState(s => ({ onbStep: Math.max(1, s.onbStep - 1) })), onbNext: () => app.onbNext(), onbNextLabel: step === STEPS ? 'Empezar' : 'Continuar',
 
     // 1 · name
     onNameOnb: e => { app.setName(e.target.value); poke(); },
     nameChips: NAME_OPTIONS.map(n => ({
-      label: n, on: S.userName === n, bg: S.userName === n ? 'rgb(var(--acc) / .22)' : 'rgba(255,255,255,.03)', border: S.userName === n ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.18)',
+      label: n, on: S.userName === n, bg: S.userName === n ? 'rgb(var(--acc) / .22)' : 'rgba(255,255,255,.03)', border: S.userName === n ? 'rgb(var(--acc2) / .5)' : 'rgb(var(--acc2) / .18)',
       pick: () => { app.setName(n); poke(); },
     })),
     formalOpts: [['tú', 20], ['usted', 85]].map(([label, val]) => ({

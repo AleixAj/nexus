@@ -14,14 +14,14 @@ export default function DiagnosticsCard({ v }: { v: any }) {
             <span style={{ fontFamily: mono, fontSize: 11, letterSpacing: '.2em', color: 'rgb(var(--acc2) / .7)' }}>DIAGNÓSTICO · SIN CAMBIAR NADA</span>
             <span style={{ fontSize: 26, color: '#FFF6E9' }}>{bad ? `${bad} problema${bad > 1 ? 's' : ''}${warn ? ` y ${warn} aviso${warn > 1 ? 's' : ''}` : ''}` : warn ? `Todo funciona · ${warn} aviso${warn > 1 ? 's' : ''}` : 'Todo funciona'}</span>
           </div>
-          <button onClick={v.closeDiag} style={{ width: 36, height: 36, borderRadius: 10, border: '1px solid rgba(196,181,253,.14)', background: 'transparent', color: 'rgba(226,218,240,.7)', cursor: 'pointer' }}>✕</button>
+          <button onClick={v.closeDiag} style={{ width: 36, height: 36, borderRadius: 10, border: '1px solid rgb(var(--acc2) / .14)', background: 'transparent', color: 'rgba(226,218,240,.7)', cursor: 'pointer' }}>✕</button>
         </div>
         <div style={{ overflow: 'auto', display: 'flex', flexDirection: 'column', gap: 4, paddingRight: 6 }}>
           {groups.map(g => (
             <div key={g} style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 6 }}>
               <span style={{ fontFamily: mono, fontSize: 10, letterSpacing: '.2em', color: 'rgb(var(--acc2) / .55)', margin: '4px 0' }}>{g.toUpperCase()}</span>
               {v.diag.filter((c: any) => c.group === g).map((c: any) => (
-                <div key={c.name} style={{ display: 'grid', gridTemplateColumns: '26px 220px minmax(0,1fr)', gap: 10, alignItems: 'baseline', padding: '6px 4px', borderBottom: '1px solid rgba(196,181,253,.06)' }}>
+                <div key={c.name} style={{ display: 'grid', gridTemplateColumns: '26px 220px minmax(0,1fr)', gap: 10, alignItems: 'baseline', padding: '6px 4px', borderBottom: '1px solid rgb(var(--acc2) / .06)' }}>
                   <span style={{ fontFamily: mono, fontSize: 14, color: MARK[c.status][1], textAlign: 'center' }}>{MARK[c.status][0]}</span>
                   <span style={{ fontSize: 14.5, color: '#FFF6E9' }}>{c.name}</span>
                   <span style={{ fontSize: 13, lineHeight: 1.45, color: c.status === 'fail' ? '#FDA4AF' : c.status === 'warn' ? '#F5D0A0' : 'rgba(226,218,240,.6)' }}>{c.detail}</span>

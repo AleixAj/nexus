@@ -22,7 +22,7 @@ export default function VoicePanel({ v }: { v: any }) {
               </svg>
               Probar en el núcleo
             </button>
-            <button onClick={v.closePanel} style={{ width: "40px", height: "40px", borderRadius: "10px", border: "1px solid rgba(196,181,253,.14)", background: "rgba(255,255,255,.02)", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc19">
+            <button onClick={v.closePanel} style={{ width: "40px", height: "40px", borderRadius: "10px", border: "1px solid rgb(var(--acc2) / .14)", background: "rgba(255,255,255,.02)", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc19">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
                 <path d="M6 6l12 12M18 6L6 18" />
               </svg>
@@ -52,7 +52,7 @@ export default function VoicePanel({ v }: { v: any }) {
                     <span style={{ fontSize: "13px", color: "rgba(226,218,240,.6)" }}>
                       {v.desc}
                     </span>
-                    <button onClick={v.preview} style={{ alignSelf: "flex-start", marginTop: "4px", display: "flex", alignItems: "center", gap: "8px", height: "28px", padding: "0 12px", borderRadius: "999px", border: "1px solid rgba(196,181,253,.2)", background: "rgba(255,255,255,.03)", color: "rgba(241,234,248,.85)", fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", letterSpacing: ".16em", whiteSpace: "nowrap", cursor: "pointer" }} className="dc22">
+                    <button onClick={v.preview} style={{ alignSelf: "flex-start", marginTop: "4px", display: "flex", alignItems: "center", gap: "8px", height: "28px", padding: "0 12px", borderRadius: "999px", border: "1px solid rgb(var(--acc2) / .2)", background: "rgba(255,255,255,.03)", color: "rgba(241,234,248,.85)", fontFamily: "'JetBrains Mono',monospace", fontSize: "10px", letterSpacing: ".16em", whiteSpace: "nowrap", cursor: "pointer" }} className="dc22">
                       {v.previewLabel}
                     </button>
                   </div>
@@ -90,7 +90,7 @@ export default function VoicePanel({ v }: { v: any }) {
                   </span>
                 </div>
                 <div data-key={s.key} onPointerDown={v.onSlider} style={{ position: "relative", height: "20px", cursor: "pointer", touchAction: "none" }}>
-                  <div style={{ position: "absolute", left: "0", right: "0", top: "9px", height: "2px", borderRadius: "2px", background: "rgba(196,181,253,.14)" }}></div>
+                  <div style={{ position: "absolute", left: "0", right: "0", top: "9px", height: "2px", borderRadius: "2px", background: "rgb(var(--acc2) / .14)" }}></div>
                   <div style={{ position: "absolute", left: "0", top: "9px", height: "2px", width: s.pct, borderRadius: "2px", background: "linear-gradient(90deg, rgb(var(--acc) / .6), rgb(var(--acc2)))", boxShadow: "0 0 10px rgb(var(--acc) / .6)" }}></div>
                   <div style={{ position: "absolute", top: "3px", left: s.pct, width: "14px", height: "14px", marginLeft: "-7px", borderRadius: "50%", background: "#FFF6E9", boxShadow: "0 0 0 4px rgb(var(--acc) / .25), 0 0 14px rgb(var(--acc2) / .8)" }}></div>
                 </div>
@@ -100,7 +100,7 @@ export default function VoicePanel({ v }: { v: any }) {
               <span style={{ fontSize: "14.5px", color: "rgba(241,234,248,.85)" }}>
                 Idioma
               </span>
-              <div style={{ display: "flex", padding: "3px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.12)" }}>
+              <div style={{ display: "flex", padding: "3px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgb(var(--acc2) / .12)" }}>
                 {(v.langOpts || []).map((o, oIndex) => (<Fragment key={o?.id ?? oIndex}>
                   <button onClick={o.pick} style={{ flex: "1", height: "32px", borderRadius: "8px", border: "none", cursor: "pointer", fontSize: "13px", background: o.bg, color: o.color, transition: "background 250ms, color 250ms" }}>
                     {o.label}
@@ -113,14 +113,14 @@ export default function VoicePanel({ v }: { v: any }) {
                 <span style={{ fontSize: "14.5px", color: "rgba(241,234,248,.85)" }}>
                   Palabra de activación
                 </span>
-                <input value={v.wakeWord} onChange={v.onWake} maxLength={40} placeholder="Hey Nexus" title={v.wakeHint} style={{ height: "40px", padding: "0 14px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.16)", color: "#FFF6E9", fontSize: "14px", outline: "none" }} />
+                <input value={v.wakeWord} onChange={v.onWake} maxLength={40} placeholder="Hey Nexus" title={v.wakeHint} style={{ height: "40px", padding: "0 14px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgb(var(--acc2) / .16)", color: "#FFF6E9", fontSize: "14px", outline: "none" }} />
                 <span style={{ fontSize: "11.5px", lineHeight: "1.4", color: "rgba(226,218,240,.45)" }}>{v.wakeHint}</span>
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
                 <span style={{ fontSize: "14.5px", color: "rgba(241,234,248,.85)" }}>
                   Cómo te llamo
                 </span>
-                <input value={v.userName} onChange={v.onName} style={{ height: "40px", padding: "0 14px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgba(196,181,253,.16)", color: "#FFF6E9", fontSize: "14px", outline: "none" }} />
+                <input value={v.userName} onChange={v.onName} style={{ height: "40px", padding: "0 14px", borderRadius: "10px", background: "rgba(0,0,0,.3)", border: "1px solid rgb(var(--acc2) / .16)", color: "#FFF6E9", fontSize: "14px", outline: "none" }} />
               </div>
             </div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "8px" }}>

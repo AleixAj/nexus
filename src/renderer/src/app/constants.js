@@ -1,11 +1,11 @@
 // Fixed data of the interface: themes, voices, personalities, icons, sliders and texts.
 
 export const THEMES = {
+  solar: { name: 'Solar', acc: '249 115 22', acc2: '254 215 170', c1: '#F97316', c2: '#FED7AA' },
   nexus: { name: 'Nexus', acc: '139 92 246', acc2: '196 181 253', c1: '#8B5CF6', c2: '#C4B5FD' },
   arc: { name: 'Arc', acc: '34 211 238', acc2: '165 243 252', c1: '#22D3EE', c2: '#A5F3FC' },
   mark3: { name: 'Mark III', acc: '239 68 68', acc2: '253 208 150', c1: '#EF4444', c2: '#FCD34D' },
   emerald: { name: 'Esmeralda', acc: '16 185 129', acc2: '167 243 208', c1: '#10B981', c2: '#A7F3D0' },
-  solar: { name: 'Solar', acc: '249 115 22', acc2: '254 215 170', c1: '#F97316', c2: '#FED7AA' },
 };
 
 // fx: the AI processing preset applied on top of the neural voice (services/voice.ts)

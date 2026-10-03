@@ -17,7 +17,7 @@ export const routines = {
   },
   // a routine scheduled for this time: it runs even with the window hidden
   onRoutineDue(r) {
-    this.notify('RUTINA', r.name, 'Programada a las ' + r.time, '#C4B5FD');
+    this.notify('RUTINA', r.name, 'Programada a las ' + r.time, 'rgb(var(--acc2))');
     this.runRoutine(r);
   },
   async toggleRoutine(r) { await api.enableRoutine(r.id, !r.enabled); this.loadRoutines(); },

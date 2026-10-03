@@ -55,7 +55,7 @@ export const conversation = {
     this.setState({ words: [], wordsKind: null, actionLabel: '' });
     if (!wasMusic) this.setCore(this.state.music ? 'music' : 'idle');
   },
-  notify(app, title, body, dot = '#C4B5FD') {
+  notify(app, title, body, dot = 'rgb(var(--acc2))') {
     const n = { id: Date.now() + Math.random(), app, time: hm(), title, body, dot };
     this.setState(s => ({ notifs: [n, ...s.notifs].slice(0, 3) }));
     // on the wallpaper nobody can close them

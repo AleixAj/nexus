@@ -26,7 +26,7 @@ export const wakeword = {
   onWakeProgress(p) {
     const first = this.state.wakeProgress == null;
     this.setState({ wakeProgress: p < 1 ? p : null });
-    if (first && p < 1) this.notify('ACTIVACIÓN POR VOZ', 'Descargando el modelo de voz en español', 'Unos 124 MB, solo esta vez · luego funciona sin internet', '#C4B5FD');
+    if (first && p < 1) this.notify('ACTIVACIÓN POR VOZ', 'Descargando el modelo de voz en español', 'Unos 124 MB, solo esta vez · luego funciona sin internet', 'rgb(var(--acc2))');
   },
   // a new phrase: saved when the user stops typing, and used at once if it is listening. What was
   // learnt for the old phrase no longer applies.

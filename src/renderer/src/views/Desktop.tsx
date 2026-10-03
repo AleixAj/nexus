@@ -158,7 +158,7 @@ export default function Desktop({ v }: { v: any }) {
           )}
           <div style={{ display: "flex", gap: "8px", animation: "nx-left 800ms cubic-bezier(.16,1,.3,1) 320ms both" }}>
             {(v.indicators || []).map((ind, indIndex) => (<Fragment key={ind?.id ?? indIndex}>
-              <span style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 11px", borderRadius: "999px", border: "1px solid rgba(196,181,253,.16)", background: "rgba(0,0,0,.25)", fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".2em", color: "rgba(226,218,240,.78)" }}>
+              <span style={{ display: "flex", alignItems: "center", gap: "8px", padding: "6px 11px", borderRadius: "999px", border: "1px solid rgb(var(--acc2) / .16)", background: "rgba(0,0,0,.25)", fontFamily: "'JetBrains Mono',monospace", fontSize: "13px", letterSpacing: ".2em", color: "rgba(226,218,240,.78)" }}>
                 <span style={{ width: "6px", height: "6px", borderRadius: "50%", background: ind.color, boxShadow: `0 0 8px ${ind.color}` }}></span>
                 {ind.label}
               </span>

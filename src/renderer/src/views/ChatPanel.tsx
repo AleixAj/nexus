@@ -7,7 +7,7 @@ export default function ChatPanel({ v }: { v: any }) {
     <>
     {v.isChat && (<>
       <div style={{ position: "absolute", right: "calc(24px - var(--ex))", top: "24px", bottom: "112px", width: "600px", display: "flex", flexDirection: "column", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .55), rgb(var(--acc) / .06) 45%, rgb(var(--acc) / 0)) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px) saturate(1.2)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07), 0 24px 70px rgba(0,0,0,.35)", animation: "nx-right 600ms cubic-bezier(.16,1,.3,1) both" }} className="dc8 dc9">
-        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "26px 28px 18px", borderBottom: "1px solid rgba(196,181,253,.08)" }}>
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", padding: "26px 28px 18px", borderBottom: "1px solid rgb(var(--acc2) / .08)" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px", animation: "nx-in 500ms cubic-bezier(.16,1,.3,1) 80ms both" }}>
             <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
               CHAT · {v.modelName}
@@ -16,7 +16,7 @@ export default function ChatPanel({ v }: { v: any }) {
               Conversación de hoy
             </span>
           </div>
-          <button onClick={v.closePanel} style={{ width: "36px", height: "36px", borderRadius: "10px", border: "1px solid rgba(196,181,253,.14)", background: "rgba(255,255,255,.02)", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc10">
+          <button onClick={v.closePanel} style={{ width: "36px", height: "36px", borderRadius: "10px", border: "1px solid rgb(var(--acc2) / .14)", background: "rgba(255,255,255,.02)", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc10">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M6 6l12 12M18 6L6 18" />
             </svg>
@@ -60,7 +60,7 @@ export default function ChatPanel({ v }: { v: any }) {
             </>)}
           </Fragment>))}
         </div>
-        <div style={{ position: "relative", padding: "16px 20px 20px", borderTop: "1px solid rgba(196,181,253,.08)", display: "flex", flexDirection: "column", gap: "10px" }}>
+        <div style={{ position: "relative", padding: "16px 20px 20px", borderTop: "1px solid rgb(var(--acc2) / .08)", display: "flex", flexDirection: "column", gap: "10px" }}>
           {v.showSlash && (<>
             <div style={{ position: "absolute", left: "20px", right: "20px", bottom: "100%", marginBottom: "-6px", padding: "8px", display: "flex", flexDirection: "column", gap: "2px", borderRadius: "12px", background: "rgba(12,9,22,.92)", border: "1px solid rgb(var(--acc) / .35)", backdropFilter: "blur(24px)", boxShadow: "0 20px 60px rgba(0,0,0,.5)", animation: "nx-in 260ms cubic-bezier(.16,1,.3,1) both" }}>
               {(v.slashCmds || []).map((c, cIndex) => (<Fragment key={c?.id ?? cIndex}>
@@ -91,7 +91,7 @@ export default function ChatPanel({ v }: { v: any }) {
               ))}
             </div>
           )}
-          <div style={{ display: "flex", alignItems: "center", gap: "8px", height: "52px", padding: "0 8px 0 16px", borderRadius: "12px", background: "rgba(0,0,0,.35)", border: "1px solid rgba(196,181,253,.16)", transition: "border-color 250ms, box-shadow 250ms" }} className="dc12">
+          <div style={{ display: "flex", alignItems: "center", gap: "8px", height: "52px", padding: "0 8px 0 16px", borderRadius: "12px", background: "rgba(0,0,0,.35)", border: "1px solid rgb(var(--acc2) / .16)", transition: "border-color 250ms, box-shadow 250ms" }} className="dc12">
             <input value={v.chatInput} onChange={v.onChatInput} onKeyDown={v.onChatKey} placeholder="Escribe a Nexus o pulsa / para comandos" style={{ flex: "1", background: "none", border: "none", outline: "none", color: "#FFF6E9", fontSize: "15px" }} />
             <button onClick={v.onMic} style={{ width: "38px", height: "38px", borderRadius: "9px", border: "none", background: "transparent", color: "rgba(226,218,240,.7)", display: "grid", placeItems: "center", cursor: "pointer" }} className="dc13">
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round">

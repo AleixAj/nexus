@@ -14,7 +14,7 @@ function Chip({ on, onClick, children }: { on: boolean; onClick: () => void; chi
   return (
     <button onClick={onClick} className="nx-onb-chip" style={{
       height: 34, padding: '0 16px', borderRadius: 999, cursor: 'pointer', fontSize: 13.5,
-      border: `1px solid ${on ? 'rgb(var(--acc2) / .6)' : 'rgba(196,181,253,.18)'}`,
+      border: `1px solid ${on ? 'rgb(var(--acc2) / .6)' : 'rgb(var(--acc2) / .18)'}`,
       background: on ? 'rgb(var(--acc) / .26)' : 'rgba(255,255,255,.03)', color: on ? '#FFF6E9' : 'rgba(241,234,248,.8)',
       transition: 'background 200ms, border-color 200ms'
     }}>{children}</button>
@@ -25,13 +25,13 @@ function Toggle({ on, onClick, name, note }: { on: boolean; onClick: () => void;
   return (
     <button onClick={onClick} style={{
       display: 'flex', alignItems: 'center', gap: 16, width: '100%', padding: '16px 18px', borderRadius: 12, cursor: 'pointer', textAlign: 'left',
-      background: on ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: `1px solid ${on ? 'rgb(var(--acc2) / .45)' : 'rgba(196,181,253,.12)'}`, color: '#F1EAF8'
+      background: on ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', border: `1px solid ${on ? 'rgb(var(--acc2) / .45)' : 'rgb(var(--acc2) / .12)'}`, color: '#F1EAF8'
     }}>
       <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
         <span style={{ fontSize: 16 }}>{name}</span>
         <span style={{ fontSize: 13, color: 'rgba(226,218,240,.55)' }}>{note}</span>
       </span>
-      <span style={{ position: 'relative', flex: 'none', width: 40, height: 22, borderRadius: 999, background: on ? 'rgb(var(--acc) / .85)' : 'rgba(255,255,255,.06)', border: `1px solid ${on ? 'rgb(var(--acc2) / .5)' : 'rgba(196,181,253,.2)'}`, transition: 'background 250ms' }}>
+      <span style={{ position: 'relative', flex: 'none', width: 40, height: 22, borderRadius: 999, background: on ? 'rgb(var(--acc) / .85)' : 'rgba(255,255,255,.06)', border: `1px solid ${on ? 'rgb(var(--acc2) / .5)' : 'rgb(var(--acc2) / .2)'}`, transition: 'background 250ms' }}>
         <span style={{ position: 'absolute', top: 2, left: on ? 20 : 2, width: 16, height: 16, borderRadius: '50%', background: '#FFF6E9', transition: `left 300ms ${ease}` }} />
       </span>
     </button>
@@ -145,24 +145,24 @@ export default function Onboarding({ v }: { v: any }) {
 {v.keyTargets && (
                 <div style={{ display: 'flex', gap: '6px' }}>
                   {v.keyTargets.map(o => (
-                    <button key={o.label} onClick={o.pick} style={{ height: '28px', padding: '0 12px', borderRadius: '999px', cursor: 'pointer', fontSize: '12.5px', border: `1px solid ${o.on ? 'rgb(var(--acc2) / .6)' : 'rgba(196,181,253,.18)'}`, background: o.on ? 'rgb(var(--acc) / .26)' : 'rgba(255,255,255,.03)', color: 'rgba(241,234,248,.9)' }}>{o.label}</button>
+                    <button key={o.label} onClick={o.pick} style={{ height: '28px', padding: '0 12px', borderRadius: '999px', cursor: 'pointer', fontSize: '12.5px', border: `1px solid ${o.on ? 'rgb(var(--acc2) / .6)' : 'rgb(var(--acc2) / .18)'}`, background: o.on ? 'rgb(var(--acc) / .26)' : 'rgba(255,255,255,.03)', color: 'rgba(241,234,248,.9)' }}>{o.label}</button>
                   ))}
                 </div>
               )}
               <div style={{ display: 'flex', gap: 8 }}>
                 <input type={v.keyType} value={v.keyInput} onChange={v.onKeyInput} onKeyDown={v.onKeyEnter} placeholder={v.keyPlaceholder} spellCheck={false}
-                  style={{ flex: 1, minWidth: 0, height: 44, padding: '0 16px', borderRadius: 10, background: 'rgba(0,0,0,.35)', border: '1px solid rgba(196,181,253,.2)', color: '#FFF6E9', fontFamily: mono, fontSize: 13, outline: 'none' }} />
+                  style={{ flex: 1, minWidth: 0, height: 44, padding: '0 16px', borderRadius: 10, background: 'rgba(0,0,0,.35)', border: '1px solid rgb(var(--acc2) / .2)', color: '#FFF6E9', fontFamily: mono, fontSize: 13, outline: 'none' }} />
                 <button onClick={v.saveKey} style={{ height: 44, padding: '0 18px', borderRadius: 10, border: '1px solid rgb(var(--acc2) / .4)', background: 'rgb(var(--acc) / .35)', color: '#FFF6E9', fontSize: 14, cursor: 'pointer' }}>Guardar</button>
-                <button onClick={v.openGroq} style={{ height: 44, padding: '0 16px', borderRadius: 10, border: '1px solid rgba(196,181,253,.2)', background: 'transparent', color: 'rgba(226,218,240,.8)', fontSize: 14, cursor: 'pointer' }}>Conseguir una ↗</button>
+                <button onClick={v.openGroq} style={{ height: 44, padding: '0 16px', borderRadius: 10, border: '1px solid rgb(var(--acc2) / .2)', background: 'transparent', color: 'rgba(226,218,240,.8)', fontSize: 14, cursor: 'pointer' }}>Conseguir una ↗</button>
               </div>
             </div>
           ) : (
             <div style={{ display: 'flex', gap: 8, alignItems: 'center', animation: enter(150) }}>
               <span style={{ ...text, fontSize: 13, flex: 1 }}>{v.keyHelp}</span>
-              <button onClick={v.openGroq} style={{ height: 40, padding: '0 16px', borderRadius: 10, border: '1px solid rgba(196,181,253,.2)', background: 'transparent', color: 'rgba(226,218,240,.8)', fontSize: 14, cursor: 'pointer' }}>Descargar Ollama ↗</button>
+              <button onClick={v.openGroq} style={{ height: 40, padding: '0 16px', borderRadius: 10, border: '1px solid rgb(var(--acc2) / .2)', background: 'transparent', color: 'rgba(226,218,240,.8)', fontSize: 14, cursor: 'pointer' }}>Descargar Ollama ↗</button>
             </div>
           )}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '14px 16px', borderRadius: 12, background: 'rgba(255,255,255,.025)', border: '1px solid rgba(196,181,253,.12)', animation: enter(210) }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, padding: '14px 16px', borderRadius: 12, background: 'rgba(255,255,255,.025)', border: '1px solid rgb(var(--acc2) / .12)', animation: enter(210) }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
               <span style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 4 }}>
                 <span style={{ fontSize: 15 }}>Micrófono</span>
@@ -191,7 +191,7 @@ export default function Onboarding({ v }: { v: any }) {
 
       {/* footer */}
       <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 10 }}>
-        {step > 1 && <button onClick={v.onbBack} style={{ height: 46, padding: '0 20px', borderRadius: 10, border: '1px solid rgba(196,181,253,.2)', background: 'rgba(0,0,0,.3)', color: 'rgba(241,234,248,.85)', fontSize: 14.5, cursor: 'pointer' }}>Atrás</button>}
+        {step > 1 && <button onClick={v.onbBack} style={{ height: 46, padding: '0 20px', borderRadius: 10, border: '1px solid rgb(var(--acc2) / .2)', background: 'rgba(0,0,0,.3)', color: 'rgba(241,234,248,.85)', fontSize: 14.5, cursor: 'pointer' }}>Atrás</button>}
         <button onClick={v.onbNext} style={{ height: 46, padding: '0 26px', borderRadius: 10, border: '1px solid rgba(255,255,255,.18)', background: 'linear-gradient(180deg, rgb(var(--acc) / .95), rgb(var(--acc) / .7))', color: '#fff', fontSize: 14.5, fontWeight: 500, cursor: 'pointer', boxShadow: '0 0 24px rgb(var(--acc) / .45)' }}>{v.onbNextLabel}</button>
       </div>
     </div>
