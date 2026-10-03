@@ -52,7 +52,7 @@
       "package.json"
     ],
     "win": {
-      "icon": "resources/icon.png",
+      "icon": "resources/icon.ico",
       "target": "dir",
       "artifactName": "NEXUS-Portable.${ext}"
     },

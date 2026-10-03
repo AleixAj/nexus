@@ -1,4 +1,6 @@
-# NEXUS
+<p align="center"><img src="docs/logo.png" alt="NEXUS logo" width="160"></p>
+
+<h1 align="center">NEXUS</h1>
 
 **A J.A.R.V.I.S.-style desktop assistant for Windows.** An animated energy core living in a galaxy that listens,
 talks back and gets things done on your PC — and can sit behind your desktop icons as a live wallpaper.

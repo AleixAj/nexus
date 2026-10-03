@@ -75,7 +75,7 @@ export default function Desktop({ v }: { v: any }) {
             <div style={{ display: "flex", alignItems: "flex-start", fontSize: "124px", fontWeight: "300", lineHeight: "1", letterSpacing: "-.03em", color: "#FFF6E9", marginLeft: "-6px", filter: "drop-shadow(0 0 18px rgb(var(--acc) / .55))" }}>
               {(v.clockDigits || []).map((d, dIndex) => (<Fragment key={d?.id ?? dIndex}>
                 {d.sep && (<>
-                  <span style={{ width: ".3em", textAlign: "center", height: "1em", lineHeight: ".92", opacity: ".45" }}>
+                  <span style={{ width: ".3em", textAlign: "center", height: "1em", lineHeight: ".92" }}>
                     :
                   </span>
                 </>)}

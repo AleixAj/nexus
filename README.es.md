@@ -1,4 +1,6 @@
-# NEXUS
+<p align="center"><img src="docs/logo.png" alt="Logo de NEXUS" width="160"></p>
+
+<h1 align="center">NEXUS</h1>
 
 > Documentación completa en español. Resumen técnico en inglés: [README.md](README.md).
 
