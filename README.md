@@ -16,7 +16,7 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 - **Investigación a fondo.** «Investiga a fondo qué portátil comprar»: busca desde varios ángulos, lee las mejores
   fuentes y te da un informe con citas numeradas y un apartado de qué no está claro.
 - **Presentaciones.** «Hazme una presentación sobre el sistema solar»: crea un PowerPoint con diseño (con los colores
-  de tu tema) en `DocumentosNEXUSPresentaciones` y lo abre.
+  de tu tema) en `Documentos\NEXUS\Presentaciones` y lo abre.
 - **Juegos de Steam.** «Abre Elden Ring», «instala Hades», «actualiza Cyberpunk», «¿qué juegos tengo?». Lee tus
   bibliotecas de Steam (en cualquier disco) y usa la tienda para lo que no tienes.
 - **Acciones rápidas.** Abre aplicaciones y webs y controla la música y el volumen.
