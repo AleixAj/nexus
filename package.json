@@ -1,6 +1,6 @@
 {
   "name": "nexus",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Asistente de escritorio para Windows al estilo J.A.R.V.I.S.: voz, agente con herramientas y fondo de escritorio animado.",
   "main": "out/main/index.js",
@@ -11,9 +11,10 @@
     "typecheck": "tsc --noEmit -p tsconfig.json",
     "dist": "electron-vite build && electron-builder --win dir",
     "test": "vitest run",
-    "release": "electron-vite build && electron-builder --win nsis"
+    "release": "electron-vite build && electron-builder --win nsis zip --publish never && node scripts/release.mjs"
   },
   "dependencies": {
+    "electron-updater": "^6.8.9",
     "ical.js": "^2.2.1",
     "msedge-tts": "^2.0.8",
     "pptxgenjs": "^4.0.1",
@@ -52,7 +53,8 @@
     ],
     "win": {
       "icon": "resources/icon.png",
-      "target": "dir"
+      "target": "dir",
+      "artifactName": "NEXUS-Portable.${ext}"
     },
     "asar": true,
     "asarUnpack": [
@@ -71,8 +73,14 @@
       "perMachine": false,
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
-      "artifactName": "NEXUS-Setup-${version}.exe",
+      "artifactName": "NEXUS-Setup.exe",
       "shortcutName": "NEXUS"
+    },
+    "publish": {
+      "provider": "github",
+      "owner": "AleixAj",
+      "repo": "nexus",
+      "releaseType": "draft"
     }
   },
   "overrides": {

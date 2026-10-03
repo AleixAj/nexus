@@ -11,6 +11,22 @@ talks back and gets things done on your PC — and can sit behind your desktop i
 
 ![NEXUS demo](docs/demo.gif)
 
+<h2 align="center">DOWNLOAD</h2>
+
+<p align="center">
+  <a href="https://github.com/AleixAj/nexus/releases/latest/download/NEXUS-Setup.exe">
+    <img src="docs/readme/btn-download.svg" alt="Download for Windows (installer)" width="460">
+  </a>
+</p>
+<p align="center">
+  <a href="https://github.com/AleixAj/nexus/releases/latest/download/NEXUS-Portable.zip">
+    <img src="docs/readme/btn-portable.svg" alt="Download the portable version (.zip)" width="320">
+  </a>
+</p>
+<p align="center">
+  <sub>Windows 10 and 11 · Interface in Spanish · <a href="https://github.com/AleixAj/nexus/releases">All versions</a></sub>
+</p>
+
 > The interface is in Spanish (it was built for Spanish speakers). Full user documentation in Spanish:
 > [README.es.md](README.es.md).
 
@@ -110,8 +126,10 @@ npm run typecheck
 npm run dist         # packaged app in dist/
 ```
 
-A ready-to-use build is in [Releases](https://github.com/AleixAj/nexus/releases). It is not code-signed, so Windows
-SmartScreen will warn on first run.
+Ready-to-use builds are in [Releases](https://github.com/AleixAj/nexus/releases): an installer that keeps itself up
+to date (electron-updater, from GitHub Releases) and a portable zip. They are not code-signed, so Windows SmartScreen
+warns on first run (*More info → Run anyway*). To publish a new version: `npm run release` (builds and uploads a
+draft with the GitHub CLI).
 
 ## Project structure
 

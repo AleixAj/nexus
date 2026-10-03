@@ -10,6 +10,7 @@ import { listReminders, startReminders, when } from './reminders'
 import { listRoutines, startRoutines } from './routines'
 import { watchMedia } from './media'
 import { registerIpc } from './ipc'
+import { startUpdater } from './updater'
 import { pickQualityOnce } from './hardware'
 import { DICTATE_HOTKEY } from './dictation'
 import { HOTKEY, isDev, beforeQuit, broadcast, createTray, createWindow, mainWindow, notify, showWindow, talk } from './window'
@@ -74,6 +75,7 @@ if (!app.requestSingleInstanceLock()) {
     startWatchers()
     createTray()
     createWindow(loadSettings().mode === 'wallpaper' ? 'wallpaper' : 'window')
+    startUpdater()
     if (!globalShortcut.register(HOTKEY, talk)) console.warn(`[hotkey] ${HOTKEY} está ocupado por otra aplicación`)
     // the hotkeys of features that can be switched off (Settings → Funciones): dictation does not
     // bring the window up (the text goes to the app in front); the bar asks from any app or acts on

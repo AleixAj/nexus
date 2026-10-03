@@ -2,6 +2,22 @@
 
 > Documentación completa en español. Resumen técnico en inglés: [README.md](README.md).
 
+<h2 align="center">DESCARGAS</h2>
+
+<p align="center">
+  <a href="https://github.com/AleixAj/nexus/releases/latest/download/NEXUS-Setup.exe">
+    <img src="docs/readme/btn-download-es.svg" alt="Descargar para Windows (instalador)" width="460">
+  </a>
+</p>
+<p align="center">
+  <a href="https://github.com/AleixAj/nexus/releases/latest/download/NEXUS-Portable.zip">
+    <img src="docs/readme/btn-portable-es.svg" alt="Descargar versión portable (.zip)" width="320">
+  </a>
+</p>
+<p align="center">
+  <sub>Windows 10 y 11 · <a href="#descarga-e-instalación">Leer antes de instalar</a> · <a href="https://github.com/AleixAj/nexus/releases">Todas las versiones</a></sub>
+</p>
+
 Asistente virtual de escritorio para Windows, al estilo J.A.R.V.I.S.: un núcleo de energía animado
 que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 
@@ -94,10 +110,21 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   lo que falle.
 - **Fondo de escritorio.** NEXUS puede ponerse detrás de los iconos del escritorio y quedarse ahí en segundo plano.
 
+## Descarga e instalación
+
+1. Descarga **NEXUS-Setup.exe** con el botón de arriba y ábrelo.
+2. Si Windows muestra «Windows protegió tu PC», pulsa **Más información → Ejecutar de todas formas** (la app no
+   está firmada digitalmente, que cuesta dinero; el código está aquí mismo para quien quiera revisarlo).
+3. Sigue los pasos del instalador. La primera vez NEXUS te pide tu nombre, la voz y una clave gratuita de IA.
+
+**Se actualiza sola:** cuando hay versión nueva la descarga en segundo plano, te avisa y la instala al cerrar
+NEXUS (o al momento desde el icono de la bandeja → *Reiniciar y actualizar*). La versión **portable** (.zip) no
+necesita instalarse, pero tampoco se actualiza sola.
+
 ## Requisitos
 
 - Windows 10 u 11.
-- [Node.js](https://nodejs.org) 20 o superior.
+- [Node.js](https://nodejs.org) 20 o superior (solo para compilarla tú).
 - Una IA, a elegir en la configuración inicial (todas gratis y sin tarjeta):
 
 | Opción | Clave | Notas |
@@ -136,6 +163,9 @@ npm run dev
 
 La primera vez aparece la **configuración inicial**; ahí mismo puedes pegar tu clave de Groq (o hacerlo luego en
 **Ajustes**). La clave se guarda cifrada con el sistema de Windows y solo se envía a Groq.
+
+Para publicar una versión nueva: sube la versión en `package.json`, escribe las novedades en `scripts/notes.md` y
+ejecuta `npm run release` (crea el instalador y el .zip y los sube a un borrador de GitHub Releases con `gh`).
 
 Para generar el programa de Windows (`dist/win-unpacked/NEXUS.exe`):
 

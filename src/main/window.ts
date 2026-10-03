@@ -239,6 +239,13 @@ export function talk() {
   win.webContents.send('hotkey:talk')
 }
 
+// "restart and update", once an update has been downloaded
+let updateItem: { label: string; click: () => void } | null = null
+export function setUpdateItem(label: string, click: () => void) {
+  updateItem = { label, click }
+  updateTray()
+}
+
 function updateTray() {
   if (!tray) return
   tray.setToolTip(mode === 'wallpaper' ? 'NEXUS · fondo de escritorio' : 'NEXUS')
@@ -249,6 +256,7 @@ function updateTray() {
     { label: 'Fondo de escritorio', type: 'checkbox', checked: mode === 'wallpaper', click: i => switchMode(i.checked ? 'wallpaper' : 'window') },
     { label: 'Abrir ventana', click: showWindow },
     { type: 'separator' },
+    ...(updateItem ? [{ label: updateItem.label, click: () => { quitting = true; updateItem!.click() } }, { type: 'separator' as const }] : []),
     { label: 'Salir', click: () => { quitting = true; app.quit() } }
   ]))
 }
