@@ -14,6 +14,7 @@ import { redact } from '../lib/privacy'
 import { noteTool, resetTaint } from '../lib/taint'
 import { approvalKey, approve, isApproved } from '../approvals'
 import { markRun, routineFor, routinePrompt } from '../routines'
+import { isPaused, recordAction } from '../activity'
 
 type Msg = { role: string; content?: string | null; tool_calls?: any[]; tool_call_id?: string; name?: string }
 
@@ -97,6 +98,10 @@ async function useTool(name: string, args: any, turn: Turn): Promise<ToolResult>
   if (wanted && !wanted.test(turn.said)) {
     return { result: 'No lo hago: el usuario no lo ha pedido con sus palabras en este mensaje. Si lo quiere, que lo pida él directamente.', label: 'Acción bloqueada · no la has pedido tú' }
   }
+  // the emergency pause: answers and reads, but changes nothing
+  if (isPaused() && !t.readOnly && !t.trivial) {
+    return { result: 'NO SE HA HECHO NADA: NEXUS está en pausa total. No digas que lo has hecho; dile al usuario que no lo he hecho porque está la pausa, y que la quite en el panel Actividad si quiere.', label: 'En pausa · no hago cambios' }
+  }
   const req = t.confirm?.(args)
   const key = approvalKey(name, args)
   if (req && !isApproved(key)) {
@@ -108,7 +113,10 @@ async function useTool(name: string, args: any, turn: Turn): Promise<ToolResult>
   const label = t.progress?.(args)
   if (label) h.onProgress(label)
   noteTool(name)
+  // how to undo it (a copy of the file…), taken just before the change
+  const undo = t.prepare ? await t.prepare(args).catch(() => null) : null
   const r = await runTool(t, args, { progress: h.onProgress, signal })
+  if (!t.readOnly && !t.trivial && !r.result.startsWith('Error')) recordAction(name, r.label, undo || undefined)
   // keys, passwords or card numbers found in a file, the clipboard or the screen never reach the online AI
   return { ...r, result: redact(r.result) }
 }
@@ -119,15 +127,16 @@ async function runQuick(q: Quick, text: string, h: Handlers, ctl: AbortControlle
   if ('answer' in q) reply = q.answer
   else {
     const r = await useTool(q.tool, q.args, { said: text, h, signal: ctl.signal, guard: new LoopGuard() })
-    if (q.ok && !q.ok(r.result)) return null // not something it can do alone: the AI tries
-    reply = r.label === 'Acción denegada' ? 'De acuerdo, no lo hago.' : q.reply(r.result)
+    if (r.label === 'En pausa · no hago cambios') reply = 'Estoy en pausa total: no hago cambios en tu PC. Quítala en el panel Actividad.'
+    else if (q.ok && !q.ok(r.result)) return null // not something it can do alone: the AI tries
+    else reply = r.label === 'Acción denegada' ? 'De acuerdo, no lo hago.' : q.reply(r.result)
     if (r.label !== reply.replace(/\.$/, '')) h.onAction(r.label)
   }
   if (ctl.signal.aborted) throw aborted()
   h.onDelta(reply)
   restoreHistory()
   history = trim([...history, { role: 'user', content: text }, { role: 'assistant', content: reply }])
-  logExchange(text, reply)
+  if (!loadSettings().privateMode) logExchange(text, reply)
   return reply
 }
 
@@ -231,6 +240,6 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
     h.onAction('Queda poco cupo gratis hoy · activa «Respaldo» (Gemini) en Ajustes')
   }
   history = trim(turn)
-  if (full.trim()) logExchange(text, full)
+  if (full.trim() && !loadSettings().privateMode) logExchange(text, full)
   return full
 }

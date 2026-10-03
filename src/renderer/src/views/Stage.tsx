@@ -16,6 +16,7 @@ import ConfirmCard from './ConfirmCard'
 import KeyCard from './KeyCard'
 import VisionPreview from './VisionPreview'
 import DiagnosticsCard from './DiagnosticsCard'
+import ActivityPanel from './ActivityPanel'
 
 export default function Stage({ v }: { v: any }) {
   return (
@@ -32,6 +33,7 @@ export default function Stage({ v }: { v: any }) {
         <MusicPanel v={v} />
         <MemoryPanel v={v} />
         <NewsPanel v={v} />
+        <ActivityPanel v={v} />
         <SettingsPanel v={v} />
         <Overlay v={v} />
         <Onboarding v={v} />

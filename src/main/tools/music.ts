@@ -43,14 +43,14 @@ const VOLUME_LABELS: Record<string, string> = { volume_up: 'Volumen subido', vol
 
 export const musicTools: Tool[] = [
   {
-    name: 'spotify',
+    name: 'spotify', trivial: true,
     description: 'Spotify de escritorio: abrir, Me gusta, buscar canción/artista/lista, qué suena, reproducir/pausar, siguiente, anterior.',
     params: { action: oneOf(['open', 'liked', 'search', 'now_playing', 'play_pause', 'next', 'previous']), query: str('Qué buscar') },
     required: ['action'],
     run: async a => said(await spotify(String(a.action || ''), String(a.query || '')))
   },
   {
-    name: 'spotify_play',
+    name: 'spotify_play', trivial: true,
     description: 'Pone en Spotify una lista del usuario por su nombre, sus Me gusta, o una canción/artista/álbum. Mejor que spotify search cuando hay que reproducir algo concreto.',
     params: { query: str('Nombre de la lista, canción, artista o álbum'), kind: oneOf(['playlist', 'liked', 'track', 'artist', 'album']), shuffle: bool('Aleatorio') },
     required: ['kind'],
@@ -70,7 +70,7 @@ export const musicTools: Tool[] = [
     }
   },
   {
-    name: 'media',
+    name: 'media', trivial: true,
     description: 'Volumen del sistema.',
     params: { action: oneOf(Object.keys(VOLUME_LABELS)), times: num('Pasos de 2 %') },
     required: ['action'],

@@ -13,6 +13,7 @@ import { memory } from './app/features/memory';
 import { music } from './app/features/music';
 import { power } from './app/features/power';
 import { news } from './app/features/news';
+import { activity } from './app/features/activity';
 import { routines } from './app/features/routines';
 import { settings } from './app/features/settings';
 import { startup } from './app/features/startup';
@@ -108,6 +109,9 @@ export default class NexusApp extends Component {
     on(api.onConfirm, (id, cid, req) => this.onConfirm(id, cid, req));
     on(api.onCovered, state => this.onScreenState(state));
     on(api.onDeskEdit, e => this.onDeskEdit(e));
+    on(api.onActivity, a => this.onActivityList(a));
+    on(api.onPulseNotice, n => this.onPulseNotice(n));
+    on(api.onPulseEvening, () => this.onPulseEvening());
     this.watchWallTyping();
     on(api.onTtsQuota, engine => this.onVoiceQuota(engine));
     on(api.onMedia, m => this.onMedia(m));
@@ -186,6 +190,7 @@ export default class NexusApp extends Component {
     if (opening && p === 'news') this.loadNews();
     if (opening && p === 'routines') this.loadRoutines();
     if (opening && p === 'settings') this.loadQuota();
+    if (opening && p === 'activity') this.loadActivity();
     if (opening && p === 'settings') this.loadSpotify();
     this.setState({ panel: opening ? p : null, volOpen: false });
   }
@@ -202,4 +207,4 @@ export default class NexusApp extends Component {
   }
 }
 
-Object.assign(NexusApp.prototype, conversation, dictation, memory, music, news, power, routines, settings, startup, vision, voices, wakeword);
+Object.assign(NexusApp.prototype, activity, conversation, dictation, memory, music, news, power, routines, settings, startup, vision, voices, wakeword);

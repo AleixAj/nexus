@@ -46,9 +46,13 @@ export function shellView(app, c) {
     dock: DOCK.map(([id, label]) => {
       const act = P === id || (id === 'volume' && S.volOpen);
       return {
-        sep: id === 'volume', domId: 'dock-' + id, d: ICON[id], bg: act ? 'rgb(var(--acc) / .22)' : 'transparent', color: act ? '#FFF6E9' : 'rgba(214,204,236,.72)', dot: act || (id === 'music' && S.music) ? 1 : 0,
-        click: () => id === 'volume' ? app.setState(s => ({ volOpen: !s.volOpen, hoverDock: null })) : app.openPanel(id),
-        enter: () => app.setState({ hoverDock: label }), leave: () => app.setState({ hoverDock: null }),
+        sep: id === 'private', domId: 'dock-' + id, d: id === 'private' && S.privateMode ? ICON.privateOn : ICON[id],
+        bg: act || (id === 'private' && S.privateMode) ? 'rgb(var(--acc) / .22)' : 'transparent',
+        color: id === 'private' && S.privateMode ? '#F5B971' : id === 'activity' && S.paused ? '#FB7185' : act ? '#FFF6E9' : 'rgba(214,204,236,.72)',
+        dot: act || (id === 'music' && S.music) || (id === 'private' && S.privateMode) || (id === 'activity' && S.paused) ? 1 : 0,
+        click: () => id === 'volume' ? app.setState(s => ({ volOpen: !s.volOpen, hoverDock: null })) : id === 'private' ? app.togglePrivate() : app.openPanel(id),
+        // private mode and the pause say their state on hover
+        enter: () => app.setState({ hoverDock: id === 'private' ? (S.privateMode ? 'MODO PRIVADO · ACTIVADO' : 'MODO PRIVADO · DESACTIVADO') : id === 'activity' && S.paused ? 'ACTIVIDAD · EN PAUSA' : label }), leave: () => app.setState({ hoverDock: null }),
       };
     }),
     hasHover: !!S.hoverDock && !S.volOpen, hoverLabel: S.hoverDock, volOpen: S.volOpen,

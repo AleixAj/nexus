@@ -4,6 +4,7 @@ import { join } from 'path'
 import { loadSettings, saveSettings } from './settings'
 import { attachToDesktop, refreshWallpaper, stopDesktop, type Pointer } from './wallpaper'
 import { closeEditBox } from './editBox'
+import { openBar } from './bar'
 
 export type Mode = 'window' | 'wallpaper'
 
@@ -241,6 +242,7 @@ function updateTray() {
   tray.setToolTip(mode === 'wallpaper' ? 'NEXUS · fondo de escritorio' : 'NEXUS')
   tray.setContextMenu(Menu.buildFromTemplate([
     { label: 'Hablar con NEXUS', accelerator: 'Ctrl+Alt+Space', click: talk },
+    { label: 'Preguntar por escrito', accelerator: 'Ctrl+Alt+A', click: () => { openBar() } },
     { type: 'separator' },
     { label: 'Fondo de escritorio', type: 'checkbox', checked: mode === 'wallpaper', click: i => switchMode(i.checked ? 'wallpaper' : 'window') },
     { label: 'Abrir ventana', click: showWindow },

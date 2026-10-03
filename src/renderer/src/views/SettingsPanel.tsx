@@ -182,13 +182,21 @@ function Tab({ v }: { v: any }) {
           </div>
           <Help>Habla: si la barra se mueve, te oigo bien. Toca el nombre para cambiar de micrófono.</Help>
         </Group>
-        <Group title="ESCUCHA">
+        <Group title="ESCUCHA Y ATAJOS">
           <Toggles list={[t.wake]} />
-          <Row label="Atajo para hablar" note="Desde cualquier aplicación, aunque NEXUS esté detrás">
-            <div style={{ display: 'flex', gap: '6px' }}>
-              {v.hotkeyKeys.map((k: string) => <span key={k} style={{ padding: '6px 11px', borderRadius: '7px', border: '1px solid rgba(196,181,253,.3)', borderBottomWidth: '2px', fontFamily: mono, fontSize: '13px', color: '#FFF6E9' }}>{k}</span>)}
-            </div>
-          </Row>
+          {[
+            ['Hablar con NEXUS', 'Desde cualquier aplicación, aunque NEXUS esté detrás', v.hotkeyKeys],
+            ['Preguntar por escrito', 'Una barra pequeña encima de lo que estés haciendo', ['CTRL', 'ALT', 'A'], v.tryBar],
+            ['Con el texto seleccionado', 'Resumir, traducir, corregir, explicar o responder lo que tengas seleccionado en cualquier app', ['CTRL', 'ALT', 'S']],
+            ['Dictar', 'Hablas y se escribe donde esté el cursor', ['CTRL', 'ALT', 'D']],
+          ].map(([label, note, keys, test]: any) => (
+            <Row key={label} label={label} note={note}>
+              <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                {test && <button onClick={test} style={{ ...ghostBtn, height: '32px', padding: '0 12px', fontSize: '13px', marginRight: '6px' }}>Probar</button>}
+                {keys.map((k: string) => <span key={k} style={{ padding: '6px 11px', borderRadius: '7px', border: '1px solid rgba(196,181,253,.3)', borderBottomWidth: '2px', fontFamily: mono, fontSize: '13px', color: '#FFF6E9' }}>{k.toUpperCase()}</span>)}
+              </div>
+            </Row>
+          ))}
         </Group>
       </>
     )
@@ -214,6 +222,10 @@ function Tab({ v }: { v: any }) {
     case 'system': return (
       <>
         <Group title="AL ENCENDER"><Toggles list={[t.autostart, t.briefing]} /></Group>
+        <Group title="AVISOS">
+          <Toggles list={[t.proactive, t.evening]} />
+          {v.showEveningTime && <Row label="Hora del resumen de la noche"><div style={{ width: '540px' }}><Segments opts={v.eveningTimes} /></div></Row>}
+        </Group>
         <Group title="FONDO DE ESCRITORIO"><Toggles list={[t.wallpaper]} />
           <Row label="En qué pantallas" note="Con varias, las secundarias muestran la misma galaxia sin el núcleo, estén donde estén (izquierda, derecha, arriba o abajo)">
             <div style={{ width: '360px' }}><Segments opts={v.wallScreens} /></div>

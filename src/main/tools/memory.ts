@@ -1,4 +1,5 @@
 // The agent saves and forgets facts about the user (Memory panel).
+import { loadSettings } from '../settings'
 import { CATEGORIES, addFact, forgetFacts, searchChats } from '../memory'
 import { isTainted } from '../lib/taint'
 import { oneOf, str, type Tool } from './define'
@@ -12,6 +13,7 @@ export const memoryTools: Tool[] = [
     params: { text: str('El dato, en tercera persona y en una frase'), category: oneOf(CATEGORIES) },
     required: ['text', 'category'],
     run: a => {
+      if (loadSettings().privateMode) return { result: 'Modo privado activo: no guardo nada. Díselo si te pide recordar algo.', label: 'Modo privado · no guardo nada' }
       // learnt next to a web page, a file or the screen: it could come from there and not from
       // the user, so it waits for the user's OK in the Memory panel
       const pending = isTainted()

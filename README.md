@@ -71,6 +71,19 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   tu tarjeta gráfica, memoria y procesador.
 - **Cupo que no se acaba.** Órdenes sencillas sin IA, solo las herramientas necesarias en cada pregunta, cinco
   servicios gratis en rotación y un medidor de lo que queda hoy (más abajo, en Requisitos).
+- **Barra flotante.** `Ctrl + Alt + A` abre una barra pequeña encima de cualquier app (también de un juego) para
+  preguntar por escrito sin abrir NEXUS. La respuesta se puede copiar.
+- **Con el texto seleccionado.** Selecciona un texto en cualquier app y pulsa `Ctrl + Alt + S`: resumir, traducir,
+  corregir, explicar o responder, y *Pegar en su sitio* lo sustituye donde estaba. (Como «Click to Do» de Windows.)
+- **Avisos por su cuenta, pocos y útiles.** Una cita en 10 minutos, el PC al límite de CPU, batería baja o disco
+  casi lleno. Máximo seis al día y nada de noche; las notificaciones de Windows se callan solas mientras juegas.
+- **Resumen de la noche y prioridades.** Por la mañana te pregunta tus tres cosas importantes del día; por la noche
+  (a la hora que elijas) te cuenta qué hiciste, qué queda y qué tienes mañana. Si estás jugando o presentando, espera.
+- **Actividad y deshacer.** Panel con todo lo que NEXUS cambió en tu PC estos 7 días. Antes de guardar, editar o
+  mover un archivo guarda una copia, así que «deshaz lo último» (o el botón) lo deja como estaba. *Pausa total*
+  para que siga respondiendo pero no cambie nada.
+- **Modo privado.** El botón del ojo en la barra: mientras está activo no guarda conversaciones, no aprende nada y no
+  mira la pantalla ni la cámara.
 - **Autodiagnóstico.** Ajustes → *Comprobar que todo funciona*: revisa internet, cada clave, las voces, el micrófono, que
   entienda lo que dices, búsqueda, noticias, tiempo, calendario, Spotify y disco, sin cambiar nada, y dice cómo arreglar
   lo que falle.

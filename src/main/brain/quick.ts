@@ -123,6 +123,7 @@ export async function quickCommand(raw: string, callName = ''): Promise<Quick | 
   }
   if (MUTE.test(p)) return { tool: 'media', args: { action: 'mute' }, reply: () => 'Hecho.' }
 
+  if (/^(deshaz|deshazlo|deshaz (lo ultimo|eso|el ultimo cambio|lo que has hecho)|vuelve a dejarlo como estaba|dejalo como estaba)$/.test(p)) return { tool: 'undo_last', args: {}, reply: r => r }
   if (/^(bloquea|bloquear)( el| la)?( pc| ordenador| equipo| pantalla| sesion)?$/.test(p)) return { tool: 'pc_control', args: { action: 'lock' }, reply: r => r + '.' }
   if (/^apaga (la )?pantalla$/.test(p)) return { tool: 'pc_control', args: { action: 'screen_off' }, reply: () => 'Pantalla apagada.' }
   if (/^cancela (el )?(apagado|reinicio)$/.test(p)) return { tool: 'pc_control', args: { action: 'cancel_shutdown' }, reply: r => r + '.' }

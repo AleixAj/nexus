@@ -6,7 +6,8 @@ import { describeImage, imageFile, screenshot, visionUnavailable } from '../visi
 import { short } from '../lib/text'
 import { askWindow, broadcast } from '../window'
 import { toPath } from './files'
-import { str, type Tool } from './define'
+import { said, str, type Tool } from './define'
+import { loadSettings } from '../settings'
 
 const unavailable = (why: string) => ({ result: why, label: 'Sin visión disponible' })
 const preview = (base64: string, mime: string, source: string) => broadcast('vision:preview', { src: `data:${mime};base64,${base64}`, source })
@@ -19,6 +20,7 @@ export const visionTools: Tool[] = [
     required: ['question'],
     progress: () => 'Mirando la pantalla',
     run: async a => {
+      if (loadSettings().privateMode) return said('Modo privado activo: no miro la pantalla ni la cámara (se quita con el botón del ojo en la barra).')
       const why = await visionUnavailable()
       if (why) return unavailable(why)
       const shot = await screenshot()
@@ -34,6 +36,7 @@ export const visionTools: Tool[] = [
     confirm: () => ({ title: 'Usar la cámara', detail: 'Tomaré una sola foto con la webcam para responderte. Verás la foto en pantalla.' }),
     progress: () => 'Mirando por la cámara',
     run: async a => {
+      if (loadSettings().privateMode) return said('Modo privado activo: no miro la pantalla ni la cámara (se quita con el botón del ojo en la barra).')
       const why = await visionUnavailable()
       if (why) return unavailable(why)
       // the photo is taken by the window (it has camera access); one frame, the camera turns off after

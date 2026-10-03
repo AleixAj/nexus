@@ -55,6 +55,9 @@ export const ICON = {
   memory: 'M12 3a9 9 0 1 0 0 18a9 9 0 1 0 0-18M12 7v5l3 2',
   settings: 'M4 7h10M18 7h2M4 17h4M12 17h8M16 5a2 2 0 1 0 0 4a2 2 0 1 0 0-4M10 15a2 2 0 1 0 0 4a2 2 0 1 0 0-4',
   volume: 'M4 9h4l5-4v14l-5-4H4zM16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11',
+  activity: 'M4 6h10M4 12h10M4 18h6M15 16l2.5 2.5L22 14',
+  private: 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6',
+  privateOn: 'M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12zM12 9a3 3 0 1 0 0 6a3 3 0 1 0 0-6M3 3l18 18',
   trigger: 'M12 3l9 9-9 9-9-9z',
   app: 'M4 5h16v14H4zM4 9h16',
   audio: 'M9 18V5l11-2v13M9 18a3 3 0 1 1-6 0a3 3 0 1 1 6 0',
@@ -65,7 +68,7 @@ export const ICON = {
   save: 'M5 4h11l3 3v13H5zM8 4v5h8V4M8 20v-6h8v6',
 };
 
-export const DOCK = [['chat', 'CHAT'], ['voice', 'VOZ Y PERSONALIDAD'], ['routines', 'RUTINAS'], ['system', 'SISTEMA'], ['music', 'MÚSICA'], ['news', 'NOTICIAS'], ['memory', 'MEMORIA'], ['settings', 'AJUSTES'], ['volume', 'VOLUMEN']];
+export const DOCK = [['chat', 'CHAT'], ['voice', 'VOZ Y PERSONALIDAD'], ['routines', 'RUTINAS'], ['system', 'SISTEMA'], ['music', 'MÚSICA'], ['news', 'NOTICIAS'], ['memory', 'MEMORIA'], ['activity', 'ACTIVIDAD'], ['settings', 'AJUSTES'], ['private', 'MODO PRIVADO'], ['volume', 'VOLUMEN']];
 
 export const CORE_LABELS = { idle: 'EN REPOSO', wake: 'ACTIVANDO', listening: 'ESCUCHANDO', thinking: 'PENSANDO', speaking: 'HABLANDO', action: 'EJECUTANDO ACCIÓN', error: 'SIN CONEXIÓN', music: 'MODO MÚSICA' };
 export const LIVE_STATES = ['wake', 'listening', 'thinking', 'speaking', 'action'];
@@ -75,7 +78,7 @@ export const CORE_LAYOUT = {
   overlay: { x: 960, y: 540, s: .5, v: 0 },
   onboarding: { x: 960, y: 230, s: .5, v: 1 },
   chat: { x: 652, y: 480, s: .8, v: 1 },
-  voice: { x: 410, y: 440, s: .62, v: 1 }, routines: { x: 410, y: 440, s: .62, v: 1 }, memory: { x: 410, y: 440, s: .62, v: 1 }, news: { x: 410, y: 440, s: .62, v: 1 }, settings: { x: 410, y: 440, s: .62, v: 1 },
+  voice: { x: 410, y: 440, s: .62, v: 1 }, routines: { x: 410, y: 440, s: .62, v: 1 }, memory: { x: 410, y: 440, s: .62, v: 1 }, news: { x: 410, y: 440, s: .62, v: 1 }, activity: { x: 560, y: 440, s: .7, v: 1 }, settings: { x: 410, y: 440, s: .62, v: 1 },
   system: { x: 960, y: 520, s: .46, v: 1 },
   music: { x: 960, y: 470, s: .92, v: 1 },
   home: { x: 960, y: 480, s: 1, v: 1 },

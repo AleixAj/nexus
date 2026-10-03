@@ -21,6 +21,7 @@ import { broadcast } from './window'
 import { listApprovals, revoke } from './approvals'
 import { runDiagnostics } from './diagnostics'
 import { openEditBox } from './editBox'
+import { canUndo, isPaused, listActivity, onActivityChanged, setPaused, undoAction } from './activity'
 import { quotaToday } from './brain/providers'
 import { calendarConnected, events, setCalendarUrl } from './calendar'
 import { deleteRoutine, listRoutines, setRoutineEnabled, triggerText } from './routines'
@@ -134,6 +135,12 @@ export function registerIpc() {
   handle('calendar:set', (_e, url) => setCalendarUrl(str(url, 1000)))
   handle('calendar:events', async (_e, days) => (calendarConnected() ? events(Math.max(1, Math.min(31, Number(days) || 1))).catch(() => []) : null))
   handle('diagnostics:run', () => runDiagnostics())
+  // what NEXUS has done, undo and the emergency pause
+  const activityNow = () => ({ list: listActivity().slice(0, 150).map(a => ({ id: a.id, at: a.at, label: a.label, tool: a.tool, undone: !!a.undone, canUndo: canUndo(a), trash: a.undo?.kind === 'trash' })), paused: isPaused() })
+  handle('activity:list', () => activityNow())
+  handle('activity:undo', (_e, id) => undoAction(str(id, 64)))
+  handle('activity:pause', (_e, on) => setPaused(!!on))
+  onActivityChanged(() => broadcast('activity:changed', activityNow()))
   // a text field clicked while NEXUS is the wallpaper: open a real text box on top of it
   handle('desk:edit-open', (e, r) => {
     const owner = BrowserWindow.fromWebContents(e.sender)

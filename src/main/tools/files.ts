@@ -5,6 +5,8 @@ import { basename, dirname, extname, isAbsolute, join, resolve } from 'path'
 import { clip, short, size } from '../lib/text'
 import { bool, num, str, type Tool } from './define'
 import { blockedPath } from '../lib/privacy'
+import { backupFile } from '../activity'
+import { existsSync } from 'fs'
 
 const MAX_READ = 9000
 
@@ -177,6 +179,7 @@ export const fileTools: Tool[] = [
     name: 'write_file', group: 'write',
     description: 'Crea o sobrescribe un archivo de texto.',
     params: { path: str('Ruta'), content: str('Contenido'), append: bool('Añadir al final') }, required: ['path', 'content'],
+    prepare: async a => backupFile(writable(a.path)),
     confirm: a => ({ title: a.append ? 'Añadir texto a un archivo' : 'Guardar un archivo', detail: `${showPath(a.path)}\n\n${clip(String(a.content || ''), 1500)}` }),
     run: async a => {
       const file = writable(a.path), content = String(a.content ?? '')
@@ -189,6 +192,7 @@ export const fileTools: Tool[] = [
     name: 'edit_file', group: 'write',
     description: 'Reemplaza un texto exacto en un archivo.',
     params: { path: str('Ruta'), find: str('Texto actual'), replace: str('Texto nuevo') }, required: ['path', 'find', 'replace'],
+    prepare: async a => backupFile(writable(a.path)),
     confirm: a => ({ title: 'Modificar un archivo', detail: `${showPath(a.path)}\n\n− ${clip(String(a.find || ''), 700)}\n+ ${clip(String(a.replace || ''), 700)}` }),
     run: async a => {
       const file = writable(a.path), find = String(a.find ?? '')
@@ -203,6 +207,7 @@ export const fileTools: Tool[] = [
     name: 'move_path', group: 'write',
     description: 'Mueve o renombra.',
     params: { from: str('Ruta'), to: str('Ruta nueva') }, required: ['from', 'to'],
+    prepare: async a => ({ kind: 'move', from: writable(a.from), to: writable(a.to) }),
     confirm: a => ({ title: 'Mover o renombrar', detail: `${showPath(a.from)}\n→ ${showPath(a.to)}` }),
     run: async a => {
       const from = writable(a.from), to = writable(a.to)
@@ -216,6 +221,7 @@ export const fileTools: Tool[] = [
     intent: () => /borr|elimin|papelera|quita|tira|delete|remove/i,
     description: 'Envía a la papelera (solo si lo piden).',
     params: { path: str('Ruta') }, required: ['path'],
+    prepare: async a => ({ kind: 'trash', path: writable(a.path) }),
     confirm: a => ({ title: 'Enviar a la papelera', detail: showPath(a.path) }),
     run: async a => {
       const file = writable(a.path)
@@ -228,6 +234,7 @@ export const fileTools: Tool[] = [
     name: 'create_folder', group: 'write',
     description: 'Crea una carpeta.',
     params: { path: str('Ruta') }, required: ['path'],
+    prepare: async a => { const dir = writable(a.path); return existsSync(dir) ? null : { kind: 'rmdir', path: dir } },
     run: async a => {
       const dir = writable(a.path)
       await fs.mkdir(dir, { recursive: true })

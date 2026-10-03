@@ -1,6 +1,8 @@
 // The shape every agent tool follows. A tool is one object: what the model sees
 // (name, description, parameters) next to what runs, so adding one touches one file.
 
+import type { Undo } from '../activity'
+
 export type ToolResult = { result: string; label: string }
 
 /** Which Settings switch enables the tool ('base' = always on). */
@@ -18,6 +20,10 @@ export type Tool = {
   group?: Group
   /** Only reads (search, look, list…): several of these in a row run at the same time. */
   readOnly?: boolean
+  /** Small everyday controls (music, volume): not written in the activity list, allowed while paused. */
+  trivial?: boolean
+  /** Runs before the change (after the approval) and says how to undo it: keeps a copy of a file… */
+  prepare?: (a: any) => Promise<Undo | null>
   /** If present the user must approve the call; returns what the approval card shows (null = no need this time). */
   confirm?: (a: any) => { title: string; detail: string } | null
   /** Too risky to approve for good (any command, deleting): it always asks. */

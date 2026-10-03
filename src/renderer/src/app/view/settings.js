@@ -69,6 +69,8 @@ export function settingsView(app, c) {
     // system
     toggles: Object.fromEntries([
       { id: 'wallpaper', label: 'Fondo de escritorio', note: 'NEXUS se pone detrás de tus iconos y se queda ahí. Háblale con ' + hotkey + '; para volver a ventana, apágalo aquí o desde la bandeja', on: WALLPAPER, toggle: () => api && api.setMode(WALLPAPER ? 'window' : 'wallpaper') },
+      { id: 'proactive', label: 'Avisos por mi cuenta', note: 'Te aviso solo de lo útil: una cita en 10 minutos, el PC al límite, batería baja o disco lleno. Pocos al día y nada de noche', on: S.proactive !== false, toggle: () => app.flip('proactive') },
+      { id: 'evening', label: 'Resumen de la noche', note: 'Qué hiciste, qué queda y qué tienes mañana. Si estás jugando o presentando, espero a que termines', on: S.eveningReview !== false, toggle: () => app.flip('eveningReview') },
       { id: 'autostart', label: 'Iniciar con Windows', note: 'Se abre sola al encender el PC', on: S.autostart, toggle: () => app.setAutostart(!S.autostart) },
       { id: 'wake', label: `Escuchar «${S.wakeWord}» siempre`, note: S.wakeProgress != null ? `Descargando el modelo de voz… ${Math.round(S.wakeProgress * 100)} %` : 'Me despierto al oírlo. Se cambia en Voz y personalidad. Todo en tu PC: no se graba ni se envía nada', on: !!S.wakeListen, toggle: () => app.setWakeListen(!S.wakeListen) },
       { id: 'wallDock', label: 'Barra de abajo en el fondo', note: 'Con NEXUS de fondo de escritorio, sigue viéndose la barra con el chat, la música, los ajustes…', on: S.wallDock !== false, toggle: () => app.flip('wallDock') },
@@ -79,6 +81,9 @@ export function settingsView(app, c) {
       { id: 'reduced', label: 'Reducir movimiento', note: 'Sin parallax, estelas ni partículas extra. Mejor si el movimiento te marea', on: S.reduced, toggle: () => app.setReduced(!S.reduced) },
     ].map(t => [t.id, { ...t, ...toggleT(t.on) }])),
     hotkeyKeys: app.hotkeyLabel().split(' + '),
+    eveningTimes: ['20:00', '21:00', '21:30', '22:00', '23:00'].map(t => ({ label: t, ...seg((S.eveningAt || '21:30') === t), pick: () => { app.setState({ eveningAt: t }); app.save({ eveningAt: t }); } })),
+    showEveningTime: S.eveningReview !== false,
+    tryBar: () => api && api.openBar(),
     // on which monitors the wallpaper shows (the others get only the galaxy, without the core)
     wallScreens: [['Solo la principal', false], ['Todas las pantallas', true]].map(([label, all]) => ({
       label, ...seg(!!S.wallExtend === all), pick: () => { if (!!S.wallExtend !== all) app.flip('wallExtend'); },

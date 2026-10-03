@@ -46,6 +46,12 @@ export type Settings = {
   lastBriefing: string
   newsAvoid: string
   memoryLearn: boolean
+  // private mode: nothing is learnt or saved, and NEXUS does not look at the screen or the camera
+  privateMode: boolean
+  // NEXUS warns on its own (meetings, CPU, battery, disk) and gives the evening summary
+  proactive: boolean
+  eveningReview: boolean
+  eveningAt: string
   theme: string
   quality: string
   reduced: boolean
@@ -119,6 +125,10 @@ const DEFAULTS: Settings = {
   newsAvoid: 'política',
   // the agent saves what it learns about the user (Memory panel)
   memoryLearn: true,
+  privateMode: false,
+  proactive: true,
+  eveningReview: true,
+  eveningAt: '21:30',
   theme: 'nexus',
   quality: 'ultra',
   reduced: false

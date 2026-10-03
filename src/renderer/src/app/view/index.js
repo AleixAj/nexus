@@ -5,6 +5,7 @@ import { desktopView } from './desktop';
 import { memoryView } from './memory';
 import { musicView, nowPlaying } from './music';
 import { newsView } from './news';
+import { activityView } from './activity';
 import { onboardingView } from './onboarding';
 import { routinesView } from './routines';
 import { settingsView } from './settings';
@@ -21,6 +22,6 @@ export function buildView(app) {
   };
   return {
     ...shellView(app, c), ...desktopView(app, c), ...musicView(app, c), ...chatView(app, c), ...voiceView(app, c),
-    ...routinesView(app, c), ...systemView(app, c), ...memoryView(app, c), ...newsView(app, c), ...settingsView(app, c), ...onboardingView(app, c),
+    ...routinesView(app, c), ...systemView(app, c), ...memoryView(app, c), ...newsView(app, c), ...activityView(app, c), ...settingsView(app, c), ...onboardingView(app, c),
   };
 }

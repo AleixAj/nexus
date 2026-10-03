@@ -2,6 +2,7 @@
 // group (or a new file) and add that list here.
 import type { Settings } from '../settings'
 import type { Group, RunCtx, Tool, ToolResult } from './define'
+import { activityTools } from './activity'
 import { appTools } from './apps'
 import { briefingTools } from './briefing'
 import { calendarTools } from './calendar'
@@ -19,7 +20,7 @@ import { systemTools } from './system'
 import { visionTools } from './vision'
 import { webTools } from './web'
 
-const ALL: Tool[] = [...appTools, ...musicTools, ...gameTools, ...memoryTools, ...reminderTools, ...calendarTools, ...routineTools, ...newsTools, ...briefingTools, ...visionTools, ...pcTools, ...systemTools, ...webTools, ...researchTools, ...slideTools, ...fileTools]
+const ALL: Tool[] = [...activityTools, ...appTools, ...musicTools, ...gameTools, ...memoryTools, ...reminderTools, ...calendarTools, ...routineTools, ...newsTools, ...briefingTools, ...visionTools, ...pcTools, ...systemTools, ...webTools, ...researchTools, ...slideTools, ...fileTools]
 const BY_NAME = new Map(ALL.map(t => [t.name, t]))
 
 /** The switches in Settings → Agent. */
@@ -37,11 +38,12 @@ const TOPICS: [Tool[], RegExp][] = [
   [reminderTools, /avis|recuerda|recordatorio|alarma|temporizador|despiert|cronometro|en \d+ (min|hora|seg)|a las \d/],
   [calendarTools, /calendario|agenda|evento|reunion|cita|que tengo|planes|semana|manana|\bhoy\b|lunes|martes|miercoles|jueves|viernes|sabado|domingo/],
   [routineTools, /rutina|\bmodo\b|cuando (te )?diga|automatiza|cada (dia|manana|noche)/],
-  [[...newsTools, ...briefingTools], /noticia|titular|actualidad|periodico|que pasa|resumen|buenos dias|briefing|novedad/],
+  [[...newsTools, ...briefingTools], /noticia|titular|actualidad|periodico|que pasa|resumen|buenos dias|buenas noches|briefing|novedad|prioridad|objetivo|que tal el dia|hecho hoy|plan/],
   [visionTools, /pantalla|captura|imagen|foto|camara|webcam|\bmira|\bves\b|esto|este error|adjuntos|archivo actual|\.(pdf|png|jpe?g|webp)\b/],
   [pcTools, /bloque|apaga|suspend|reinici|brillo|pantalla|portapapeles|copiad|copia|pega|traduc|corrige|ordenador|\bpc\b|equipo/],
   [systemTools, /cierra|mata|termina|cpu|\bram\b|memoria|gpu|grafica|proceso|rendimiento|temperatura|disco|lento|consum|powershell|comando|terminal|estado|ventilador|\bred\b/],
   [[...webTools, ...researchTools], /busca|internet|\bweb|google|wikipedia|investiga|quien|que es|cuando|donde|precio|cuanto|ultim|actual|enlace|url|pagina|http|noticia|informa|averigua|compara/],
+  [activityTools, /deshaz|deshacer|deshazlo|como estaba|revierte|vuelve atras/],
   [slideTools, /presentacion|diapositiva|powerpoint|pptx|slides/],
   [fileTools, /archivo|carpeta|fichero|documento|escritorio|descarga|guarda|crea|borra|elimina|mueve|renombra|\blee|leer|\btxt\b|docx|pdf|ruta|[a-z]:\\|adjuntos|escribe en|nota/],
 ]

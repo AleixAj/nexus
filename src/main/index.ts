@@ -1,4 +1,7 @@
 // Start-up: one instance only, then the window, the tray, the hotkey and the background watchers.
+import { cleanBackups } from './activity'
+import { startPulse } from './pulse'
+import { BAR_HOTKEY, SELECTION_HOTKEY, onSelectionHotkey, openBar } from './bar'
 import { app, desktopCapturer, globalShortcut, session } from 'electron'
 import { loadSettings } from './settings'
 import { onAzureQuotaOut, onGeminiQuota } from './tts'
@@ -26,6 +29,8 @@ function startWatchers() {
     broadcast('reminder:due', { ...r, late })
   }, () => broadcast('reminders:changed', listReminders()))
   startRoutines(r => broadcast('routine:run', r), () => broadcast('routines:changed', listRoutines()))
+  // warnings on its own and the evening summary
+  startPulse({ notice: (title, body) => mainWindow()?.webContents.send('pulse:notice', { title, body }), evening: () => mainWindow()?.webContents.send('pulse:evening') })
   onGeminiQuota(() => broadcast('tts:quota', 'Gemini'))
   onAzureQuotaOut(() => broadcast('tts:quota', 'Azure'))
 }
@@ -45,6 +50,7 @@ if (!app.requestSingleInstanceLock()) {
     })
 
     registerIpc()
+    cleanBackups() // copies kept for "undo" older than a week
     await pickQualityOnce()
     startWatchers()
     createTray()
@@ -52,6 +58,9 @@ if (!app.requestSingleInstanceLock()) {
     if (!globalShortcut.register(HOTKEY, talk)) console.warn(`[hotkey] ${HOTKEY} está ocupado por otra aplicación`)
     // dictation does not bring the window up: the text goes to the app in front
     if (!globalShortcut.register(DICTATE_HOTKEY, () => broadcast('hotkey:dictate'))) console.warn(`[hotkey] ${DICTATE_HOTKEY} está ocupado por otra aplicación`)
+    // the floating bar: ask from any app, or act on the selected text
+    if (!globalShortcut.register(BAR_HOTKEY, () => openBar())) console.warn(`[hotkey] ${BAR_HOTKEY} está ocupado por otra aplicación`)
+    if (!globalShortcut.register(SELECTION_HOTKEY, () => onSelectionHotkey())) console.warn(`[hotkey] ${SELECTION_HOTKEY} está ocupado por otra aplicación`)
   })
 }
 

@@ -45,8 +45,12 @@ export function systemPrompt() {
     '- Noticias: usa news; nunca des noticias de política aunque salgan en una búsqueda.',
     '- Rutinas: si pide crear o cambiar una, save_routine (un paso por acción, en frases que luego sepas hacer con tus herramientas); para lanzarla, run_routine.',
     '- Calendario ("¿qué tengo mañana?"): calendar_events.',
+    '- Resúmenes: daily_briefing (when=morning por la mañana, when=evening para "resumen de la noche" o "¿qué tal el día?"). Prioridades del día: day_plan.',
+    '- "Deshaz eso" o "déjalo como estaba" tras cambiar archivos: undo_last.',
     '- Recordatorios y alarmas: set_reminder (la hora actual está en el contexto). Confirma la hora en una frase.',
-    s.memoryLearn
+    s.privateMode
+      ? '- MODO PRIVADO activo: no guardes nada con remember ni mires la pantalla o la cámara. Si te lo piden, explica que está el modo privado (se quita con el botón del ojo en la barra).'
+      : s.memoryLearn
       ? '- Memoria: si el usuario cuenta algo duradero de sí mismo (gustos, personas, lugares, trabajo, rutinas), guárdalo con remember sin anunciarlo; si pide olvidar algo, forget.'
       : '- Memoria: guarda con remember solo lo que el usuario te pida recordar expresamente; si pide olvidar algo, forget.',
     '- Si pregunta por algo que hablasteis otro día ("¿qué te dije de…?", "¿cómo se llamaba…?"), search_memory.',
