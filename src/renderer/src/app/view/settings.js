@@ -66,7 +66,7 @@ export function settingsView(app, c) {
     featGroups, featTotal: all.length, featOn: all.filter(f => f.always || f.on(S)).length,
     featQuery: S.featQuery || '', onFeatQuery: e => app.setState({ featQuery: e.target.value, featOpen: null }),
     // the tabs
-    settingsTab: tab, version: '2.4.0',
+    settingsTab: tab, version: S.appVersion || '',
     settingsTabs: TABS.map(([id, label, desc, intro]) => ({ id, label, desc, intro, badge: id === 'ai' && !hasAnyKey ? 'Falta una clave' : '', pick: () => app.setSettingsTab(id) })),
 
     // AI service and its key

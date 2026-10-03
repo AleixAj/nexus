@@ -63,6 +63,7 @@ export function registerIpc() {
   handle('settings:get', () => ({
     ...loadSettings(),
     hotkey: HOTKEY,
+    version: app.getVersion(),
     premiumPaused: geminiVoicesPaused(),
     azurePaused: azureVoicesPaused(),
     hasAzure: !!getKey('Azure'),

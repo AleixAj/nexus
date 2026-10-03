@@ -1,15 +1,17 @@
 {
   "name": "nexus",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
-  "description": "Asistente virtual de escritorio con núcleo de IA",
+  "description": "Asistente de escritorio para Windows al estilo J.A.R.V.I.S.: voz, agente con herramientas y fondo de escritorio animado.",
   "main": "out/main/index.js",
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "preview": "electron-vite preview",
     "typecheck": "tsc --noEmit -p tsconfig.json",
-    "dist": "electron-vite build && electron-builder --win dir"
+    "dist": "electron-vite build && electron-builder --win dir",
+    "test": "vitest run",
+    "release": "electron-vite build && electron-builder --win nsis"
   },
   "dependencies": {
     "ical.js": "^2.2.1",
@@ -33,7 +35,8 @@
     "electron-vite": "^5.0.0",
     "node-html-parser": "^9.0.4",
     "typescript": "^7.0.2",
-    "vite": "^7.3.6"
+    "vite": "^7.3.6",
+    "vitest": "^5.0.3"
   },
   "author": "AleixAj",
   "build": {
@@ -62,9 +65,18 @@
       "enableCookieEncryption": true,
       "enableEmbeddedAsarIntegrityValidation": true,
       "onlyLoadAppFromAsar": true
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "artifactName": "NEXUS-Setup-${version}.exe",
+      "shortcutName": "NEXUS"
     }
   },
   "overrides": {
     "image-size": "^2.0.4"
-  }
+  },
+  "license": "MIT"
 }
