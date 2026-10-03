@@ -84,6 +84,9 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   para que siga respondiendo pero no cambie nada.
 - **Modo privado.** El botón del ojo en la barra: mientras está activo no guarda conversaciones, no aprende nada y no
   mira la pantalla ni la cámara.
+- **Todas las funciones en un sitio.** Ajustes → *Funciones* lista todo lo que sabe hacer NEXUS, por temas y con
+  buscador. Al pulsar una ves qué hace y frases para pedírsela, y puedes apagarla: una función apagada desaparece de
+  verdad (la IA no puede usarla, su atajo de teclado queda libre y su icono sale de la barra).
 - **Autodiagnóstico.** Ajustes → *Comprobar que todo funciona*: revisa internet, cada clave, las voces, el micrófono, que
   entienda lo que dices, búsqueda, noticias, tiempo, calendario, Spotify y disco, sin cambiar nada, y dice cómo arreglar
   lo que falle.

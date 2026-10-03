@@ -1,6 +1,7 @@
 // Every tool the agent can use, in one list. To add one: write it in the file of its
 // group (or a new file) and add that list here.
 import type { Settings } from '../settings'
+import { FEATURE_TOOLS } from '../features'
 import type { Group, RunCtx, Tool, ToolResult } from './define'
 import { activityTools } from './activity'
 import { appTools } from './apps'
@@ -63,13 +64,17 @@ export function pickTools(said: string, chat = false): Set<string> | null {
 
 /** Definitions in OpenAI function-calling format, only for what the user allowed (and, if given, picked). */
 export function toolDefs(s: Settings, only: Set<string> | null = null) {
-  return ALL.filter(t => enabled(t.group, s) && (!only || only.has(t.name))).map(t => ({
+  const off = new Set(s.disabled || [])
+  return ALL.filter(t => enabled(t.group, s) && (!only || only.has(t.name)) && !isOffIn(t.name, off)).map(t => ({
     type: 'function',
     function: { name: t.name, description: t.description, parameters: { type: 'object', properties: t.params || {}, required: t.required || [] } }
   }))
 }
 
 export const findTool = (name: string) => BY_NAME.get(name)
+
+// a feature switched off in Settings → Funciones takes its tools with it
+const isOffIn = (tool: string, off: Set<string>) => Object.entries(FEATURE_TOOLS).some(([f, tools]) => off.has(f) && tools.includes(tool))
 
 /** Runs a tool; errors come back as text for the model, never thrown (except an abort). */
 export async function runTool(t: Tool, args: any, ctx: RunCtx): Promise<ToolResult> {

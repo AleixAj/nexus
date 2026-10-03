@@ -1,6 +1,9 @@
 // Settings panel: AI service and keys, agent permissions, Gemini switches, system and look.
 import { KEY_ORDER, PERSONAS, THEMES, providerInfo, voiceById } from '../constants';
 import { WALLPAPER, api, seg, toggleT } from '../util';
+import { FEATURE_GROUPS } from '../featureCatalog';
+
+const plain = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
 
 const QUALITY = [['ultra', 'Ultra'], ['equilibrado', 'Equilibrado'], ['ahorro', 'Ahorro']];
 const QUALITY_NOTE = { ultra: '2 600 PARTÍCULAS · 60 FPS', equilibrado: '1 500 PARTÍCULAS · 60 FPS', ahorro: '700 PARTÍCULAS · SIN GRANO' };
@@ -12,6 +15,7 @@ const QUALITY_HELP = {
 
 // the pages of Settings: name, what it holds (menu) and what it is for (top of the page)
 const TABS = [
+  ['features', 'Funciones', 'Todo lo que puedo hacer', 'Todo lo que sé hacer, explicado. Pulsa una función para ver qué hace y cómo pedírmela, y apaga las que no quieras o no vayas a usar.'],
   ['ai', 'Inteligencia', 'IA, claves y cupo', 'Qué IA responde, tus claves y cuánto cupo gratis queda hoy.'],
   ['agent', 'Permisos', 'Qué puede hacer en tu PC', 'Lo que NEXUS puede hacer por su cuenta. Lo que cambia algo en tu PC siempre te pide permiso antes.'],
   ['voice', 'Voz y audio', 'Mi voz, micrófono y escucha', 'Cómo sueno, con qué micrófono te oigo y cómo me llamas.'],
@@ -41,8 +45,26 @@ export function settingsView(app, c) {
   const prov = S.providers[kp] || {};
   const hotkey = app.hotkeyLabel().toLowerCase();
   const hasAnyKey = Object.values(S.providers || {}).some(p => p.needsKey && p.hasKey);
-  const tab = S.settingsTab || 'ai';
+  const tab = S.settingsTab || 'features';
+  // Settings → Funciones: every feature, searchable, with its switch
+  const q = plain(S.featQuery || '');
+  const all = FEATURE_GROUPS.flatMap(g => g.items);
+  const featGroups = FEATURE_GROUPS.map(g => ({
+    name: g.name,
+    items: g.items.filter(f => !q || plain(f.name + ' ' + f.short + ' ' + f.long).includes(q)).map(f => {
+      const on = f.always ? true : f.on(S);
+      return {
+        id: f.id, icon: f.icon, name: f.name, short: f.short, long: f.long, examples: f.examples || [], always: !!f.always, on,
+        ...toggleT(on), toggle: () => f.flip(app, S), label: f.name,
+        open: S.featOpen === f.id, select: () => app.setState({ featOpen: S.featOpen === f.id ? null : f.id }),
+        more: f.more ? { label: f.more[1], go: () => app.setSettingsTab(f.more[0]) } : null,
+      };
+    }),
+  })).filter(g => g.items.length);
   return {
+    // the features
+    featGroups, featTotal: all.length, featOn: all.filter(f => f.always || f.on(S)).length,
+    featQuery: S.featQuery || '', onFeatQuery: e => app.setState({ featQuery: e.target.value, featOpen: null }),
     // the tabs
     settingsTab: tab, version: '2.4.0',
     settingsTabs: TABS.map(([id, label, desc, intro]) => ({ id, label, desc, intro, badge: id === 'ai' && !hasAnyKey ? 'Falta una clave' : '', pick: () => app.setSettingsTab(id) })),

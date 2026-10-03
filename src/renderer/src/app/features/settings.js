@@ -12,7 +12,7 @@ export const settings = {
     this.setState(st => ({
       provider: s.provider, model: s.model, providers: s.providers, voiceSel: s.voice, userName: s.userName, persona: s.persona,
       theme: s.theme, quality: s.quality, reduced: s.reduced, autostart: !!s.autostart, hotkey: s.hotkey || st.hotkey,
-      subtitles: !!s.subtitles, learn: s.memoryLearn !== false, newsTopics: s.newsTopics, newsAvoid: s.newsAvoid, briefing: s.briefing, lastBriefing: s.lastBriefing, wakeListen: !!s.wakeListen, bgMotion: s.bgMotion || 'desktop', wakeWord: s.wakeWord || 'Hey Nexus', wallDock: s.wallDock !== false, wallClicks: s.wallClicks !== false, wallExtend: !!s.wallExtend, privateMode: !!s.privateMode, proactive: s.proactive !== false, eveningReview: s.eveningReview !== false, eveningAt: s.eveningAt || '21:30', spotifyClientId: s.spotifyClientId,
+      subtitles: !!s.subtitles, learn: s.memoryLearn !== false, newsTopics: s.newsTopics, newsAvoid: s.newsAvoid, briefing: s.briefing, lastBriefing: s.lastBriefing, wakeListen: !!s.wakeListen, bgMotion: s.bgMotion || 'desktop', wakeWord: s.wakeWord || 'Hey Nexus', wallDock: s.wallDock !== false, wallClicks: s.wallClicks !== false, wallExtend: !!s.wallExtend, privateMode: !!s.privateMode, disabled: s.disabled || [], proactive: s.proactive !== false, eveningReview: s.eveningReview !== false, eveningAt: s.eveningAt || '21:30', spotifyClientId: s.spotifyClientId,
       premiumPaused: !!s.premiumPaused, azurePaused: !!s.azurePaused, hasAzure: !!s.hasAzure, azureRegion: s.azureRegion,
       agent: { web: s.agentWeb, files: s.agentFiles, write: s.agentWrite, shell: s.agentShell }, micId: s.micId || '',
       gemini: { tts: s.geminiTts, search: s.geminiSearch, stt: s.geminiStt, vision: s.geminiVision, memory: s.geminiMemory, fallback: s.geminiFallback },
@@ -49,6 +49,13 @@ export const settings = {
   },
   hotkeyLabel() { return this.state.hotkey.replace('Control', 'Ctrl').replace('Space', 'Espacio').split('+').join(' + ').toUpperCase(); },
 
+  // a feature on or off (Settings → Funciones); the main process drops its tools and hotkey
+  toggleFeature(id) {
+    const cur = this.state.disabled || [];
+    const next = cur.includes(id) ? cur.filter(x => x !== id) : [...cur, id];
+    this.setState({ disabled: next });
+    this.save({ disabled: next });
+  },
   // which page of Settings is open (remembered between sessions)
   setSettingsTab(id) {
     this.setState({ settingsTab: id });

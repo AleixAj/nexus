@@ -8,6 +8,7 @@ const NOTE = 'rgba(226,218,240,.6)'
 const LINE = 'rgba(196,181,253,.16)'
 
 const ICONS: Record<string, string> = {
+  features: 'M4 4h7v7H4zM13 4h7v7h-7zM4 13h7v7H4zM13 13h7v7h-7z',
   ai: 'M12 3l1.8 4.6L18.5 9l-4.7 1.6L12 15l-1.8-4.4L5.5 9l4.7-1.4zM18 15l.9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18l2.1-.9z',
   agent: 'M12 3l8 3v6c0 4.5-3.4 8.3-8 9-4.6-.7-8-4.5-8-9V6zM9 12l2 2 4-4',
   voice: 'M12 3a3 3 0 0 0-3 3v6a3 3 0 0 0 6 0V6a3 3 0 0 0-3-3zM5 11a7 7 0 0 0 14 0M12 18v3',
@@ -121,6 +122,64 @@ function AiTab({ v }: { v: any }) {
   )
 }
 
+/** Settings → Funciones: every feature as a card; a click opens what it does, how to ask for it and its switch. */
+function FeaturesTab({ v }: { v: any }) {
+  return (
+    <>
+      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+        <div style={{ ...field, flex: '1', display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <Icon d="M10 4a6 6 0 1 0 0 12a6 6 0 1 0 0-12M20 20l-5.5-5.5" size={18} />
+          <input value={v.featQuery} onChange={v.onFeatQuery} placeholder="Buscar una función… (música, archivos, alarma)" aria-label="Buscar una función" spellCheck={false}
+            style={{ flex: '1', minWidth: 0, background: 'none', border: 'none', outline: 'none', color: '#FFF6E9', fontSize: '15px' }} />
+        </div>
+        <span style={{ flex: 'none', fontFamily: mono, fontSize: '12px', letterSpacing: '.15em', color: 'rgb(var(--acc2) / .75)' }}>{v.featOn} DE {v.featTotal} ACTIVAS</span>
+      </div>
+      {!v.featGroups.length && <Help>No hay ninguna función con ese nombre. Prueba con otra palabra.</Help>}
+      {v.featGroups.map((g: any) => (
+        <Group key={g.name} title={g.name.toUpperCase()}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, minmax(0,1fr))', gap: '10px' }}>
+            {g.items.map((f: any) => (
+              <div key={f.id} ref={el => { if (f.open && el) setTimeout(() => el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }), 60) }} style={{ gridColumn: f.open ? '1 / -1' : 'auto', borderRadius: '14px', border: `1px solid ${f.open ? 'rgb(var(--acc2) / .45)' : LINE}`, background: f.open ? 'rgb(var(--acc) / .1)' : 'rgba(255,255,255,.025)', transition: 'border-color 200ms, background 200ms', opacity: f.on ? 1 : .62 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '14px', padding: '14px 16px' }}>
+                  <button onClick={f.select} aria-expanded={f.open} style={{ flex: '1', minWidth: 0, display: 'flex', alignItems: 'center', gap: '14px', background: 'none', border: 'none', padding: 0, cursor: 'pointer', textAlign: 'left', color: 'inherit' }}>
+                    <span style={{ flex: 'none', width: '42px', height: '42px', borderRadius: '12px', display: 'grid', placeItems: 'center', background: f.on ? 'rgb(var(--acc) / .2)' : 'rgba(255,255,255,.05)', color: f.on ? 'rgb(var(--acc2))' : 'rgba(226,218,240,.5)' }}>
+                      <Icon d={f.icon} size={21} />
+                    </span>
+                    <span style={{ display: 'flex', flexDirection: 'column', gap: '3px', minWidth: 0 }}>
+                      <span style={{ fontSize: '16px', color: TEXT }}>{f.name}</span>
+                      <span style={{ fontSize: '13.5px', lineHeight: 1.4, color: NOTE }}>{f.short}</span>
+                    </span>
+                  </button>
+                  {f.always
+                    ? <span title="Siempre activa" style={{ flex: 'none', fontFamily: mono, fontSize: '10.5px', letterSpacing: '.15em', color: 'rgba(226,218,240,.45)' }}>SIEMPRE</span>
+                    : <Switch t={f} />}
+                </div>
+                {f.open && (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', padding: '0 18px 18px 72px', animation: 'nx-in 300ms both' }}>
+                    <span style={{ fontSize: '15px', lineHeight: 1.6, color: 'rgba(241,234,248,.86)' }}>{f.long}</span>
+                    {f.examples.length > 0 && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <span style={{ fontFamily: mono, fontSize: '11.5px', letterSpacing: '.18em', color: 'rgb(var(--acc2) / .7)' }}>PRUEBA A DECIR</span>
+                        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                          {f.examples.map((x: string) => <span key={x} style={{ padding: '7px 12px', borderRadius: '999px', background: 'rgba(0,0,0,.3)', border: `1px solid ${LINE}`, fontSize: '14px', color: '#FFF6E9' }}>«{x}»</span>)}
+                        </div>
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: '13.5px', color: f.on ? '#34D399' : '#F5B971' }}>{f.always ? '● Siempre activa' : f.on ? '● Activada' : '● Desactivada: no la uso aunque me la pidas'}</span>
+                      {f.more && <button onClick={f.more.go} style={{ ...ghostBtn, height: '34px', fontSize: '13.5px' }}>Más opciones en {f.more.label} →</button>}
+                    </div>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        </Group>
+      ))}
+    </>
+  )
+}
+
 function AccountsTab({ v }: { v: any }) {
   return (
     <>
@@ -163,6 +222,7 @@ function AccountsTab({ v }: { v: any }) {
 function Tab({ v }: { v: any }) {
   const t = v.toggles
   switch (v.settingsTab) {
+    case 'features': return <FeaturesTab v={v} />
     case 'ai': return <AiTab v={v} />
     case 'agent': return <Group title="LO QUE PUEDE HACER EN TU PC"><Toggles list={v.agentToggles} /></Group>
     case 'voice': return (

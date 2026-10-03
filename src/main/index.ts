@@ -1,5 +1,6 @@
 // Start-up: one instance only, then the window, the tray, the hotkey and the background watchers.
 import { cleanBackups } from './activity'
+import { applyHotkeys, isOff } from './features'
 import { startPulse } from './pulse'
 import { BAR_HOTKEY, SELECTION_HOTKEY, onSelectionHotkey, openBar } from './bar'
 import { app, desktopCapturer, globalShortcut, session } from 'electron'
@@ -28,7 +29,7 @@ function startWatchers() {
     notify(r.alarm ? '⏰ Alarma' : 'Recordatorio', (late ? `Se te pasó (${when(r.at)}): ` : '') + r.text)
     broadcast('reminder:due', { ...r, late })
   }, () => broadcast('reminders:changed', listReminders()))
-  startRoutines(r => broadcast('routine:run', r), () => broadcast('routines:changed', listRoutines()))
+  startRoutines(r => { if (!isOff('routines')) broadcast('routine:run', r) }, () => broadcast('routines:changed', listRoutines()))
   // warnings on its own and the evening summary
   startPulse({ notice: (title, body) => mainWindow()?.webContents.send('pulse:notice', { title, body }), evening: () => mainWindow()?.webContents.send('pulse:evening') })
   onGeminiQuota(() => broadcast('tts:quota', 'Gemini'))
@@ -56,11 +57,14 @@ if (!app.requestSingleInstanceLock()) {
     createTray()
     createWindow(loadSettings().mode === 'wallpaper' ? 'wallpaper' : 'window')
     if (!globalShortcut.register(HOTKEY, talk)) console.warn(`[hotkey] ${HOTKEY} está ocupado por otra aplicación`)
-    // dictation does not bring the window up: the text goes to the app in front
-    if (!globalShortcut.register(DICTATE_HOTKEY, () => broadcast('hotkey:dictate'))) console.warn(`[hotkey] ${DICTATE_HOTKEY} está ocupado por otra aplicación`)
-    // the floating bar: ask from any app, or act on the selected text
-    if (!globalShortcut.register(BAR_HOTKEY, () => openBar())) console.warn(`[hotkey] ${BAR_HOTKEY} está ocupado por otra aplicación`)
-    if (!globalShortcut.register(SELECTION_HOTKEY, () => onSelectionHotkey())) console.warn(`[hotkey] ${SELECTION_HOTKEY} está ocupado por otra aplicación`)
+    // the hotkeys of features that can be switched off (Settings → Funciones): dictation does not
+    // bring the window up (the text goes to the app in front); the bar asks from any app or acts on
+    // the selected text
+    applyHotkeys([
+      { feature: 'dictation', accel: DICTATE_HOTKEY, run: () => broadcast('hotkey:dictate') },
+      { feature: 'bar', accel: BAR_HOTKEY, run: () => { openBar() } },
+      { feature: 'selection', accel: SELECTION_HOTKEY, run: () => { onSelectionHotkey() } },
+    ])
   })
 }
 

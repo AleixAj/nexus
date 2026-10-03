@@ -9,12 +9,13 @@ import { oneOf, str, said, type Tool } from './define'
 import { calendarConnected, eventLine, events } from '../calendar'
 import { markDone, setPlan, todayPlan } from '../dayplan'
 import { listActivity } from '../activity'
+import { isOff } from '../features'
 
 const planLines = () => todayPlan().map((p, i) => `${i + 1}. ${p.done ? '[hecho] ' : ''}${p.text}`).join('\n')
 
 async function morning() {
   const s = loadSettings()
-  const [world, news, cal] = await Promise.all([getWorld().catch(() => null), getNews(s.newsTopics, s.newsAvoid).catch(() => []), calendarConnected() ? events(1).catch(() => []) : Promise.resolve(null)])
+  const [world, news, cal] = await Promise.all([getWorld().catch(() => null), isOff('news') ? Promise.resolve([]) : getNews(s.newsTopics, s.newsAvoid).catch(() => []), calendarConnected() && !isOff('calendar') ? events(1).catch(() => []) : Promise.resolve(null)])
   const endOfDay = new Date().setHours(23, 59, 59, 999)
   const today = listReminders().filter(r => r.at <= endOfDay)
   const plan = todayPlan()
@@ -24,7 +25,7 @@ async function morning() {
     cal ? (cal.length ? 'Calendario de hoy:\n' + cal.map(e => '- ' + eventLine(e)).join('\n') : 'Calendario: nada hoy.') : '',
     today.length ? 'Recordatorios de hoy:\n' + today.map(r => `- ${hm(r.at)} ${r.text}`).join('\n') : 'Sin recordatorios para hoy.',
     news.length ? 'Noticias interesantes (elige las 3 mejores):\n' + news.slice(0, 8).map(x => `- ${x.title} (${x.source})`).join('\n') : '',
-    plan.length ? 'Prioridades de hoy:\n' + planLines()
+    isOff('priorities') ? '' : plan.length ? 'Prioridades de hoy:\n' + planLines()
       : 'Aún no tiene prioridades para hoy: al final pregúntale cuáles son sus tres cosas importantes de hoy (cuando conteste, guárdalas con day_plan set).',
   ].filter(Boolean).join('\n')
 }

@@ -9,6 +9,7 @@ import { loadSettings } from './settings'
 import { calendarConnected, events, type CalEvent } from './calendar'
 import { powershell } from './lib/powershell'
 import { ICON } from './window'
+import { isOff } from './features'
 
 const MAX_A_DAY = 6
 const QUIET_FROM = 23, QUIET_TO = 8 // nothing at night (the calendar still warns)
@@ -61,7 +62,7 @@ async function tick() {
   const now = Date.now()
 
   // a meeting soon (from the connected calendar)
-  if (calendarConnected()) {
+  if (calendarConnected() && !isOff('calendar')) {
     if (!calCache || now - calCache.at > 10 * 60e3) calCache = { at: now, list: await events(1).catch(() => []) }
     for (const e of calCache.list) {
       const mins = (e.start - now) / 60e3

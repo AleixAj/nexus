@@ -21,6 +21,7 @@ import { broadcast } from './window'
 import { listApprovals, revoke } from './approvals'
 import { runDiagnostics } from './diagnostics'
 import { openEditBox } from './editBox'
+import { applyHotkeys } from './features'
 import { canUndo, isPaused, listActivity, onActivityChanged, setPaused, undoAction } from './activity'
 import { quotaToday } from './brain/providers'
 import { calendarConnected, events, setCalendarUrl } from './calendar'
@@ -66,6 +67,7 @@ export function registerIpc() {
     const p = patch && typeof patch === 'object' ? patch : {}
     const out = saveSettings(p)
     if ('wallClicks' in p) wallClicksChanged()
+    if ('disabled' in p) applyHotkeys()
     if ('wallExtend' in p) { if (out.wallExtend) openExtras(); else closeExtras() }
     if (['theme', 'quality', 'reduced', 'bgMotion'].some(k => k in p)) extrasRefresh()
     return out

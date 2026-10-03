@@ -15,6 +15,7 @@ import { noteTool, resetTaint } from '../lib/taint'
 import { approvalKey, approve, isApproved } from '../approvals'
 import { markRun, routineFor, routinePrompt } from '../routines'
 import { isPaused, recordAction } from '../activity'
+import { toolOff } from '../features'
 
 type Msg = { role: string; content?: string | null; tool_calls?: any[]; tool_call_id?: string; name?: string }
 
@@ -91,6 +92,8 @@ async function useTool(name: string, args: any, turn: Turn): Promise<ToolResult>
   const { h, signal, guard } = turn
   const t = findTool(name)
   if (!t) return { result: 'Herramienta desconocida', label: name }
+  // switched off by the user (Settings → Funciones)
+  if (toolOff(name)) return { result: 'Esa función está desactivada por el usuario en Ajustes → Funciones. No la uses; díselo por si quiere activarla.', label: 'Función desactivada' }
   const loop = guard.check(name, args)
   if (loop) return { result: loop, label: 'Repetición evitada' }
   // serious actions need the user's own words, not just the model's decision
@@ -128,6 +131,7 @@ async function runQuick(q: Quick, text: string, h: Handlers, ctl: AbortControlle
   else {
     const r = await useTool(q.tool, q.args, { said: text, h, signal: ctl.signal, guard: new LoopGuard() })
     if (r.label === 'En pausa · no hago cambios') reply = 'Estoy en pausa total: no hago cambios en tu PC. Quítala en el panel Actividad.'
+    else if (r.label === 'Función desactivada') reply = 'Esa función está desactivada. Puedes activarla en Ajustes → Funciones.'
     else if (q.ok && !q.ok(r.result)) return null // not something it can do alone: the AI tries
     else reply = r.label === 'Acción denegada' ? 'De acuerdo, no lo hago.' : q.reply(r.result)
     if (r.label !== reply.replace(/\.$/, '')) h.onAction(r.label)

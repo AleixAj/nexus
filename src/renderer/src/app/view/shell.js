@@ -2,6 +2,7 @@
 // notifications, the dock, the mini overlay and the approval / key cards.
 import { CORE_LABELS, DOCK, ICON, THEMES } from '../constants';
 import { WALLPAPER } from '../util';
+import { DOCK_FEATURE } from '../featureCatalog';
 
 export function shellView(app, c) {
   const { S, P, L, core, live } = c;
@@ -43,7 +44,7 @@ export function shellView(app, c) {
 
     // dock
     showDock: (!WALLPAPER || S.wallDock !== false) && S.uiIn && !S.onb && !S.overlay,
-    dock: DOCK.map(([id, label]) => {
+    dock: DOCK.filter(([id]) => !(DOCK_FEATURE[id] && (S.disabled || []).includes(DOCK_FEATURE[id]))).map(([id, label]) => {
       const act = P === id || (id === 'volume' && S.volOpen);
       return {
         sep: id === 'private', domId: 'dock-' + id, d: id === 'private' && S.privateMode ? ICON.privateOn : ICON[id],

@@ -50,6 +50,8 @@ export type Settings = {
   privateMode: boolean
   // NEXUS warns on its own (meetings, CPU, battery, disk) and gives the evening summary
   proactive: boolean
+  // features switched off in Settings → Funciones (see features.ts)
+  disabled: string[]
   eveningReview: boolean
   eveningAt: string
   theme: string
@@ -127,6 +129,7 @@ const DEFAULTS: Settings = {
   memoryLearn: true,
   privateMode: false,
   proactive: true,
+  disabled: [],
   eveningReview: true,
   eveningAt: '21:30',
   theme: 'nexus',
@@ -152,7 +155,8 @@ function clean(patch: Record<string, unknown>) {
     if (!Object.hasOwn(DEFAULTS, k)) continue
     const d = (DEFAULTS as Record<string, unknown>)[k]
     if (typeof v !== typeof d || (typeof v === 'number' && !Number.isFinite(v))) continue
-    out[k] = typeof v === 'string' ? v.slice(0, 80) : v
+    if (Array.isArray(d) !== Array.isArray(v)) continue
+    out[k] = typeof v === 'string' ? v.slice(0, 80) : Array.isArray(v) ? v.filter(x => typeof x === 'string').map(x => x.slice(0, 40)).slice(0, 60) : v
   }
   if (out.provider && out.provider !== 'Auto' && !Object.hasOwn(PROVIDERS, out.provider as string)) delete out.provider
   if (out.mode && !['window', 'wallpaper'].includes(out.mode as string)) delete out.mode
