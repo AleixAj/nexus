@@ -9,7 +9,7 @@ import { str, type Tool } from './define'
 
 // each theme of the app, as slide colours (accent, light accent)
 const THEMES: Record<string, [string, string]> = {
-  nexus: ['8B5CF6', 'C4B5FD'], arc: ['22D3EE', 'A5F3FC'], mark3: ['EF4444', 'FCD34D'], emerald: ['10B981', 'A7F3D0'], solar: ['F97316', 'FED7AA'],
+  nexus: ['8B5CF6', 'C4B5FD'], arc: ['22D3EE', 'A5F3FC'], mark3: ['EF4444', 'FCD34D'], emerald: ['10B981', 'A7F3D0'], solar: ['F97316', 'FED7AA'], chicle: ['FF4DA0', 'FFC2E0'], orquidea: ['C83CDC', 'F0B4FA'],
 }
 type Slide = { title?: string; bullets?: string[]; notes?: string; quote?: string; stat?: string; statLabel?: string }
 

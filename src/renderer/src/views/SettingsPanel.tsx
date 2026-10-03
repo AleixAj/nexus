@@ -319,7 +319,7 @@ function Tab({ v }: { v: any }) {
     case 'look': return (
       <>
         <Group title="TEMA DE COLOR">
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5,1fr)', gap: '12px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7,1fr)', gap: '12px' }}>
             {v.themeCards.map((c: any) => (
               <button key={c.name} onClick={c.pick} aria-pressed={c.on} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px', padding: '18px 6px', borderRadius: '14px', cursor: 'pointer', background: c.bg, border: `1px solid ${c.border}`, color: '#F1EAF8', transition: 'transform 300ms cubic-bezier(.34,1.2,.64,1), border-color 300ms' }} className="dc53">
                 <span style={{ width: '48px', height: '48px', borderRadius: '50%', background: `radial-gradient(circle at 50% 50%, #FFF6E9 0 12%, ${c.c2} 24%, ${c.c1} 48%, #05030A 72%)`, boxShadow: `0 0 0 1.5px ${c.c2}, 0 0 18px ${c.c1}` }} />

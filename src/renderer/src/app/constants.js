@@ -6,6 +6,8 @@ export const THEMES = {
   arc: { name: 'Arc', acc: '34 211 238', acc2: '165 243 252', c1: '#22D3EE', c2: '#A5F3FC' },
   mark3: { name: 'Mark III', acc: '239 68 68', acc2: '253 208 150', c1: '#EF4444', c2: '#FCD34D' },
   emerald: { name: 'Esmeralda', acc: '16 185 129', acc2: '167 243 208', c1: '#10B981', c2: '#A7F3D0' },
+  chicle: { name: 'Chicle', acc: '255 77 160', acc2: '255 194 224', c1: '#FF4DA0', c2: '#FFC2E0' },
+  orquidea: { name: 'Orquídea', acc: '200 60 220', acc2: '240 180 250', c1: '#C83CDC', c2: '#F0B4FA' },
 };
 
 // fx: the AI processing preset applied on top of the neural voice (services/voice.ts)
