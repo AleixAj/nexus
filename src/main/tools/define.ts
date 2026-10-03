@@ -28,6 +28,8 @@ export type Tool = {
   confirm?: (a: any) => { title: string; detail: string } | null
   /** Too risky to approve for good (any command, deleting): it always asks. */
   noAlways?: boolean
+  /** These arguments always need the user's OK, even if the kind of action was approved for good. */
+  alwaysAsk?: (a: any) => boolean
   /**
    * Serious actions (shut down, delete…) only run if the user's own words ask for them: the model
    * alone cannot decide them, not even when a web page or a file tells it to. Returns the words

@@ -3,7 +3,7 @@ import { cleanBackups } from './activity'
 import { applyHotkeys, isOff } from './features'
 import { startPulse } from './pulse'
 import { BAR_HOTKEY, SELECTION_HOTKEY, onSelectionHotkey, openBar } from './bar'
-import { app, desktopCapturer, globalShortcut, session } from 'electron'
+import { Menu, app, desktopCapturer, globalShortcut, session, shell, webContents } from 'electron'
 import { loadSettings } from './settings'
 import { onAzureQuotaOut, onGeminiQuota } from './tts'
 import { listReminders, startReminders, when } from './reminders'
@@ -12,7 +12,7 @@ import { watchMedia } from './media'
 import { registerIpc } from './ipc'
 import { pickQualityOnce } from './hardware'
 import { DICTATE_HOTKEY } from './dictation'
-import { HOTKEY, beforeQuit, broadcast, createTray, createWindow, mainWindow, notify, showWindow, talk } from './window'
+import { HOTKEY, isDev, beforeQuit, broadcast, createTray, createWindow, mainWindow, notify, showWindow, talk } from './window'
 
 // the greeting plays on start, before any click
 app.commandLine.appendSwitch('autoplay-policy', 'no-user-gesture-required')
@@ -22,6 +22,19 @@ app.commandLine.appendSwitch('force_high_performance_gpu')
 app.commandLine.appendSwitch('disable-features', 'HardwareMediaKeyHandling,MediaSessionService')
 
 process.on('unhandledRejection', err => console.warn('[unhandled]', err))
+
+// ---------- hardening for every window (main, bar, wallpaper screens, text box) ----------
+// No pop-ups, no navigating away from NEXUS's own page, no <webview>: links open in the browser.
+app.on('web-contents-created', (_e, wc) => {
+  wc.setWindowOpenHandler(({ url }) => {
+    if (/^https?:\/\//i.test(url)) shell.openExternal(url)
+    return { action: 'deny' }
+  })
+  // (while developing, the page may reload itself from the dev server)
+  wc.on('will-navigate', (e, url) => { if (!(isDev && url.startsWith(process.env.ELECTRON_RENDERER_URL!))) e.preventDefault() })
+  wc.on('will-redirect', e => e.preventDefault())
+  wc.on('will-attach-webview', e => e.preventDefault())
+})
 
 function startWatchers() {
   watchMedia(m => broadcast('media:state', m), x => broadcast('media:extra', x))
@@ -43,10 +56,15 @@ if (!app.requestSingleInstanceLock()) {
   app.on('second-instance', (_e, argv) => { if (!argv.includes('--background')) showWindow() })
 
   app.whenReady().then(async () => {
-    // microphone only for our own window
-    session.defaultSession.setPermissionRequestHandler((wc, permission, cb) => cb(permission === 'media' && wc === mainWindow()?.webContents))
-    // the halo can follow the PC's audio (music): system loopback, no picker
-    session.defaultSession.setDisplayMediaRequestHandler((_req, cb) => {
+    // no menu in the installed app (its hidden shortcuts would open the developer tools)
+    if (app.isPackaged) Menu.setApplicationMenu(null)
+    // microphone and camera only for our own window; nothing else (location, notifications…) for anyone
+    const isMain = (wc: Electron.WebContents | null) => !!wc && wc === mainWindow()?.webContents
+    session.defaultSession.setPermissionRequestHandler((wc, permission, cb) => cb(permission === 'media' && isMain(wc)))
+    session.defaultSession.setPermissionCheckHandler((wc, permission) => permission === 'media' && isMain(wc))
+    // the halo can follow the PC's audio (music): system loopback, no picker, only for the main window
+    session.defaultSession.setDisplayMediaRequestHandler((req, cb) => {
+      if (!req.frame || !isMain(webContents.fromFrame(req.frame) || null)) { cb({}); return }
       desktopCapturer.getSources({ types: ['screen'] }).then(src => cb({ video: src[0], audio: 'loopback' })).catch(() => cb({}))
     })
 

@@ -309,9 +309,20 @@ Varias de estas ideas vienen de [OpenJarvis](https://github.com/open-jarvis/Open
 [JARVIS-OS](https://github.com/MAL19INDUSTRIES/JARVIS-OS-V.2).
 
 - **Privacidad:** antes de enviar a la IA lo que sale de un archivo, el portapapeles o la pantalla, se ocultan claves,
-  contraseñas, tarjetas e IBAN. Los archivos de claves (`.env`, `.ssh`, `.pem`…) no se pueden leer.
+  contraseñas, tarjetas e IBAN. No se pueden leer archivos de claves (`.env`, `.ssh`, `.pem`, `.git-credentials`…) ni los
+  perfiles de los navegadores (contraseñas, cookies, carteras).
+- **Claves cifradas:** las claves de las IA, la memoria, el calendario y Spotify se guardan cifradas con tu cuenta de
+  Windows (DPAPI). Ninguna clave va en el código ni en el repositorio.
 - **Permisos:** lo que cambia el equipo pide permiso; con «Permitir siempre» deja de preguntar para ese tipo de acción
-  (se quita en Rutinas → Permisos). Borrar y PowerShell preguntan siempre.
+  (se quita en Rutinas → Permisos). Borrar, PowerShell y crear o cambiar archivos que ejecutan programas (`.exe`,
+  `.bat`, `.ps1`, accesos directos…) preguntan siempre, aunque el archivo de permisos diga otra cosa.
+- **Zonas prohibidas:** el agente nunca escribe en el inicio de Windows, en los perfiles de PowerShell ni en los archivos
+  de NEXUS (así una web no puede darle permisos ni dejar algo que se ejecute al encender el PC).
+- **Solo internet público:** al leer webs no abre direcciones de este PC ni de tu red local (router, otros equipos).
+- **Ventanas blindadas:** sin ventanas emergentes ni navegación fuera de NEXUS; micrófono, cámara y captura de pantalla
+  solo para la ventana principal; el proceso principal solo atiende a la página propia de NEXUS.
+- **Ejecutable endurecido:** `NEXUS.exe` no se puede usar como intérprete de Node ni depurar desde fuera, comprueba
+  que su código no se ha manipulado y no tiene el menú oculto de herramientas de desarrollo.
 - **Solo lo que pides tú:** apagar, reiniciar o borrar solo se hacen si lo has dicho con tus palabras; si la orden sale
   de una web o un archivo, se bloquea.
 - **Freno de bucles:** si el agente repite la misma acción tres veces, se para (ahorra cupo gratis).

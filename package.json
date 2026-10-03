@@ -54,6 +54,17 @@
     "asar": true,
     "asarUnpack": [
       "node_modules/sherpa-onnx-*/**"
-    ]
+    ],
+    "electronFuses": {
+      "runAsNode": false,
+      "enableNodeOptionsEnvironmentVariable": false,
+      "enableNodeCliInspectArguments": false,
+      "enableCookieEncryption": true,
+      "enableEmbeddedAsarIntegrityValidation": true,
+      "onlyLoadAppFromAsar": true
+    }
+  },
+  "overrides": {
+    "image-size": "^2.0.4"
   }
 }

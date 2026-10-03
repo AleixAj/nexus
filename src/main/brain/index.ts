@@ -112,11 +112,14 @@ async function useTool(name: string, args: any, turn: Turn): Promise<ToolResult>
   }
   const req = t.confirm?.(args)
   const key = approvalKey(name, args)
-  if (req && !isApproved(key)) {
-    const ok = await h.confirm({ ...req, always: !t.noAlways })
+  // "always" never covers what must be asked every time (commands, deleting, files that run code),
+  // even if approvals.json says otherwise
+  const everyTime = !!t.noAlways || !!t.alwaysAsk?.(args)
+  if (req && (everyTime || !isApproved(key))) {
+    const ok = await h.confirm({ ...req, detail: req.detail + (t.alwaysAsk?.(args) ? '\n\n⚠ Este archivo puede ejecutar programas al abrirlo.' : ''), always: !everyTime })
     if (signal.aborted) throw aborted()
     if (!ok) return { result: 'El usuario ha denegado el permiso para esta acción.', label: 'Acción denegada' }
-    if (ok === 'always' && !t.noAlways) approve(key, req.title)
+    if (ok === 'always' && !everyTime) approve(key, req.title)
   }
   const label = t.progress?.(args)
   if (label) h.onProgress(label)

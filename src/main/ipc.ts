@@ -3,6 +3,7 @@ import { app, BrowserWindow, ipcMain, type IpcMainInvokeEvent } from 'electron'
 import { createHash } from 'crypto'
 import { mkdir, readFile, writeFile } from 'fs/promises'
 import { join } from 'path'
+import { pathToFileURL } from 'url'
 import { PROVIDERS, getKey, loadSettings, saveSettings, setKey, testKey } from './settings'
 import { azureVoicesPaused, geminiVoicesPaused, isPremium, speak, speakDetailed, warmVoices } from './tts'
 import { abort, ask, clearCurrentFiles, resetHistory } from './brain'
@@ -28,9 +29,14 @@ import { calendarConnected, events, setCalendarUrl } from './calendar'
 import { deleteRoutine, listRoutines, setRoutineEnabled, triggerText } from './routines'
 import { REDIRECT, connectSpotify, disconnectSpotify, spotifyStatus } from './spotifyApi'
 
+// Only NEXUS's own page may call the main process: the exact file it ships with (any query),
+// not any other local file or web page.
+const PAGE = pathToFileURL(join(__dirname, '../renderer/index.html')).href.toLowerCase()
 const trusted = (e: IpcMainInvokeEvent) => {
-  const url = e.senderFrame?.url || ''
-  return isDev ? url.startsWith(process.env.ELECTRON_RENDERER_URL!) : url.startsWith('file://')
+  const frame = e.senderFrame
+  if (!frame || frame !== frame.top) return false // no iframes
+  const url = (frame.url || '').split(/[?#]/)[0]
+  return isDev ? url.startsWith(process.env.ELECTRON_RENDERER_URL!) : url.toLowerCase() === PAGE
 }
 
 function handle(channel: string, fn: (e: IpcMainInvokeEvent, ...args: any[]) => unknown) {

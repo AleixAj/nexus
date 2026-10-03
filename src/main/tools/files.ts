@@ -4,7 +4,7 @@ import { promises as fs, type Dirent } from 'fs'
 import { basename, dirname, extname, isAbsolute, join, resolve } from 'path'
 import { clip, short, size } from '../lib/text'
 import { bool, num, str, type Tool } from './define'
-import { blockedPath } from '../lib/privacy'
+import { autorunPath, blockedPath, runnablePath } from '../lib/privacy'
 import { backupFile } from '../activity'
 import { existsSync } from 'fs'
 
@@ -36,6 +36,8 @@ export function toPath(p: unknown) {
   if (blockedPath(path)) throw new Error('Ese archivo guarda claves o contraseñas: por seguridad no lo toco')
   return path
 }
+/** True if the call creates or changes a file that runs code when opened (.exe, .bat, .ps1, .lnk…). */
+const runs = (...paths: unknown[]) => paths.some(p => { try { return runnablePath(toPath(p)) } catch { return false } })
 const showPath = (x: unknown) => { try { return toPath(x) } catch { return String(x) } }
 const nameOf = (p: unknown) => basename(String(p || ''))
 
@@ -44,6 +46,9 @@ const PROTECTED = [process.env.SystemRoot || 'C:\\Windows', process.env.ProgramF
 function writable(p: unknown) {
   const path = toPath(p), low = path.toLowerCase()
   if (PROTECTED.some(d => low.startsWith(d.toLowerCase()))) throw new Error('No modifico carpetas del sistema ni de programas instalados')
+  // NEXUS's own data (settings, permissions, memory): changing it would let a page give it permissions
+  if (low.startsWith(app.getPath('userData').toLowerCase())) throw new Error('No modifico los archivos internos de NEXUS')
+  if (autorunPath(path)) throw new Error('No guardo nada en el inicio de Windows ni en perfiles de PowerShell: se ejecutaría solo')
   if (/^[a-z]:\\?$/i.test(path)) throw new Error('No modifico la raíz de un disco')
   return path
 }
@@ -177,6 +182,7 @@ export const fileTools: Tool[] = [
   // ---------- changes (each one asks the user first) ----------
   {
     name: 'write_file', group: 'write',
+    alwaysAsk: a => runs(a.path),
     description: 'Crea o sobrescribe un archivo de texto.',
     params: { path: str('Ruta'), content: str('Contenido'), append: bool('Añadir al final') }, required: ['path', 'content'],
     prepare: async a => backupFile(writable(a.path)),
@@ -190,6 +196,7 @@ export const fileTools: Tool[] = [
   },
   {
     name: 'edit_file', group: 'write',
+    alwaysAsk: a => runs(a.path),
     description: 'Reemplaza un texto exacto en un archivo.',
     params: { path: str('Ruta'), find: str('Texto actual'), replace: str('Texto nuevo') }, required: ['path', 'find', 'replace'],
     prepare: async a => backupFile(writable(a.path)),
@@ -205,6 +212,7 @@ export const fileTools: Tool[] = [
   },
   {
     name: 'move_path', group: 'write',
+    alwaysAsk: a => runs(a.from, a.to),
     description: 'Mueve o renombra.',
     params: { from: str('Ruta'), to: str('Ruta nueva') }, required: ['from', 'to'],
     prepare: async a => ({ kind: 'move', from: writable(a.from), to: writable(a.to) }),

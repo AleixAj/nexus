@@ -7,7 +7,7 @@ const SECRETS: [RegExp, string][] = [
   [/-----BEGIN [A-Z ]*PRIVATE KEY-----[\s\S]*?-----END [A-Z ]*PRIVATE KEY-----/g, '[CLAVE PRIVADA OCULTA]'],
   [/\b(sk-(?:proj-|ant-)?[A-Za-z0-9_-]{20,}|gsk_[A-Za-z0-9]{20,}|csk-[A-Za-z0-9]{20,}|AIza[0-9A-Za-z_-]{35}|gh[pousr]_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{40,}|xox[abpr]-[A-Za-z0-9-]{10,}|AKIA[0-9A-Z]{16}|eyJ[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,}\.[A-Za-z0-9_-]{10,})\b/g, '[CLAVE OCULTA]'],
   [/\b((?:pass(?:word)?|pwd|contraseña|clave|secret|token|api[_-]?key)\s*[:=]\s*)(["']?)[^\s"']{4,}\2/gi, '$1[OCULTA]'],
-  [/\bES\d{2}(?:[ -]?\d{4}){5}\b/g, '[IBAN OCULTO]'],
+  [/\b[A-Z]{2}\d{2}(?:[ -]?[A-Z0-9]{4}){3,7}(?:[ -]?[A-Z0-9]{1,3})?\b/g, '[IBAN OCULTO]'],
 ]
 
 /** Card numbers pass the Luhn check; plain long numbers (phones, ids) do not. */
@@ -28,8 +28,20 @@ export function redact(text: string) {
 }
 
 // files that hold credentials: the agent may not read them
-const BLOCKED_NAMES = /^(\.env(\..*)?|id_(rsa|dsa|ecdsa|ed25519)|.*\.(pem|key|pfx|p12|kdbx|ovpn)|credentials(\.json)?|login data|cookies|key-[a-z]+\.bin|memory\.bin|spotify\.bin|calendar\.bin|wallet\.dat)$/i
+const BLOCKED_NAMES = /^(\.env(\..*)?|id_(rsa|dsa|ecdsa|ed25519)|.*\.(pem|key|pfx|p12|kdbx?|ovpn|ppk|asc|gpg)|credentials(\.json)?|login data|cookies|web data|local state|history|\.git-credentials|\.netrc|_netrc|\.npmrc|\.pypirc|key-[a-z]+\.bin|memory\.bin|spotify\.bin|calendar\.bin|wallet\.dat|logins\.json|key[34]\.db)$/i
 
 export function blockedPath(path: string) {
-  return BLOCKED_NAMES.test(basename(path)) || /[\\/]\.ssh[\\/]|[\\/]\.aws[\\/]|[\\/]\.gnupg[\\/]/i.test(path)
+  return BLOCKED_NAMES.test(basename(path)) || BLOCKED_DIRS.test(path)
 }
+// folders full of secrets: ssh/cloud keys, browser profiles (saved passwords, cookies, wallet extensions)
+const BLOCKED_DIRS = /[\\/](\.ssh|\.aws|\.azure|\.gnupg|\.docker|\.kube)[\\/]|[\\/]User Data[\\/]|[\\/]Mozilla[\\/]Firefox[\\/]Profiles[\\/]|[\\/]Local Extension Settings[\\/]/i
+
+// Places where a file runs code on its own (Windows startup, PowerShell profiles): never written by
+// the agent. A web page or a document with hidden orders could otherwise leave something there
+// that runs every time the PC starts.
+const AUTORUN = /[\\/]Start Menu[\\/]Programs[\\/]Startup([\\/]|$)|[\\/](Windows)?PowerShell[\\/][^\\/]*profile[^\\/]*\.ps1$/i
+export const autorunPath = (path: string) => AUTORUN.test(path)
+
+// Files that run code when opened: written only with the user's OK every single time
+const RUNNABLE = /\.(exe|com|bat|cmd|ps1|psm1|psd1|vbs|vbe|js|jse|wsf|wsh|hta|msi|msp|scr|pif|lnk|url|reg|dll|cpl|jar|scf|inf|appref-ms|application|gadget|settingcontent-ms)$/i
+export const runnablePath = (path: string) => RUNNABLE.test(path)

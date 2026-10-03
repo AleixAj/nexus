@@ -20,7 +20,7 @@ function page(r: EditReq) {
   const field = r.multiline
     ? `<textarea id="f" placeholder="${esc(r.placeholder)}"></textarea>`
     : `<input id="f" type="${r.secret ? 'password' : 'text'}" placeholder="${esc(r.placeholder)}" spellcheck="false">`
-  return `<!doctype html><html><head><meta charset="utf-8"><style>
+  return `<!doctype html><html><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; style-src 'unsafe-inline'"><style>
 html,body{margin:0;height:100%;background:transparent;overflow:hidden}
 #f{box-sizing:border-box;width:100%;height:100%;padding:0 14px;border-radius:10px;outline:none;resize:none;
   border:1px solid rgb(${r.accent} / .75);background:rgb(10 7 20 / .97);color:#FFF6E9;caret-color:rgb(${r.accent});
