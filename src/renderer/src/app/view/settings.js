@@ -72,7 +72,7 @@ export function settingsView(app, c) {
     // AI service and its key
     providerOpts: ['Auto', ...Object.keys(S.providers)].map(p => ({ label: p, ...seg(S.provider === p), pick: () => app.pickProvider(p) })),
     providerNote: providerInfo(S.provider).note, showModel: S.provider !== 'Auto',
-    cycleModel: () => app.cycleModel(),
+    modelOptions: ((S.providers[S.provider] || {}).models || []).map(m => ({ label: m, on: S.model === m, pick: () => app.pickModel(m) })),
     keyInput: S.keyInput, keyType: S.showKey ? 'text' : 'password', keyDisabled: !prov.needsKey,
     keyPlaceholder: !prov.needsKey ? 'No necesaria · Ollama en http://localhost:11434' : prov.hasKey ? '•••••••••••• guardada · pega otra para cambiarla' : 'Pega aquí tu clave de ' + kp,
     keyStatus: !prov.needsKey ? 'LOCAL' : prov.hasKey ? 'GUARDADA' : 'FALTA', keyColor: !prov.needsKey || prov.hasKey ? '#34D399' : '#F5B971',
@@ -113,7 +113,9 @@ export function settingsView(app, c) {
     // the voice itself is chosen (and heard) in the Voice panel
     voiceNow: `${voiceById(S.voiceSel).name} · ${(PERSONAS.find(p => p.id === S.persona) || PERSONAS[0]).name}`,
     openVoice: () => app.openPanel('voice', true),
-    micName: app.micLabel(), cycleMic: () => app.cycleMic(),
+    micName: app.micLabel(), refreshMics: () => app.countMics(),
+    // the Windows default first, with the name of the microphone it is now
+    micOptions: [{ id: '', label: 'Predeterminado de Windows' + ((S.micList || []).find(m => !m.id) ? ' · ' + (S.micList || []).find(m => !m.id).label : '') }, ...(S.micList || []).filter(m => m.id)].map(m => ({ label: m.label, on: (S.micId || '') === m.id, pick: () => app.pickMic(m.id) })),
 
     // self-test
     runDiagnostics: () => app.runDiagnostics(), diagRunning: !!S.diagRunning, diag: S.diag, closeDiag: () => app.setState({ diag: null }),

@@ -74,12 +74,7 @@ export const settings = {
     if (S.provider !== 'Auto') return S.provider;
     return S.keyTarget || KEY_ORDER.find(p => !(S.providers[p] || {}).hasKey) || 'Groq';
   },
-  cycleModel() {
-    const models = (this.state.providers[this.state.provider] || {}).models || [];
-    if (!models.length) return;
-    const next = models[(models.indexOf(this.state.model) + 1) % models.length];
-    this.setState({ model: next }); this.save({ model: next });
-  },
+  pickModel(m) { this.setState({ model: m }); this.save({ model: m }); },
   async saveKey() {
     const key = this.state.keyInput.trim(); if (!key || !api) return;
     try { await api.setKey(this.keyProv(), key); } catch { this.fail('No he podido guardar la clave'); return; }
@@ -97,12 +92,6 @@ export const settings = {
     } catch { this.setState({ mics: 0, micList: [] }); }
   },
   pickMic(id) { this.setState({ micId: id }); voice.setMicDevice(id); this.save({ micId: id }); },
-  cycleMic() {
-    const list = this.state.micList || [];
-    if (!list.length) return;
-    const i = list.findIndex(m => m.id === this.state.micId);
-    this.pickMic(list[(i + 1) % list.length].id);
-  },
   micLabel() {
     const m = (this.state.micList || []).find(x => x.id === this.state.micId);
     return m ? m.label : 'Predeterminado de Windows';

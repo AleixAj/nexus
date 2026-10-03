@@ -1,6 +1,6 @@
 // Settings, split in tabs (left) so each page has few options, large text and a line that says
 // what that page is for.
-import type { ReactNode } from 'react'
+import { useEffect, useRef, useState, type ReactNode } from 'react'
 
 const mono = "'JetBrains Mono',monospace"
 const TEXT = 'rgba(241,234,248,.92)'
@@ -63,13 +63,40 @@ const ghostBtn = { height: '40px', padding: '0 16px', borderRadius: '9px', borde
 const mainBtn = { height: '40px', padding: '0 18px', borderRadius: '9px', border: '1px solid rgb(var(--acc2) / .45)', background: 'rgb(var(--acc) / .4)', color: '#FFF6E9', fontSize: '14.5px', cursor: 'pointer' } as const
 const Help = ({ children }: { children: ReactNode }) => <span style={{ fontSize: '14px', lineHeight: 1.55, color: NOTE }}>{children}</span>
 
-/** A list button that cycles through options (model, microphone). */
-const Picker = ({ value, onClick }: { value: string; onClick: () => void }) => (
-  <button onClick={onClick} style={{ ...field, display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', width: '100%' }} className="dc52">
-    <span>{value}</span>
-    <Icon d="M6 9l6 6 6-6" size={16} />
-  </button>
-)
+/** A real drop-down: shows the chosen option; a click opens the list, picking one closes it
+ *  (so do Esc and a click outside). `onOpen` refreshes the options (new microphones…). */
+function Select({ value, options, onOpen, label }: { value: string; options: any[]; onOpen?: () => void; label: string }) {
+  const [open, setOpen] = useState(false)
+  const box = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    if (!open) return
+    const out = (e: MouseEvent) => { if (box.current && !box.current.contains(e.target as Node)) setOpen(false) }
+    const key = (e: KeyboardEvent) => { if (e.key === 'Escape') { e.stopPropagation(); setOpen(false) } }
+    document.addEventListener('mousedown', out); document.addEventListener('keydown', key, true)
+    return () => { document.removeEventListener('mousedown', out); document.removeEventListener('keydown', key, true) }
+  }, [open])
+  return (
+    <div ref={box} style={{ position: 'relative', width: '100%' }}>
+      <button onClick={() => { if (!open) onOpen?.(); setOpen(!open) }} aria-haspopup="listbox" aria-expanded={open} aria-label={label}
+        style={{ ...field, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', cursor: 'pointer', width: '100%', borderColor: open ? 'rgb(var(--acc2) / .5)' : LINE }} className="dc52">
+        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{value}</span>
+        <span style={{ flex: 'none', display: 'grid', transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 200ms' }}><Icon d="M6 9l6 6 6-6" size={16} /></span>
+      </button>
+      {open && (
+        <div role="listbox" aria-label={label} style={{ position: 'absolute', zIndex: 30, left: 0, right: 0, top: 'calc(100% + 6px)', maxHeight: '280px', overflow: 'auto', padding: '6px', borderRadius: '12px', background: 'rgb(12 9 22 / .98)', border: '1px solid rgb(var(--acc2) / .35)', boxShadow: '0 18px 40px rgba(0,0,0,.55)', animation: 'nx-in 160ms both' }}>
+          {options.length === 0 && <span style={{ display: 'block', padding: '10px 12px', fontSize: '14px', color: NOTE }}>No hay opciones</span>}
+          {options.map(o => (
+            <button key={o.label} role="option" aria-selected={o.on} onClick={() => { o.pick(); setOpen(false) }}
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', width: '100%', padding: '10px 12px', borderRadius: '8px', border: 'none', cursor: 'pointer', textAlign: 'left', fontSize: '15px', background: o.on ? 'rgb(var(--acc) / .22)' : 'transparent', color: o.on ? '#FFF6E9' : TEXT }} className="dc11">
+              <span style={{ flex: 'none', width: '16px', color: 'rgb(var(--acc2))' }}>{o.on ? '✓' : ''}</span>
+              <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{o.label}</span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 function AiTab({ v }: { v: any }) {
   return (
@@ -77,7 +104,7 @@ function AiTab({ v }: { v: any }) {
       <Group title="QUÉ IA PIENSA POR TI">
         <Segments opts={v.providerOpts} />
         <Help>{v.providerNote}</Help>
-        {v.showModel && <Row label="Modelo" note="Toca para cambiar entre los modelos de este servicio"><div style={{ width: '300px' }}><Picker value={v.modelName} onClick={v.cycleModel} /></div></Row>}
+        {v.showModel && <Row label="Modelo" note="El modelo de este servicio que me responde"><div style={{ width: '320px' }}><Select label="Modelo" value={v.modelName} options={v.modelOptions} /></div></Row>}
       </Group>
       <Group title="CLAVE DE API">
         {v.keyTargets && (
@@ -233,14 +260,14 @@ function Tab({ v }: { v: any }) {
           </Row>
         </Group>
         <Group title="MICRÓFONO">
-          <Picker value={v.micName} onClick={v.cycleMic} />
+          <Select label="Micrófono" value={v.micName} options={v.micOptions} onOpen={v.refreshMics} />
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
             <span style={{ fontSize: '14px', color: NOTE }}>Nivel</span>
             <div style={{ flex: '1', height: '6px', borderRadius: '4px', background: 'rgba(196,181,253,.1)', overflow: 'hidden' }}>
               <div data-nexus-meter="1" style={{ height: '100%', width: '100%', transformOrigin: '0 50%', transform: 'scaleX(0)', background: 'linear-gradient(90deg,#34D399,rgb(var(--acc2)))' }} />
             </div>
           </div>
-          <Help>Habla: si la barra se mueve, te oigo bien. Toca el nombre para cambiar de micrófono.</Help>
+          <Help>Habla: si la barra se mueve, te oigo bien. Si no es este micrófono, elige otro en la lista.</Help>
         </Group>
         <Group title="ESCUCHA Y ATAJOS">
           <Toggles list={[t.wake]} />
