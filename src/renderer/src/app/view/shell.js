@@ -19,7 +19,7 @@ export function shellView(app, c) {
     bgFilter: S.overlay ? 'blur(12px) brightness(.3)' : P === 'music' ? 'brightness(.85)' : P === 'system' ? 'blur(3px) brightness(.78)' : P ? 'blur(6px) brightness(.7)' : 'none',
     overlay: S.overlay,
     showUI: S.uiIn && !S.overlay && !S.onb,
-    showHud: !P, showFrame: (S.uiIn && !S.overlay) || S.onb, showNotifs: !P,
+    isWall: WALLPAPER, showHud: !P, showFrame: (S.uiIn && !S.overlay) || S.onb, showNotifs: !P,
     isChat: on('chat'), isVoice: on('voice'), isRoutines: on('routines'), isSystem: on('system'), isMusic: on('music'), isMemory: on('memory'), isSettings: on('settings'),
     closePanel: () => app.openPanel(null),
 

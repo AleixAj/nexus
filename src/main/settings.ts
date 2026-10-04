@@ -41,6 +41,8 @@ export type Settings = {
   wallClicks: boolean
   // wallpaper mode: the galaxy (without the core) also on the other monitors
   wallExtend: boolean
+  /** always start as the wallpaper (at login too), whatever the last mode was */
+  bootWall: boolean
   wakeWord: string
   // how the recogniser writes the phrase in the user's own voice (training), and the loudness
   // from which the microphone sound is worth recognising (0 = automatic)
@@ -123,6 +125,7 @@ const DEFAULTS: Settings = {
   wallDock: true,
   wallClicks: true,
   wallExtend: false,
+  bootWall: false,
   // the phrase that wakes it: whatever the user likes ("Oye Jarvis", "Hola Viernes"…)
   wakeWord: 'Oye Nexus',
   wakeLearnt: [],

@@ -74,7 +74,8 @@ if (!app.requestSingleInstanceLock()) {
     await pickQualityOnce()
     startWatchers()
     createTray()
-    createWindow(loadSettings().mode === 'wallpaper' ? 'wallpaper' : 'window')
+    const st = loadSettings()
+    createWindow(st.mode === 'wallpaper' || st.bootWall ? 'wallpaper' : 'window')
     startUpdater()
     if (!globalShortcut.register(HOTKEY, talk)) console.warn(`[hotkey] ${HOTKEY} está ocupado por otra aplicación`)
     // the hotkeys of features that can be switched off (Settings → Funciones): dictation does not

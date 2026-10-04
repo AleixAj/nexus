@@ -126,7 +126,7 @@ export default function BootIntro({ v }: { v: any }) {
         {out && <div style={{ position: 'absolute', left: CX - 320, top: CY - 320, width: 640, height: 640, borderRadius: '50%', background: 'radial-gradient(circle, #fff 0%, rgb(var(--acc2) / .8) 10%, rgb(var(--acc) / .3) 28%, transparent 62%)', animation: 'nxi-flash 750ms cubic-bezier(.16,1,.3,1) 330ms both' }} />}
 
         {/* boot log */}
-        <div style={{ position: 'absolute', left: 64, bottom: 64, width: 640, display: 'flex', flexDirection: 'column', gap: 9, fontFamily: mono, fontSize: 11.5, letterSpacing: '.14em', animation: leave }}>
+        <div style={{ position: 'absolute', right: 64, bottom: 64, width: 640, display: 'flex', flexDirection: 'column', gap: 9, fontFamily: mono, fontSize: 11.5, letterSpacing: '.14em', animation: leave }}>
           {(v.introLines || []).map((l: any, i: number) => (
             <div key={i} style={{ display: 'flex', alignItems: 'baseline', gap: 12, animation: `nxi-line-in 420ms cubic-bezier(.16,1,.3,1) ${700 + i * 260}ms both` }}>
               <span style={{ color: 'rgb(var(--acc2) / .45)' }}>{String(i + 1).padStart(2, '0')}</span>
@@ -139,12 +139,12 @@ export default function BootIntro({ v }: { v: any }) {
         </div>
 
         {/* side readouts */}
-        <div style={{ position: 'absolute', right: 64, bottom: 64, textAlign: 'right', display: 'flex', flexDirection: 'column', gap: 8, fontFamily: mono, fontSize: 10.5, letterSpacing: '.22em', color: 'rgba(226,218,240,.4)', animation: out ? leave : 'nxi-fade-in 800ms 900ms both' }}>
+        <div style={{ position: 'absolute', right: 64, top: 84, textAlign: 'right', display: 'flex', flexDirection: 'column', gap: 8, fontFamily: mono, fontSize: 10.5, letterSpacing: '.22em', color: 'rgba(226,218,240,.4)', animation: out ? leave : 'nxi-fade-in 800ms 900ms both' }}>
           <span data-scramble="1">ARRANQUE SEGURO · VERIFICADO</span>
           <span data-scramble="1">CANAL DE AUDIO · 48 KHZ · ESTÉREO</span>
           <span style={{ color: 'rgb(var(--acc2) / .7)' }} data-scramble="1">{v.introStamp}</span>
         </div>
-        <div style={{ position: 'absolute', left: 64, top: 52, fontFamily: mono, fontSize: 10.5, letterSpacing: '.24em', color: 'rgb(var(--acc2) / .5)', animation: out ? leave : 'nxi-fade-in 800ms 300ms both' }}>
+        <div style={{ position: 'absolute', right: 64, top: 52, fontFamily: mono, fontSize: 10.5, letterSpacing: '.24em', color: 'rgb(var(--acc2) / .5)', animation: out ? leave : 'nxi-fade-in 800ms 300ms both' }}>
           <span data-scramble="1">NX-OS 2.4.0 · SECUENCIA DE ARRANQUE</span>
         </div>
 

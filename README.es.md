@@ -204,6 +204,12 @@ escuchando el atajo **Ctrl + Alt + Espacio**. Para cerrarla del todo, usa *Salir
 
 En **modo fondo de escritorio** la animación sustituye a tu fondo de pantalla, detrás de los iconos:
 
+- **Al encender el PC:** con *Iniciar con Windows* activado, NEXUS vuelve como lo dejaste; con *Empezar como fondo de
+  escritorio* (Ajustes → Sistema) arranca siempre detrás de los iconos. Si Windows aún no ha preparado el escritorio,
+  lo reintenta unos segundos en vez de quedarse en ventana.
+- **El lado izquierdo queda libre para tus iconos:** los paneles de música y de sistema, la vista de lo que NEXUS está
+  mirando y el texto del arranque salen a la derecha.
+
 - Sigue viéndose la barra de abajo y se usa como siempre: toca el núcleo para hablar, abre paneles, usa la rueda
   y verás el hover. Como Wallpaper Engine, NEXUS recibe el ratón que pasa por el escritorio vacío (nunca el de
   otras apps) como si fuera una ventana normal.

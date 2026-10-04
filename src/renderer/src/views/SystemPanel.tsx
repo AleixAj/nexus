@@ -5,7 +5,7 @@ export default function SystemPanel({ v }: { v: any }) {
   return (
     <>
     {v.isSystem && (<>
-      <div style={{ position: "absolute", left: "calc(64px - var(--ex))", top: "48px", display: "flex", flexDirection: "column", gap: "8px", animation: "nx-left 700ms cubic-bezier(.16,1,.3,1) both" }}>
+      <div style={{ position: "absolute", right: "calc(124px - var(--ex))", top: "48px", display: "flex", flexDirection: "column", alignItems: "flex-end", textAlign: "right", gap: "8px", animation: "nx-right 700ms cubic-bezier(.16,1,.3,1) both" }}>
         <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
           {v.sysHeader}
         </span>
@@ -25,8 +25,8 @@ export default function SystemPanel({ v }: { v: any }) {
         </svg>
       </button>
       <svg width="1920" height="1080" style={{ position: "absolute", inset: "0", pointerEvents: "none", animation: "nx-in 1000ms cubic-bezier(.16,1,.3,1) both" }}>
-        <ellipse cx="960" cy="520" rx="300" ry="262" fill="none" style={{ stroke: "rgb(var(--acc2) / .16)" }} strokeWidth="1" strokeDasharray="2 6" />
-        <ellipse cx="960" cy="520" rx="220" ry="190" fill="none" style={{ stroke: "rgb(var(--acc) / .1)" }} strokeWidth="1" />
+        <ellipse cx="660" cy="520" rx="300" ry="262" fill="none" style={{ stroke: "rgb(var(--acc2) / .16)" }} strokeWidth="1" strokeDasharray="2 6" />
+        <ellipse cx="660" cy="520" rx="220" ry="190" fill="none" style={{ stroke: "rgb(var(--acc) / .1)" }} strokeWidth="1" />
       </svg>
       {(v.gauges || []).map((g, gIndex) => (<Fragment key={g?.id ?? gIndex}>
         <div style={{ position: "absolute", left: g.left, top: g.top, width: "170px", height: "170px", display: "grid", placeItems: "center", animation: "nx-in 800ms cubic-bezier(.16,1,.3,1) both", animationDelay: g.delay }}>
@@ -51,7 +51,7 @@ export default function SystemPanel({ v }: { v: any }) {
           </div>
         </div>
       </Fragment>))}
-      <div style={{ position: "absolute", left: "calc(64px - var(--ex))", top: "190px", width: "400px", padding: "22px", display: "flex", flexDirection: "column", gap: "14px", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07)", animation: "nx-left 700ms cubic-bezier(.16,1,.3,1) 120ms both" }} className="dc32">
+      <div style={{ position: "absolute", right: "calc(496px - var(--ex))", top: "190px", width: "330px", padding: "22px", display: "flex", flexDirection: "column", gap: "14px", background: "linear-gradient(rgba(7,5,14,.5),rgba(7,5,14,.5)) padding-box, linear-gradient(155deg, rgb(var(--acc) / .5), rgb(var(--acc) / 0) 55%) border-box", border: "1px solid transparent", borderRadius: "14px", backdropFilter: "blur(24px)", boxShadow: "inset 0 1px 0 rgba(255,255,255,.07)", animation: "nx-left 700ms cubic-bezier(.16,1,.3,1) 120ms both" }} className="dc32">
         <span data-scramble="1" style={{ fontFamily: "'JetBrains Mono',monospace", fontSize: "11px", letterSpacing: ".2em", color: "rgb(var(--acc2) / .62)" }}>
           PROCESOS QUE MÁS CONSUMEN
         </span>

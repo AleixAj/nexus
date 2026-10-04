@@ -58,7 +58,7 @@ export default function Desktop({ v }: { v: any }) {
           <span data-tele="hex" style={{ color: "#F5B971" }}></span>
         </div>
       </div>
-      <div style={{ position: "absolute", left: "calc(22px - var(--ex))", top: "300px", width: "14px", height: "480px", pointerEvents: "none", background: "repeating-linear-gradient(180deg, rgb(var(--acc2) / .4) 0 1px, transparent 1px 60px) 0 0 / 14px 100% no-repeat, repeating-linear-gradient(180deg, rgb(var(--acc2) / .22) 0 1px, transparent 1px 12px) 0 0 / 7px 100% no-repeat", animation: "nx-left 900ms cubic-bezier(.16,1,.3,1) 300ms both" }}></div>
+      {!v.isWall && (<div style={{ position: "absolute", left: "calc(22px - var(--ex))", top: "300px", width: "14px", height: "480px", pointerEvents: "none", background: "repeating-linear-gradient(180deg, rgb(var(--acc2) / .4) 0 1px, transparent 1px 60px) 0 0 / 14px 100% no-repeat, repeating-linear-gradient(180deg, rgb(var(--acc2) / .22) 0 1px, transparent 1px 12px) 0 0 / 7px 100% no-repeat", animation: "nx-left 900ms cubic-bezier(.16,1,.3,1) 300ms both" }}></div>)}
       <div style={{ position: "absolute", right: "calc(22px - var(--ex))", top: "300px", width: "14px", height: "480px", pointerEvents: "none", background: "repeating-linear-gradient(180deg, rgb(var(--acc2) / .4) 0 1px, transparent 1px 60px) 100% 0 / 14px 100% no-repeat, repeating-linear-gradient(180deg, rgb(var(--acc2) / .22) 0 1px, transparent 1px 12px) 100% 0 / 7px 100% no-repeat", animation: "nx-right 900ms cubic-bezier(.16,1,.3,1) 300ms both" }}></div>
     </>)}
     {v.showUI && (<>

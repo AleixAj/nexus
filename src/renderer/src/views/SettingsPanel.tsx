@@ -346,7 +346,7 @@ function Tab({ v }: { v: any }) {
     )
     case 'system': return (
       <>
-        <Group title="AL ENCENDER"><Toggles list={[t.autostart, t.briefing]} /></Group>
+        <Group title="AL ENCENDER"><Toggles list={[t.autostart, t.bootWall, t.briefing]} /></Group>
         <Group title="AVISOS">
           <Toggles list={[t.proactive, t.evening]} />
           {v.showEveningTime && <Row label="Hora del resumen de la noche"><div style={{ width: '540px' }}><Segments opts={v.eveningTimes} /></div></Row>}

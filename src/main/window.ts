@@ -105,13 +105,20 @@ export function createWindow(m: Mode, query: Record<string, string> = {}) {
   w.once('ready-to-show', async () => {
     if (!wall) { if (BACKGROUND) { BACKGROUND = false; return } if (SECONDARY) w.showInactive(); else w.show(); return }
     w.showInactive()
-    try {
-      await attachWall(w)
-      openExtras()
-    } catch (err: any) {
-      console.warn('[wallpaper]', err.message)
-      switchMode('window', { notice: 'wallpaper-failed' })
+    // right after logging in Windows may not have the desktop ready yet: try again for a while
+    for (let tries = 1; ; tries++) {
+      try {
+        await attachWall(w)
+        openExtras()
+        return
+      } catch (err: any) {
+        console.warn('[wallpaper]', err.message)
+        if (tries >= 6 || w.isDestroyed() || win !== w) break
+        await new Promise(r => setTimeout(r, 5000))
+      }
     }
+    // shown as a window this time only: the next start tries the wallpaper again
+    if (win === w && !w.isDestroyed()) switchMode('window', { notice: 'wallpaper-failed' }, false)
   })
   // closing the window keeps NEXUS running in the tray
   w.on('close', e => {
@@ -209,7 +216,7 @@ function placeOnSecondary() {
   return { x: a.x + Math.round((a.width - width) / 2), y: a.y + Math.round((a.height - height) / 2), width, height }
 }
 
-export async function switchMode(m: Mode, query: Record<string, string> = {}) {
+export async function switchMode(m: Mode, query: Record<string, string> = {}, remember = true) {
   if (switching) return
   switching = true
   closeEditBox()
@@ -219,7 +226,7 @@ export async function switchMode(m: Mode, query: Record<string, string> = {}) {
   win?.destroy()
   win = null
   if (was === 'wallpaper') await refreshWallpaper()
-  saveSettings({ mode: m })
+  if (remember) saveSettings({ mode: m })
   switching = false
   createWindow(m, { quiet: '1', ...query })
 }

@@ -28,7 +28,7 @@ export default function MusicPanel({ v }: { v: any }) {
     return (
       <>
         {close}
-        <div style={{ position: 'absolute', left: 96, top: 180, width: 420, display: 'flex', flexDirection: 'column', gap: 18, animation: `nx-left 800ms ${ease} both` }}>
+        <div style={{ position: 'absolute', right: 'calc(96px - var(--ex))', top: 180, width: 420, display: 'flex', flexDirection: 'column', gap: 18, animation: `nx-right 800ms ${ease} both` }}>
           <span style={{ fontFamily: mono, fontSize: 11, letterSpacing: '.2em', color: 'rgb(var(--acc2) / .62)' }}>SPOTIFY</span>
           <span style={{ fontSize: 36, fontWeight: 300, color: '#FFF6E9' }}>{v.spotifyHint.title}</span>
           <span style={{ fontSize: 15.5, lineHeight: 1.55, color: 'rgba(226,218,240,.6)' }}>{v.spotifyHint.text}</span>
@@ -44,13 +44,13 @@ export default function MusicPanel({ v }: { v: any }) {
   return (
     <>
       {close}
-      <div style={{ position: 'absolute', left: 96, top: 140, width: 400, display: 'flex', flexDirection: 'column', gap: 20, animation: `nx-left 800ms ${ease} both` }}>
-        <div style={{ width: 400, height: 400, borderRadius: 14, overflow: 'hidden', position: 'relative', boxShadow: `0 30px 90px ${v.musicGlow}, 0 0 0 1px rgba(255,255,255,.08)`, background: 'repeating-linear-gradient(135deg, rgba(255,255,255,.06) 0 2px, transparent 2px 12px), linear-gradient(135deg, rgb(var(--acc)), #1E1B4B)' }}>
+      <div style={{ position: 'absolute', right: 'calc(96px - var(--ex))', top: 140, width: 340, display: 'flex', flexDirection: 'column', gap: 20, animation: `nx-right 800ms ${ease} both` }}>
+        <div style={{ width: 340, height: 340, borderRadius: 14, overflow: 'hidden', position: 'relative', boxShadow: `0 30px 90px ${v.musicGlow}, 0 0 0 1px rgba(255,255,255,.08)`, background: 'repeating-linear-gradient(135deg, rgba(255,255,255,.06) 0 2px, transparent 2px 12px), linear-gradient(135deg, rgb(var(--acc)), #1E1B4B)' }}>
           {m.cover && <img src={m.cover} alt="" style={{ width: '100%', height: '100%', objectFit: 'cover', display: 'block', animation: `nx-in 600ms ${ease} both` }} />}
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 6, minWidth: 0 }}>
           <span style={{ fontFamily: mono, fontSize: 11, letterSpacing: '.2em', color: '#FDBA74', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.source}</span>
-          <span style={{ fontSize: 34, fontWeight: 400, color: '#FFF6E9', letterSpacing: '-.01em', lineHeight: 1.15 }}>{m.title}</span>
+          <span style={{ fontSize: 30, fontWeight: 400, color: '#FFF6E9', letterSpacing: '-.01em', lineHeight: 1.15 }}>{m.title}</span>
           <span style={{ fontSize: 17, color: 'rgba(226,218,240,.65)' }}>{m.artist}</span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
@@ -81,7 +81,7 @@ export default function MusicPanel({ v }: { v: any }) {
         </div>
       </div>
 
-      <div style={{ position: 'absolute', right: 96, top: 140, width: 480, display: 'flex', flexDirection: 'column', gap: 18, animation: `nx-right 800ms ${ease} 100ms both` }}>
+      <div style={{ position: 'absolute', right: 'calc(484px - var(--ex))', top: 140, width: 380, display: 'flex', flexDirection: 'column', gap: 18, animation: `nx-right 800ms ${ease} 100ms both` }}>
         <span style={{ fontFamily: mono, fontSize: 11, letterSpacing: '.2em', color: 'rgb(var(--acc2) / .62)' }}>LETRA SINCRONIZADA</span>
         {v.lyricLines ? (
           <div style={{ height: 560, overflow: 'hidden', WebkitMask: 'linear-gradient(transparent, #000 22%, #000 70%, transparent)', mask: 'linear-gradient(transparent, #000 22%, #000 70%, transparent)' }}>

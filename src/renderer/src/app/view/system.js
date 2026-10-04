@@ -38,7 +38,7 @@ export function systemView(app, c) {
   return {
     gauges: gauges(si).map((g, i) => {
       const a = ANGLES[i] * Math.PI / 180;
-      return { ...g, left: (960 + Math.cos(a) * 300 - 85) + 'px', top: (520 + Math.sin(a) * 262 - 85) + 'px', dash: (414.7 * g.p).toFixed(1) + ' 999', color: g.warn ? '#FB7185' : i === 2 ? '#F5B971' : 'rgb(var(--acc2))', delay: (200 + i * 60) + 'ms' };
+      return { ...g, left: (660 + Math.cos(a) * 300 - 85) + 'px', top: (520 + Math.sin(a) * 262 - 85) + 'px', dash: (414.7 * g.p).toFixed(1) + ' 999', color: g.warn ? '#FB7185' : i === 2 ? '#F5B971' : 'rgb(var(--acc2))', delay: (200 + i * 60) + 'ms' };
     }),
     coreBars: per.map((u, i) => ({ h: Math.max(3, u) + '%', color: u > 90 ? '#FB7185' : u > 60 ? '#F5B971' : 'rgb(var(--acc2))', tip: 'Hilo ' + (i + 1) + ': ' + u + ' %' })),
     coreTitle: si ? 'CPU · ' + per.length + ' HILOS' : 'CPU', coreNote: si ? 'EL MÁS CARGADO ' + Math.max(0, ...per) + ' %' : '',
