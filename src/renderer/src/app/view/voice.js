@@ -3,7 +3,7 @@ import { PERSONAS, SLIDERS, VOICES } from '../constants';
 import { card, seg } from '../util';
 
 /** Advice on the wake phrase: very short ones wake it up by mistake. */
-function wakeHint(w) {
+export function wakeHint(w) {
   const letters = (w || '').replace(/[^a-záéíóúüñ]/gi, '').length;
   if (letters < 6) return 'Muy corta: puede despertarse sola. Mejor dos palabras, como «Oye Jarvis».';
   if (letters > 22) return 'Larga: cuesta decirla. Con dos palabras basta.';

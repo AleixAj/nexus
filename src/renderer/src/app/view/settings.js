@@ -1,6 +1,7 @@
 // Settings panel: AI service and keys, agent permissions, Gemini switches, system and look.
 import { KEY_ORDER, PERSONAS, THEMES, providerInfo, voiceById } from '../constants';
 import { WALLPAPER, api, seg, toggleT } from '../util';
+import { wakeHint } from './voice';
 import { FEATURE_GROUPS } from '../featureCatalog';
 
 const plain = t => t.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '');
@@ -94,7 +95,7 @@ export function settingsView(app, c) {
       { id: 'proactive', label: 'Avisos por mi cuenta', note: 'Te aviso solo de lo útil: una cita en 10 minutos, el PC al límite, batería baja o disco lleno. Pocos al día y nada de noche', on: S.proactive !== false, toggle: () => app.flip('proactive') },
       { id: 'evening', label: 'Resumen de la noche', note: 'Qué hiciste, qué queda y qué tienes mañana. Si estás jugando o presentando, espero a que termines', on: S.eveningReview !== false, toggle: () => app.flip('eveningReview') },
       { id: 'autostart', label: 'Iniciar con Windows', note: 'Se abre sola al encender el PC', on: S.autostart, toggle: () => app.setAutostart(!S.autostart) },
-      { id: 'wake', label: `Escuchar «${S.wakeWord}» siempre`, note: S.wakeProgress != null ? `Descargando el modelo de voz… ${Math.round(S.wakeProgress * 100)} %` : 'Me despierto al oírlo. Se cambia en Voz y personalidad. Todo en tu PC: no se graba ni se envía nada', on: !!S.wakeListen, toggle: () => app.setWakeListen(!S.wakeListen) },
+      { id: 'wake', label: `Escuchar «${S.wakeWord}» siempre`, note: S.wakeProgress != null ? `Descargando el modelo de voz… ${Math.round(S.wakeProgress * 100)} %` : 'Me despierto al oírlo. La frase la eliges justo debajo. Todo en tu PC: no se graba ni se envía nada', on: !!S.wakeListen, toggle: () => app.setWakeListen(!S.wakeListen) },
       { id: 'wallDock', label: 'Barra de abajo en el fondo', note: 'Con NEXUS de fondo de escritorio, sigue viéndose la barra con el chat, la música, los ajustes…', on: S.wallDock !== false, toggle: () => app.flip('wallDock') },
       { id: 'wallClicks', label: 'Pulsar en el fondo', note: 'Toca el núcleo para hablar y usa la barra aunque esté detrás de los iconos. Solo cuenta lo que pulsas en el escritorio vacío', on: S.wallClicks !== false, toggle: () => app.flip('wallClicks') },
       { id: 'bgMotion', label: 'Fondo quieto mientras usas otras apps', note: 'En modo fondo de escritorio solo se anima cuando miras el escritorio o te hablo. Ahorra batería y CPU', on: (S.bgMotion || 'desktop') !== 'always', toggle: () => { const v = (S.bgMotion || 'desktop') === 'always' ? 'desktop' : 'always'; app.setState({ bgMotion: v }, () => app.updatePower()); app.save({ bgMotion: v }); } },
@@ -104,7 +105,9 @@ export function settingsView(app, c) {
     ].map(t => [t.id, { ...t, ...toggleT(t.on) }])),
     hotkeyKeys: app.hotkeyLabel().split(' + '),
     // training the wake phrase with the user's voice
-    wakePhrase: S.wakeWord || 'Hey Nexus',
+    wakePhrase: S.wakeWord || 'Oye Nexus',
+    wakeInput: S.wakeWord, onWakeInput: e => app.setWakeWord(e.target.value), wakeInputHint: wakeHint(S.wakeWord),
+    wakeIdeas: ['Oye Nexus', 'Oye Jarvis', 'Hola Friday', 'Ey Ordenador'].map(w => ({ label: w, on: (S.wakeWord || '').trim().toLowerCase() === w.toLowerCase(), pick: () => app.setWakeWord(w) })),
     wakeTrained: (S.wakeLearnt || []).length > 0,
     wakeTrain: S.wakeTrain ? {
       ...S.wakeTrain, step: (S.wakeTrain.heard || []).length,
@@ -127,6 +130,7 @@ export function settingsView(app, c) {
     micOptions: [{ id: '', label: 'Predeterminado de Windows' + ((S.micList || []).find(m => !m.id) ? ' · ' + (S.micList || []).find(m => !m.id).label : '') }, ...(S.micList || []).filter(m => m.id)].map(m => ({ label: m.label, on: (S.micId || '') === m.id, pick: () => app.pickMic(m.id) })),
 
     // self-test
+    restartApp: () => { app.setState({ restarting: true }); api && api.restartApp() }, restarting: !!S.restarting,
     runDiagnostics: () => app.runDiagnostics(), diagRunning: !!S.diagRunning, diag: S.diag, closeDiag: () => app.setState({ diag: null }),
 
     // calendar (secret iCal address)

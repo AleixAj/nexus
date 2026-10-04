@@ -1,4 +1,4 @@
-// The wake phrase the user picks ("Hey Nexus", "Oye Jarvis", "Hola Viernes"…), without internet:
+// The wake phrase the user picks ("Oye Nexus", "Oye Jarvis", "Hola Viernes"…), without internet:
 // a Spanish speech recogniser (sherpa-onnx + Kroko community model, CC-BY-SA) transcribes on the
 // PC and the phrase is looked for by how it sounds. Nothing is recorded or sent anywhere.
 // Small English keyword models were tried first: with Spanish voices they caught about 1 in 6.

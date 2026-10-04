@@ -548,7 +548,7 @@ export function stopLoopback() {
   loop = null
 }
 
-// ---------- "Hey Nexus" ----------
+// ---------- "Oye Nexus" ----------
 // The microphone stays open at 16 kHz and every ~100 ms of sound goes to the keyword spotter
 // in the main process (on the PC: nothing is recorded or sent online).
 let wake: { stream: MediaStream; ctx: AudioContext; node: ScriptProcessorNode } | null = null

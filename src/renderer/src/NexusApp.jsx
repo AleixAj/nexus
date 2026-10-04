@@ -39,7 +39,7 @@ export default class NexusApp extends Component {
     // chat and quick overlay
     chat: [], chatInput: '', attachments: [], currentFiles: [], ovInput: '', ovState: 'idle', ovLabel: 'NEXUS', ovReply: '',
     // voice and personality
-    voiceSel: 'lyra', preview: null, persona: 'butler', userName: 'señor', lang: 'es-ES', wakeWord: 'Hey Nexus',
+    voiceSel: 'lyra', preview: null, persona: 'butler', userName: 'señor', lang: 'es-ES', wakeWord: 'Oye Nexus',
     sliders: { speed: 1, pitch: 0, warmth: 70, formal: 85, volume: 64, fx: 35 },
     // routines and the actions approved for good
     routines: [], approvals: [], routineSel: null, runStep: -1, runningRoutine: null,

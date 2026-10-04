@@ -299,6 +299,15 @@ function Tab({ v }: { v: any }) {
         </Group>
         <Group title="ESCUCHA Y ATAJOS">
           <Toggles list={[t.wake]} />
+          <Row label="Frase para llamarme" note={v.wakeInputHint}>
+            <input value={v.wakeInput} onChange={v.onWakeInput} maxLength={40} placeholder="Oye Jarvis" aria-label="Frase para llamarme" style={{ width: '260px', height: '42px', padding: '0 14px', borderRadius: '10px', background: 'rgba(0,0,0,.3)', border: '1px solid rgb(var(--acc2) / .25)', color: '#FFF6E9', fontSize: '15px', outline: 'none' }} />
+          </Row>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', alignItems: 'center' }}>
+            <span style={{ fontSize: '13px', color: NOTE, marginRight: '4px' }}>Ideas:</span>
+            {v.wakeIdeas.map((w: any) => (
+              <button key={w.label} onClick={w.pick} aria-pressed={w.on} style={{ ...ghostBtn, height: '32px', padding: '0 12px', fontSize: '13px', ...(w.on ? { background: 'rgb(var(--acc) / .22)', borderColor: 'rgb(var(--acc2) / .5)' } : {}) }}>«{w.label}»</button>
+            ))}
+          </div>
           <WakeTraining v={v} />
           {[
             ['Hablar con NEXUS', 'Desde cualquier aplicación, aunque NEXUS esté detrás', v.hotkeyKeys],
@@ -347,6 +356,10 @@ function Tab({ v }: { v: any }) {
             <div style={{ width: '360px' }}><Segments opts={v.wallScreens} /></div>
           </Row>
           <Toggles list={[t.wallDock, t.wallClicks, t.bgMotion]} /></Group>
+        <Group title="REINICIAR">
+          <Help>Cierra NEXUS y lo vuelve a abrir desde cero, con la animación de arranque. Útil si algo se ha quedado raro. No se pierde nada.</Help>
+          <button onClick={v.restartApp} disabled={v.restarting} style={{ ...mainBtn, height: '52px', fontSize: '16px', opacity: v.restarting ? .6 : 1 }}>{v.restarting ? 'Reiniciando…' : 'Reiniciar NEXUS'}</button>
+        </Group>
       </>
     )
     case 'accounts': return <AccountsTab v={v} />

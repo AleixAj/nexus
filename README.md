@@ -37,7 +37,7 @@ talks back and gets things done on your PC — and can sit behind your desktop i
 - **Voice and chat** with an LLM agent that uses **46 tools**: web search and deep research with cited sources, files
   (read, write, move — with undo), apps, Spotify, Steam, reminders and alarms, calendar, PC control, clipboard,
   screen and camera vision, PowerPoint generation and more.
-- **Custom wake phrase, fully offline** ("Oye Jarvis", "Hey Nexus"…): streaming speech recognition on-device with
+- **Custom wake phrase, fully offline** ("Oye Jarvis", "Oye Nexus"…, editable in Settings): streaming speech recognition on-device with
   sherpa-onnx and fuzzy phonetic matching. Nothing is recorded or sent.
 - **Live wallpaper mode**: the window is re-parented behind the desktop icons (the WorkerW technique), stays clickable
   through a low-level mouse hook, can extend to every monitor and pauses itself when a fullscreen game covers it.

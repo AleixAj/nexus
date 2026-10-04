@@ -257,6 +257,7 @@ function updateTray() {
     { label: 'Abrir ventana', click: showWindow },
     { type: 'separator' },
     ...(updateItem ? [{ label: updateItem.label, click: () => { quitting = true; updateItem!.click() } }, { type: 'separator' as const }] : []),
+    { label: 'Reiniciar NEXUS', click: restartApp },
     { label: 'Salir', click: () => { quitting = true; app.quit() } }
   ]))
 }
@@ -265,6 +266,13 @@ export function createTray() {
   tray = new Tray(nativeImage.createFromPath(join(RES, 'tray.png')).resize({ width: 16, height: 16 }))
   tray.on('click', showWindow)
   updateTray()
+}
+
+/** Close and open again, like a fresh start (with the intro). */
+export function restartApp() {
+  quitting = true
+  app.relaunch({ args: process.argv.slice(1).filter(a => a !== '--background') })
+  app.quit()
 }
 
 /** Before quitting: give the desktop its normal wallpaper back. Returns true if quitting must wait. */

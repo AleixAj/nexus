@@ -116,7 +116,7 @@ const DEFAULTS: Settings = {
   newsTopics: 'tech,science,curious',
   // spoken summary the first time NEXUS starts each day
   briefing: true,
-  // "Hey Nexus" always listening (on the PC, nothing is sent): off until the user turns it on
+  // "Oye Nexus" always listening (on the PC, nothing is sent): off until the user turns it on
   wakeListen: false,
   // the wallpaper animates only while you look at the desktop ('desktop'), always, or never
   bgMotion: 'desktop',
@@ -124,7 +124,7 @@ const DEFAULTS: Settings = {
   wallClicks: true,
   wallExtend: false,
   // the phrase that wakes it: whatever the user likes ("Oye Jarvis", "Hola Viernes"…)
-  wakeWord: 'Hey Nexus',
+  wakeWord: 'Oye Nexus',
   wakeLearnt: [],
   wakeGate: 0,
   // the user's own app at developer.spotify.com (for playlists by name)

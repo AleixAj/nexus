@@ -45,7 +45,7 @@ export const FEATURE_GROUPS = [
         long: 'Me hablas con el micrófono (toca el núcleo o pulsa Ctrl + Alt + Espacio) o me escribes en el chat. Te contesto con voz y por escrito, y sigo el hilo de la conversación.',
         examples: ['¿Qué tiempo hace mañana?', 'Explícame qué es un SSD'] },
       { id: 'wake', icon: I.wake, name: 'Frase de activación', short: 'Me despierto al oír tu frase', ...setting(S => !!S.wakeListen, (app, S) => app.setWakeListen(!S.wakeListen)),
-        long: 'Me quedo escuchando solo tu frase («Oye Jarvis», «Hey Nexus»…) y me despierto al oírla, sin tocar nada. El reconocimiento va en tu PC: no se graba ni se envía nada. La frase se cambia en Voz y personalidad.',
+        long: 'Me quedo escuchando solo tu frase («Oye Jarvis», «Oye Nexus»…) y me despierto al oírla, sin tocar nada. El reconocimiento va en tu PC: no se graba ni se envía nada. La frase se cambia en Ajustes → Voz y audio.',
         examples: ['Oye Jarvis, ¿qué hora es?'], more: ['voice', 'Voz y audio'] },
       { id: 'bar', icon: I.bar, name: 'Barra flotante', short: 'Pregunta desde cualquier app (Ctrl + Alt + A)', ...feature('bar'),
         long: 'Una barra pequeña que se abre encima de lo que estés haciendo, incluso jugando, para preguntarme algo por escrito sin abrir NEXUS. La respuesta se puede copiar. Esc la cierra.',

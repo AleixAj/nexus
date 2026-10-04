@@ -15,7 +15,7 @@ import { systemSnapshot } from './sysinfo'
 import { cancelReminders, listReminders } from './reminders'
 import { addFact, approveFact, clearMemory, deleteExchange, deleteFact, getMemory } from './memory'
 import { currentExtra, currentMedia, mediaControl } from './media'
-import { HOTKEY, closeExtras, extrasRefresh, isDev, openExtras, switchMode, wallClicksChanged } from './window'
+import { HOTKEY, closeExtras, extrasRefresh, isDev, openExtras, restartApp, switchMode, wallClicksChanged } from './window'
 import { typeText } from './dictation'
 import { ensureModel, feedWakeWord, modelReady, startWakeWord, stopWakeWord, transcribeWake } from './wakeword'
 import { broadcast } from './window'
@@ -102,12 +102,12 @@ export function registerIpc() {
     return audio
   })
   handle('tts:warm', () => warmVoices(loadSettings().lang))
-  // "Hey Nexus": audio comes in small pieces many times a second, so it is a one-way message
+  // "Oye Nexus": audio comes in small pieces many times a second, so it is a one-way message
   handle('wake:start', async (_e, phrase) => {
     // the first time, the Spanish model is downloaded (the window shows the progress)
     if (!modelReady()) await ensureModel(p => broadcast('wake:progress', p))
     const s = loadSettings()
-    startWakeWord(str(phrase, 60) || s.wakeWord || 'Hey Nexus', s.wakeLearnt || [], () => broadcast('wake:detected'), text => broadcast('wake:heard', text))
+    startWakeWord(str(phrase, 60) || s.wakeWord || 'Oye Nexus', s.wakeLearnt || [], () => broadcast('wake:detected'), text => broadcast('wake:heard', text))
   })
   handle('wake:stop', () => stopWakeWord())
   // training: what the recogniser understands when the user says the phrase (downloads the model first if needed)
@@ -151,6 +151,7 @@ export function registerIpc() {
   handle('calendar:set', (_e, url) => setCalendarUrl(str(url, 1000)))
   handle('calendar:events', async (_e, days) => (calendarConnected() ? events(Math.max(1, Math.min(31, Number(days) || 1))).catch(() => []) : null))
   handle('diagnostics:run', () => runDiagnostics())
+  handle('app:restart', () => { setTimeout(restartApp, 150) })
   // what NEXUS has done, undo and the emergency pause
   const activityNow = () => ({ list: listActivity().slice(0, 150).map(a => ({ id: a.id, at: a.at, label: a.label, tool: a.tool, undone: !!a.undone, canUndo: canUndo(a), trash: a.undo?.kind === 'trash' })), paused: isPaused() })
   handle('activity:list', () => activityNow())

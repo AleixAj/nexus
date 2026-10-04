@@ -40,8 +40,8 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 - **Juegos de Steam.** «Abre Elden Ring», «instala Hades», «actualiza Cyberpunk», «¿qué juegos tengo?». Lee tus
   bibliotecas de Steam (en cualquier disco) y usa la tienda para lo que no tienes.
 - **Acciones rápidas.** Abre aplicaciones y webs y controla la música y el volumen.
-- **Tu frase de activación, sin internet.** «Hey Nexus», «Oye Jarvis», «Hola Viernes»… la que escribas en Voz y
-  personalidad. Con el interruptor de Ajustes, NEXUS se despierta al oírla. Un reconocedor de voz en español funciona en
+- **Tu frase de activación, sin internet.** «Oye Nexus», «Oye Jarvis», «Hola Viernes»… la que escribas en
+  Ajustes → Voz y audio (o en Voz y personalidad). Con el interruptor de Ajustes, NEXUS se despierta al oírla. Un reconocedor de voz en español funciona en
   tu PC (sherpa-onnx con el modelo comunitario de Kroko, CC-BY-SA, ~124 MB que se descargan la primera vez) y busca la
   frase por cómo suena. No se graba ni se envía nada. Gasta en torno a un 6 % de un núcleo mientras escucha.
   Si la frase incluye un nombre («Oye Jarvis»), NEXUS lo toma como suyo al hablar contigo.
@@ -107,6 +107,8 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
 - **Todas las funciones en un sitio.** Ajustes → *Funciones* lista todo lo que sabe hacer NEXUS, por temas y con
   buscador. Al pulsar una ves qué hace y frases para pedírsela, y puedes apagarla: una función apagada desaparece de
   verdad (la IA no puede usarla, su atajo de teclado queda libre y su icono sale de la barra).
+- **Reiniciar.** Ajustes → Sistema → *Reiniciar NEXUS* (o desde el icono de la bandeja): se cierra y vuelve a abrir
+  desde cero, con la animación de arranque.
 - **Autodiagnóstico.** Ajustes → *Comprobar que todo funciona*: revisa internet, cada clave, las voces, el micrófono, que
   entienda lo que dices, búsqueda, noticias, tiempo, calendario, Spotify y disco, sin cambiar nada, y dice cómo arreglar
   lo que falle.

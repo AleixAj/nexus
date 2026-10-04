@@ -36,6 +36,7 @@ contextBridge.exposeInMainWorld('nexus', {
   setCalendar: (url: string) => ipcRenderer.invoke('calendar:set', url),
   calendarEvents: (days: number) => ipcRenderer.invoke('calendar:events', days),
   runDiagnostics: () => ipcRenderer.invoke('diagnostics:run'),
+  restartApp: () => ipcRenderer.invoke('app:restart'),
   listActivity: () => ipcRenderer.invoke('activity:list'),
   onPulseNotice: (fn: (n: { title: string; body: string }) => void) => on('pulse:notice', fn),
   onPulseEvening: (fn: () => void) => on('pulse:evening', fn),

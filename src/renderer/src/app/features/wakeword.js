@@ -34,7 +34,7 @@ export const wakeword = {
     this.setState({ wakeWord: text });
     clearTimeout(this.wakeT);
     this.wakeT = setTimeout(async () => {
-      const w = text.trim() || 'Hey Nexus';
+      const w = text.trim() || 'Oye Nexus';
       this.setState({ wakeLearnt: [], wakeTrain: null });
       if (api) await api.setSettings({ wakeWord: w, wakeLearnt: [] });
       if (this.state.wakeListen && api) api.wakeStart(w).catch(() => {});
@@ -66,7 +66,7 @@ export const wakeword = {
     }
   },
   async finishTrain({ heard, voices }) {
-    const phrase = (this.state.wakeWord || 'Hey Nexus').trim();
+    const phrase = (this.state.wakeWord || 'Oye Nexus').trim();
     const letters = s => s.toLowerCase().normalize('NFD').replace(/[^a-zñ]/g, '').length;
     // only what sounds like the whole phrase (a lone "oye" would wake it up all the time)
     const learnt = [...new Set(heard.map(h => h.trim()).filter(h => h && letters(h) >= letters(phrase) * 0.6))];
