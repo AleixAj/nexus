@@ -30,7 +30,7 @@ export function shellView(app, c) {
     onPill: () => core === 'error' ? app.retry() : core === 'music' && !live ? app.musicCtl('pause') : talkOrStop(),
 
     // under the core
-    capLeft: L.x + 'px', capTop: (P === 'system' ? 905 : L.y + 150 * L.s * 2.3 + 12) + 'px', capWidth: (wide ? 640 : P === 'chat' ? 760 : 1000) + 'px',
+    capLeft: L.x + 'px', capTop: (P === 'system' ? 905 : L.y + 150 * L.s * 2.05 + 12) + 'px', capWidth: (wide ? 640 : P === 'chat' ? 760 : 1000) + 'px',
     stateLabel: S.dictating ? (core === 'thinking' ? 'ESCRIBIENDO' : 'DICTANDO') : CORE_LABELS[core] || '', stateColor, showWave: core === 'listening',
     words: S.subtitles ? S.words : [], wordsColor: wk === 'nexus' ? '#FFE9D2' : 'rgba(255,246,233,.95)', wordsOpacity: wk === 'userDim' ? .45 : 1, wordsSize: wide ? '22px' : '30px',
     hasAction: !!S.actionLabel, actionLabel: S.actionLabel, hasError: core === 'error', errorTitle: S.errorTitle || 'No puedo conectar con el modelo', errorDetail: S.errorDetail || '',

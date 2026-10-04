@@ -82,8 +82,8 @@ export const CORE_LAYOUT = {
   chat: { x: 652, y: 480, s: .8, v: 1 },
   voice: { x: 410, y: 440, s: .62, v: 1 }, routines: { x: 410, y: 440, s: .62, v: 1 }, memory: { x: 410, y: 440, s: .62, v: 1 }, news: { x: 410, y: 440, s: .62, v: 1 }, activity: { x: 560, y: 440, s: .7, v: 1 }, settings: { x: 410, y: 440, s: .62, v: 1 },
   system: { x: 960, y: 520, s: .46, v: 1 },
-  music: { x: 960, y: 470, s: .92, v: 1 },
-  home: { x: 960, y: 480, s: 1, v: 1 },
+  music: { x: 960, y: 460, s: 1.12, v: 1 },
+  home: { x: 960, y: 465, s: 1.25, v: 1 },
 };
 
 export const MEMORY_CATEGORIES = ['Preferencias', 'Personas', 'Lugares', 'Trabajo', 'Otros'];

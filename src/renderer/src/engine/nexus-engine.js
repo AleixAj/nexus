@@ -220,7 +220,7 @@
     ctx.lineWidth = Math.max(.6, 1 * sc);
     rings.forEach(([rf, dash, rot, c, a], k) => {
       ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
-      ctx.setLineDash(dash.map(v => v * sc)); ctx.strokeStyle = col(c, a * kR * alpha * (.7 + .5 * p.energy));
+      ctx.setLineDash(dash.map(v => v * sc)); ctx.strokeStyle = col(c, a * kR * alpha * (.7 + .5 * p.energy + .7 * au.mid * gainC));
       ctx.beginPath(); ctx.arc(0, 0, rf * R * cont ** .3, 0, TAU); ctx.stroke(); ctx.restore();
       if (p.amber > .02) {
         const ang = t * (k % 2 ? -3.2 : 4) + k * 2.1;
@@ -248,9 +248,8 @@
       g.addColorStop(0, col(CORAL, .14 * fl * alpha)); g.addColorStop(1, col(CORAL, 0));
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, R * 1.6, 0, TAU); ctx.fill();
     }
-    // audio halo
-    const NB = S.NB, hr0 = R * 1.07, ig = S.ignite * (B ? B.ignite : 1);
-    const tips = [];
+    // ---- energy field: the voice and the music move a plasma around the core, not bars ----
+    const NB = S.NB, ig = S.ignite * (B ? B.ignite : 1);
     for (let i = 0; i < NB; i++) {
       const a = i / NB * TAU;
       const wave = .5 + .5 * Math.sin(a * 3 - t * 2.3 + Math.sin(a * 2 + t * .9) * 1.2);
@@ -259,36 +258,99 @@
       if (S.specK > 0 && S.spec) v = lerp(v, v * .35 + S.spec[i] * .95, S.specK);
       v = v * p.gain + .035 + .015 * br;
       S.bv[i] += (v - S.bars[i]) * 170 * dt; S.bv[i] *= Math.exp(-15 * dt); S.bars[i] += S.bv[i] * dt;
-      const f = i / NB, vis = clamp((ig * 1.2 - f) / .2, 0, 1);
-      const len = clamp(S.bars[i], 0, 1.4), ang = a - Math.PI / 2;
-      const r1 = hr0, r2 = hr0 + R * (.015 + .4 * len) * vis;
-      const ca = Math.cos(ang), sa = Math.sin(ang);
-      tips.push([cx + ca * r2, cy + sa * r2]);
-      if (vis <= 0) continue;
-      const edge = ig < 1 ? clamp(1 - Math.abs(ig * 1.2 - .2 - f) * 8, 0, 1) : 0;
-      ctx.strokeStyle = col(mix(pal.b, pal.w, clamp(len * .8 + edge, 0, 1)), (.22 + .65 * len + edge) * vis * alpha);
-      ctx.lineWidth = Math.max(.8, (S.mini ? 1.4 : 2) * sc);
-      ctx.beginPath(); ctx.moveTo(cx + ca * r1, cy + sa * r1); ctx.lineTo(cx + ca * r2, cy + sa * r2); ctx.stroke();
     }
-    if (ig >= 1) {
-      ctx.strokeStyle = col(pal.b, (.12 + .3 * au.mid * gainC) * alpha); ctx.lineWidth = .8 * sc;
-      ctx.beginPath(); tips.forEach((q, i) => i ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1])); ctx.closePath(); ctx.stroke();
+    // spread over the neighbours: a flowing field instead of separate spikes
+    if (!S.sm) S.sm = new Float32Array(NB);
+    for (let i = 0; i < NB; i++) {
+      let acc = 0, wsum = 0;
+      for (let k = -4; k <= 4; k++) { const wk = 5 - Math.abs(k); acc += clamp(S.bars[(i + k + NB) % NB], 0, 1.4) * wk; wsum += wk; }
+      S.sm[i] = acc / wsum;
     }
-    // sparks
-    if (!REDUCED) {
-      let spawn = au.high * p.gain * dt * (S.mini ? 30 : 110) * ig;
-      while (spawn > 0 && S.sparks.length < (S.mini ? 40 : 220)) {
+    // active states (talking, listening, music) keep the plasma awake between sounds
+    const base = clamp((p.energy - .3) * .35, 0, .2) * Math.min(1, p.gain);
+    const field = a => S.sm[Math.floor(((a % TAU + TAU) % TAU) / TAU * NB) % NB] + base * (.6 + .4 * Math.sin(a * 2 + t * 1.3));
+    const amp = ig * (REDUCED ? .5 : 1);
+    // plasma corona: three living layers (periodic waves, so there is no seam)
+    const PTS = S.mini ? 72 : 144, layers = [[pal.w, 0, 1], [pal.b, 1, .8], [pal.a, 2, .6]];
+    const shape = (L, k) => {
+      const a = k / PTS * TAU, e = field(a - Math.PI / 2);
+      const w = .5 * Math.sin(a * 3 + t * (1.1 + L * .35) + L * 1.7) + .3 * Math.sin(a * 5 - t * (1.7 + L * .2) + L * 2.9) + .2 * Math.sin(a * 2 + t * .6 - L);
+      const rip = .25 * Math.sin(a * 11 - t * (5 + L)) * e;
+      const r = R * (1.012 + L * .03) + R * (.01 + .15 * e * (.6 + .3 * w + rip)) * amp + R * .008 * w;
+      return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
+    };
+    const trace = L => { ctx.beginPath(); for (let k = 0; k <= PTS; k++) { const q = shape(L, k % PTS); k ? ctx.lineTo(q[0], q[1]) : ctx.moveTo(q[0], q[1]); } ctx.closePath(); };
+    const lvl = clamp(au.mid * .8 + au.bass * .6 + base * 1.5, 0, 1) * Math.min(1, p.gain) * amp;
+    // the glowing body of the plasma, between the ring and the outer layer
+    trace(2);
+    g = ctx.createRadialGradient(cx, cy, R * .98, cx, cy, R * 1.55);
+    g.addColorStop(0, col(pal.b, (.05 + .16 * lvl) * alpha)); g.addColorStop(.3, col(pal.a, (.02 + .08 * lvl) * alpha)); g.addColorStop(1, col(pal.m, 0));
+    ctx.fillStyle = g; ctx.fill();
+    for (const [c, L, k] of layers) {
+      trace(L);
+      ctx.strokeStyle = col(c, (.04 + .1 * lvl) * k * alpha); ctx.lineWidth = (S.mini ? 3 : 6) * sc; ctx.stroke();
+      ctx.strokeStyle = col(mix(c, pal.w, .35), (.12 + .45 * lvl) * k * alpha); ctx.lineWidth = Math.max(.6, (L ? .8 : 1.2) * sc); ctx.stroke();
+    }
+    // AI data ring: segments that light up with the sound, turning slowly
+    const SEG = S.mini ? 36 : 72, dr = R * 1.2;
+    ctx.lineWidth = Math.max(.8, 2.2 * sc);
+    for (let i = 0; i < SEG; i++) {
+      const a0 = i / SEG * TAU + S.r1 * .6, e = field(a0);
+      const on = clamp(.06 + e * 1.1 * Math.min(1, p.gain), 0, 1) * amp;
+      if (on < .07) continue;
+      ctx.strokeStyle = col(mix(pal.b, pal.w, clamp(e, 0, 1)), on * .8 * alpha);
+      ctx.beginPath(); ctx.arc(cx, cy, dr, a0, a0 + TAU / SEG * .55); ctx.stroke();
+    }
+    // energy pulses on the beats and stressed syllables
+    S.pcd = (S.pcd || 0) - dt; if (!S.pulses) S.pulses = [];
+    if (!REDUCED && ig >= 1 && au.bass * p.gain > .55 && S.pcd <= 0) { S.pulses.push({ age: 0, k: clamp(au.bass, .4, 1) }); S.pcd = .32; }
+    for (let i = S.pulses.length - 1; i >= 0; i--) {
+      const q = S.pulses[i]; q.age += dt; if (q.age > .9) { S.pulses.splice(i, 1); continue; }
+      const k = q.age / .9, rr = R * (1.05 + expo(k) * .6), a = (1 - k) ** 2 * q.k;
+      ctx.strokeStyle = col(pal.b, .3 * a * alpha); ctx.lineWidth = (.8 + 2.5 * (1 - k)) * sc;
+      ctx.beginPath(); ctx.arc(cx, cy, rr, 0, TAU); ctx.stroke();
+    }
+    // plasma arcs: short-lived bridges of energy that leap between two points of the ring
+    if (!S.fil) S.fil = [];
+    if (!REDUCED && ig >= 1) {
+      let spawn = (au.mid * .45 + au.high * 1.1 + au.bass * .35) * p.gain * dt * (S.mini ? 2 : 6);
+      while (spawn > 0 && S.fil.length < (S.mini ? 2 : 5)) {
         if (spawn < 1 && Math.random() > spawn) break; spawn -= 1;
-        const a = Math.random() * TAU, bi = Math.floor(((a + Math.PI / 2 + TAU) % TAU) / TAU * NB) % NB;
-        S.sparks.push({ a, r: hr0 + R * .4 * S.bars[bi], v: (60 + Math.random() * 220) * sc, life: 0, max: .5 + Math.random() * .8 });
+        let a = Math.random() * TAU; for (let tr = 0; tr < 3 && field(a) < .35 * Math.random(); tr++) a = Math.random() * TAU;
+        const e = field(a);
+        S.fil.push({ a, span: (.12 + .3 * Math.random()) * (Math.random() < .5 ? -1 : 1), h: R * (.04 + .12 * Math.random()) * (.6 + e), seed: Math.random() * 100, life: 0, max: .12 + Math.random() * .22 });
+      }
+    }
+    for (let i = S.fil.length - 1; i >= 0; i--) {
+      const f = S.fil[i]; f.life += dt; if (f.life > f.max) { S.fil.splice(i, 1); continue; }
+      const k = Math.sin(Math.PI * f.life / f.max) * (n1(f.seed + t * 25) > .25 ? 1 : .5), r0 = R * 1.015;
+      ctx.beginPath();
+      for (let j = 0; j <= 14; j++) {
+        const u = j / 14, ang = f.a + f.span * u, bulge = Math.sin(Math.PI * u);
+        const r = r0 + f.h * bulge + (n1(f.seed + j * 5.1 + t * 38) - .5) * 6 * sc * bulge;
+        const x = cx + Math.cos(ang) * r, y = cy + Math.sin(ang) * r;
+        j ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+      }
+      ctx.strokeStyle = col(pal.b, .16 * k * alpha); ctx.lineWidth = 4 * sc; ctx.stroke();
+      ctx.strokeStyle = col(mix(pal.w, pal.b, .25), .8 * k * alpha); ctx.lineWidth = Math.max(.6, .9 * sc); ctx.stroke();
+    }
+    // ejected energy: glowing motes that drift outward and curl
+    if (!REDUCED) {
+      let spawn = au.high * p.gain * dt * (S.mini ? 24 : 80) * ig;
+      while (spawn > 0 && S.sparks.length < (S.mini ? 40 : 200)) {
+        if (spawn < 1 && Math.random() > spawn) break; spawn -= 1;
+        const a = Math.random() * TAU;
+        S.sparks.push({ a, r: R * (1.05 + .3 * field(a)), v: (40 + Math.random() * 160) * sc, life: 0, max: .6 + Math.random() * .9 });
       }
     }
     for (let i = S.sparks.length - 1; i >= 0; i--) {
-      const s = S.sparks[i]; s.life += dt; s.r += s.v * dt; s.v *= Math.exp(-dt * 1.8);
+      const s = S.sparks[i]; s.life += dt; s.r += s.v * dt; s.v *= Math.exp(-dt * 1.8); s.a += .35 * dt;
       if (s.life > s.max) { S.sparks.splice(i, 1); continue; }
-      const k = 1 - s.life / s.max, ca = Math.cos(s.a), sa = Math.sin(s.a), l = (4 + s.v * .04) * sc;
-      ctx.strokeStyle = col(mix(pal.w, pal.b, 1 - k), k * .9 * alpha); ctx.lineWidth = 1.1 * sc;
-      ctx.beginPath(); ctx.moveTo(cx + ca * s.r, cy + sa * s.r); ctx.lineTo(cx + ca * (s.r - l), cy + sa * (s.r - l)); ctx.stroke();
+      const k = 1 - s.life / s.max, ca = Math.cos(s.a), sa = Math.sin(s.a), l = (3 + s.v * .03) * sc, x = cx + ca * s.r, y = cy + sa * s.r;
+      ctx.strokeStyle = col(mix(pal.w, pal.b, 1 - k), k * .35 * alpha); ctx.lineWidth = 1 * sc;
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(cx + Math.cos(s.a - .02) * (s.r - l), cy + Math.sin(s.a - .02) * (s.r - l)); ctx.stroke();
+      const d = Math.max(1, 1.8 * sc * k);
+      ctx.fillStyle = col(mix(pal.w, pal.b, 1 - k), k * .95 * alpha); ctx.fillRect(x - d / 2, y - d / 2, d, d);
     }
     // orbits
     const R2 = R * R * .96;
