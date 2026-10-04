@@ -1,6 +1,6 @@
 {
   "name": "nexus",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "private": true,
   "description": "Asistente de escritorio para Windows al estilo J.A.R.V.I.S.: voz, agente con herramientas y fondo de escritorio animado.",
   "main": "out/main/index.js",

@@ -7,13 +7,14 @@
 Si Windows muestra "Windows protegió tu PC", pulsa **Más información → Ejecutar de todas formas** (la app no está firmada digitalmente).
 
 ### Novedades
-- **Logo nuevo:** un núcleo de energía con una galaxia dentro, en el icono de la app, la bandeja y el instalador.
-- **Naranja por defecto:** el tema *Solar* pasa a ser el de serie, y los bordes y detalles de la interfaz siguen ahora el color del tema que elijas.
-- **Dos temas nuevos:** *Chicle* (rosa chicle) y *Orquídea* (rosa púrpura), en Ajustes → Apariencia.
-- **El tiempo vuelve a salir** aunque el servicio que localiza tu ciudad esté saturado (ahora tiene uno de reserva).
-- Los dos puntos del reloj salen del mismo color que los números.
+- **Núcleo nuevo, más grande:** al hablar o con música, el anillo se envuelve en plasma de energía, con arcos que saltan, pulsos y partículas. Alrededor, un anillo de circuito con señales de luz que recorren nodos. Adiós a las barras tipo altavoz.
+- **Empezar como fondo de escritorio:** nueva opción en Ajustes → Sistema. Y si al encender el PC Windows aún no tiene el escritorio listo, NEXUS lo reintenta en vez de quedarse en ventana.
+- **Lado izquierdo libre para tus iconos:** los paneles de música y de sistema, la vista de lo que NEXUS está mirando y el texto de arranque salen a la derecha.
+- **Frase de activación a tu gusto** directamente en Ajustes → Voz y audio, con ideas para elegir. La de serie pasa a ser «Oye Nexus».
+- **Botón para reiniciar NEXUS** en Ajustes → Sistema y en el menú de la bandeja.
+- El panel de sistema ya no muestra una tarjeta encima de la otra.
 
-Si tienes la 1.0.1, NEXUS se actualizará sola a esta versión.
+Si tienes la 1.0.1 o la 1.0.2, NEXUS se actualizará sola a esta versión.
 
 ### Requisitos
 Windows 10 u 11 y una clave gratuita de IA (Groq recomendado; la app explica cómo conseguirla).
