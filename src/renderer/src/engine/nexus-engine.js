@@ -216,11 +216,11 @@
     g.addColorStop(0, col(pal.w, .95 * hi)); g.addColorStop(.16, col(pal.w, .6 * hi)); g.addColorStop(.45, col(pal.b, .22 * hi)); g.addColorStop(1, col(pal.a, 0));
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cx, cy, hr * 2.4, 0, TAU); ctx.fill();
     // dashed reactor rings
-    const rings = [[.92, [1.5, 5], S.r1, pal.b, .45], [.8, [26, 10, 3, 10], S.r2, pal.b, .26], [.66, [1, 3.5], S.r3, pal.w, .28]];
+    const rings = [[.92, [], S.r1, pal.b, .22], [.8, [26, 10, 3, 10], S.r2, pal.b, .26], [.66, [1, 3.5], S.r3, pal.w, .28]];
     ctx.lineWidth = Math.max(.6, 1 * sc);
     rings.forEach(([rf, dash, rot, c, a], k) => {
       ctx.save(); ctx.translate(cx, cy); ctx.rotate(rot);
-      ctx.setLineDash(dash.map(v => v * sc)); ctx.strokeStyle = col(c, a * kR * alpha * (.7 + .5 * p.energy + .7 * au.mid * gainC));
+      ctx.setLineDash(dash.map(v => v * sc)); ctx.strokeStyle = col(c, a * kR * alpha * (.7 + .5 * p.energy));
       ctx.beginPath(); ctx.arc(0, 0, rf * R * cont ** .3, 0, TAU); ctx.stroke(); ctx.restore();
       if (p.amber > .02) {
         const ang = t * (k % 2 ? -3.2 : 4) + k * 2.1;
@@ -232,6 +232,17 @@
       }
     });
     ctx.setLineDash([]);
+    // scanners: three short beams sweeping the inner ring, faster when it is busy
+    const scR = .92 * R * cont ** .3;
+    for (let k = 0; k < 3; k++) {
+      const h = S.r1 * (2.2 + k * .5) * (k % 2 ? -1 : 1) + k * 2.1, ln = .35 + .15 * k;
+      for (let j = 0; j < 6; j++) {
+        const f = 1 - j / 6;
+        ctx.strokeStyle = col(mix(pal.b, pal.w, f * .6), f * f * (.35 + .4 * p.energy) * kR * alpha); ctx.lineWidth = Math.max(.6, (.8 + 1.2 * f) * sc);
+        const d = k % 2 ? 1 : -1, s0 = h + d * ln * j / 6, s1 = h + d * ln * (j + 1) / 6;
+        ctx.beginPath(); ctx.arc(cx, cy, scR, Math.min(s0, s1), Math.max(s0, s1)); ctx.stroke();
+      }
+    }
     // event horizon ring
     const rc = mix(pal.b, pal.w, .55);
     g = ctx.createRadialGradient(cx, cy, R * .8, cx, cy, R * 1.3);
@@ -291,15 +302,60 @@
       ctx.strokeStyle = col(c, (.04 + .1 * lvl) * k * alpha); ctx.lineWidth = (S.mini ? 3 : 6) * sc; ctx.stroke();
       ctx.strokeStyle = col(mix(c, pal.w, .35), (.12 + .45 * lvl) * k * alpha); ctx.lineWidth = Math.max(.6, (L ? .8 : 1.2) * sc); ctx.stroke();
     }
-    // AI data ring: segments that light up with the sound, turning slowly
-    const SEG = S.mini ? 36 : 72, dr = R * 1.2;
-    ctx.lineWidth = Math.max(.8, 2.2 * sc);
-    for (let i = 0; i < SEG; i++) {
-      const a0 = i / SEG * TAU + S.r1 * .6, e = field(a0);
-      const on = clamp(.06 + e * 1.1 * Math.min(1, p.gain), 0, 1) * amp;
-      if (on < .07) continue;
-      ctx.strokeStyle = col(mix(pal.b, pal.w, clamp(e, 0, 1)), on * .8 * alpha);
-      ctx.beginPath(); ctx.arc(cx, cy, dr, a0, a0 + TAU / SEG * .55); ctx.stroke();
+    // AI circuit ring: a hairline where pulses of light run like signals, lighting up the nodes they cross
+    const dr = R * 1.4, act = clamp(lvl * 1.4 + base, 0, 1);
+    ctx.strokeStyle = col(pal.b, (.05 + .1 * act) * alpha); ctx.lineWidth = Math.max(.5, .7 * sc);
+    ctx.beginPath(); ctx.arc(cx, cy, dr, 0, TAU); ctx.stroke();
+    const NODES = S.mini ? 6 : 12, nrot = S.r2 * .35;
+    if (!S.nf) S.nf = new Float32Array(NODES);
+    if (!S.cm) S.cm = [{ a: 0, v: .9, l: .55 }, { a: 2.2, v: -.65, l: .4 }, { a: 4.1, v: 1.35, l: .3 }];
+    if (!S.pk) S.pk = [];
+    const near = (a1, a2) => Math.abs(((a1 - a2) % TAU + TAU + Math.PI) % TAU - Math.PI);
+    const touch = a => { for (let n = 0; n < NODES; n++) if (near(a, nrot + n / NODES * TAU) < .05) S.nf[n] = 1; };
+    // a light that runs along the ring, with a tail that fades behind it
+    const runner = (head, dir, len, k, wHead) => {
+      const steps = 10;
+      for (let j = 0; j < steps; j++) {
+        const u0 = j / steps, u1 = (j + 1) / steps, f = (1 - u0) ** 2;
+        ctx.strokeStyle = col(mix(pal.b, pal.w, f), f * k * alpha); ctx.lineWidth = Math.max(.6, (.6 + 1.6 * f) * sc);
+        ctx.beginPath(); ctx.arc(cx, cy, dr, Math.min(head - dir * len * u0, head - dir * len * u1), Math.max(head - dir * len * u0, head - dir * len * u1)); ctx.stroke();
+      }
+      const x = cx + Math.cos(head) * dr, y = cy + Math.sin(head) * dr;
+      g = ctx.createRadialGradient(x, y, 0, x, y, wHead * sc);
+      g.addColorStop(0, col(pal.w, .9 * k * alpha)); g.addColorStop(.3, col(pal.b, .35 * k * alpha)); g.addColorStop(1, col(pal.a, 0));
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, wHead * sc, 0, TAU); ctx.fill();
+    };
+    const spd = (REDUCED ? .35 : 1) * (.35 + 2.6 * act);
+    for (const c of S.cm) {
+      c.a += c.v * spd * dt; touch(c.a);
+      runner(c.a, Math.sign(c.v), c.l * (.6 + .8 * act), (.4 + .6 * act) * amp, 9 + 7 * act);
+    }
+    // data packets: quick bursts sent around the ring on stronger sounds
+    if (!REDUCED && ig >= 1) {
+      let spawn = (au.high * .9 + au.bass * .5) * p.gain * dt * (S.mini ? 3 : 8);
+      while (spawn > 0 && S.pk.length < (S.mini ? 4 : 14)) {
+        if (spawn < 1 && Math.random() > spawn) break; spawn -= 1;
+        S.pk.push({ a: Math.random() * TAU, v: (Math.random() < .5 ? -1 : 1) * (2.5 + Math.random() * 3), life: 0, max: .35 + Math.random() * .45 });
+      }
+    }
+    for (let i = S.pk.length - 1; i >= 0; i--) {
+      const q = S.pk[i]; q.life += dt; if (q.life > q.max) { S.pk.splice(i, 1); continue; }
+      q.a += q.v * dt; touch(q.a);
+      runner(q.a, Math.sign(q.v), .14, Math.sin(Math.PI * q.life / q.max) * amp, 4);
+    }
+    // the nodes: small marks across the ring that flash when a signal passes
+    for (let n = 0; n < NODES; n++) {
+      S.nf[n] *= Math.exp(-dt * 4);
+      const a = nrot + n / NODES * TAU, f = S.nf[n], ca = Math.cos(a), sa = Math.sin(a), big = n % 3 === 0;
+      const r0 = dr - (big ? 6 : 3.5) * sc, r1 = dr + (big ? 6 : 3.5) * sc;
+      ctx.strokeStyle = col(mix(pal.b, pal.w, f), (.2 + .25 * act + .55 * f) * alpha); ctx.lineWidth = Math.max(.6, (big ? 1.4 : 1) * sc);
+      ctx.beginPath(); ctx.moveTo(cx + ca * r0, cy + sa * r0); ctx.lineTo(cx + ca * r1, cy + sa * r1); ctx.stroke();
+      if (f > .05) {
+        const x = cx + ca * dr, y = cy + sa * dr;
+        g = ctx.createRadialGradient(x, y, 0, x, y, 10 * sc);
+        g.addColorStop(0, col(pal.w, .7 * f * alpha)); g.addColorStop(1, col(pal.b, 0));
+        ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 10 * sc, 0, TAU); ctx.fill();
+      }
     }
     // energy pulses on the beats and stressed syllables
     S.pcd = (S.pcd || 0) - dt; if (!S.pulses) S.pulses = [];
