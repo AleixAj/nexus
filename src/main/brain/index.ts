@@ -152,6 +152,16 @@ async function runQuick(q: Quick, text: string, h: Handlers, ctl: AbortControlle
   return reply
 }
 
+// Each AI gets the tool calls the way it accepts them (a turn may move from one AI to another)
+function forTarget(t: Target, msgs: Msg[]): Msg[] {
+  if (t.name === 'Mistral') return forMistral(msgs.map(stripSignature))
+  if (t.name !== 'Gemini') return msgs.map(stripSignature)
+  // Gemini 3 rejects calls without their thought signature; calls made by another AI get the
+  // placeholder Google documents for that case
+  return msgs.map(m => m.tool_calls ? { ...m, tool_calls: m.tool_calls.map(c => c.extra_content?.google?.thought_signature ? c : { ...c, extra_content: { google: { thought_signature: 'skip_thought_signature_validator' } } }) } : m)
+}
+const stripSignature = (m: Msg): Msg => m.tool_calls ? { ...m, tool_calls: m.tool_calls.map(({ extra_content, ...c }) => c) } : m
+
 // Mistral only takes tool call ids of 9 letters/digits; a turn may have started on another AI
 function forMistral(msgs: Msg[]): Msg[] {
   const ids = new Map<string, string>()
@@ -211,7 +221,7 @@ async function askTurn(text: string, h: Handlers, ctl: AbortController): Promise
       ...(/gpt-oss|gemini/.test(t.model) ? { reasoning_effort: 'low' } : /qwen/.test(t.model) ? { reasoning_effort: 'none' } : {}),
       // on the last round force an answer instead of more tool calls
       ...(last || !tools.length ? {} : { tools }),
-      messages: [{ role: 'system', content: systemPrompt() }, ...(t.name === 'Mistral' ? forMistral(turn) : turn)]
+      messages: [{ role: 'system', content: systemPrompt() }, ...forTarget(t, turn)]
     })
 
     const { res, target } = await callModel(all, body, ctl.signal, h.onProgress)

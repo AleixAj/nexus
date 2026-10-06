@@ -1,6 +1,7 @@
 // Parses an OpenAI-style SSE stream, forwarding text as it arrives and collecting tool calls.
 
-export type ToolCall = { id: string; type: 'function'; function: { name: string; arguments: string } }
+// extra_content: Gemini 3 sends a thought signature with each call and wants it back unchanged
+export type ToolCall = { id: string; type: 'function'; function: { name: string; arguments: string }; extra_content?: any }
 
 export async function readStream(body: ReadableStream<Uint8Array>, onDelta: (t: string) => void) {
   const reader = body.getReader()
@@ -29,6 +30,7 @@ export async function readStream(body: ReadableStream<Uint8Array>, onDelta: (t: 
       if (tc.id) c.id = tc.id
       if (tc.function?.name) c.function.name += tc.function.name
       if (tc.function?.arguments) c.function.arguments += tc.function.arguments
+      if (tc.extra_content) c.extra_content = { ...c.extra_content, ...tc.extra_content }
     }
   }
 
