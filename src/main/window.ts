@@ -88,7 +88,9 @@ function attachWall(w: BrowserWindow) {
 
 /** Another monitor was chosen for the core: move the wallpaper there. */
 export function wallDisplayChanged() {
-  if (mode === 'wallpaper') switchMode('wallpaper')
+  // what it will be once the changes under way are done, not what it is this instant
+  const target = queued ? queued[0] : switching ? goal : mode
+  if (target === 'wallpaper') switchMode('wallpaper')
 }
 
 // The mouse on the desktop, given to the page as real input: hover effects, clicks and the
@@ -239,9 +241,14 @@ function placeOnSecondary() {
   return { x: a.x + Math.round((a.width - width) / 2), y: a.y + Math.round((a.height - height) / 2), width, height }
 }
 
+// a change asked for while another is still under way: done right after it, so the last request wins
+let queued: [Mode, Record<string, string>, boolean] | null = null
+let goal: Mode = 'window'
+
 export async function switchMode(m: Mode, query: Record<string, string> = {}, remember = true) {
-  if (switching) return
+  if (switching) { queued = [m, query, remember]; return }
   switching = true
+  goal = m
   closeEditBox()
   closeExtras()
   const was = mode
@@ -252,6 +259,7 @@ export async function switchMode(m: Mode, query: Record<string, string> = {}, re
   if (remember) saveSettings({ mode: m })
   switching = false
   createWindow(m, { quiet: '1', ...query })
+  if (queued) { const next = queued; queued = null; switchMode(...next) }
 }
 
 export function showWindow() {
