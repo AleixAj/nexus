@@ -109,6 +109,7 @@ que vive en una galaxia, te escucha, te contesta con voz y hace cosas en tu PC.
   verdad (la IA no puede usarla, su atajo de teclado queda libre y su icono sale de la barra).
 - **Reiniciar.** Ajustes → Sistema → *Reiniciar NEXUS* (o desde el icono de la bandeja): se cierra y vuelve a abrir
   desde cero, con la animación de arranque.
+  *Ver la animación de arranque*, al lado, repite solo la animación entera sin cerrar el programa.
 - **Autodiagnóstico.** Ajustes → *Comprobar que todo funciona*: revisa internet, cada clave, las voces, el micrófono, que
   entienda lo que dices, búsqueda, noticias, tiempo, calendario, Spotify y disco, sin cambiar nada, y dice cómo arreglar
   lo que falle.

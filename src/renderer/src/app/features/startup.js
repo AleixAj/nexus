@@ -10,6 +10,15 @@ export const startup = {
     sfx.ignition(1);
     this.firstScreen();
   },
+  /** The whole start-up animation again (intro, ignition and boot), without restarting the program. */
+  replayIntro() {
+    this.interrupt(); this.clearFlow();
+    clearTimeout(this.bootGuard); this.booting = false;
+    this.setState({ panel: null, overlay: false, uiIn: false, words: [], actionLabel: '', intro: true });
+    this.stopHum && this.stopHum();
+    this.stopHum = sfx.bootHum([.88, 1.14, 1.4, 1.66, 1.92]);
+    this.updatePower();
+  },
   firstScreen() { voice.warmVoices(); if (this.onboarded) this.bootDesktop(); else this.startOnboarding(); },
   bootDesktop() {
     this.clearFlow(); const E = this.E(); if (!E) return;

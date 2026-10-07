@@ -137,6 +137,7 @@ export function settingsView(app, c) {
     micOptions: [{ id: '', label: 'Predeterminado de Windows' + ((S.micList || []).find(m => !m.id) ? ' · ' + (S.micList || []).find(m => !m.id).label : '') }, ...(S.micList || []).filter(m => m.id)].map(m => ({ label: m.label, on: (S.micId || '') === m.id, pick: () => app.pickMic(m.id) })),
 
     // self-test
+    replayIntro: () => app.replayIntro(),
     restartApp: () => { app.setState({ restarting: true }); api && api.restartApp() }, restarting: !!S.restarting,
     runDiagnostics: () => app.runDiagnostics(), diagRunning: !!S.diagRunning, diag: S.diag, closeDiag: () => app.setState({ diag: null }),
 

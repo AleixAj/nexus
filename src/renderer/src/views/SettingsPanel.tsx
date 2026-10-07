@@ -360,8 +360,11 @@ function Tab({ v }: { v: any }) {
           </Row>
           <Toggles list={[t.wallDock, t.wallClicks, t.bgMotion]} /></Group>
         <Group title="REINICIAR">
-          <Help>Cierra NEXUS y lo vuelve a abrir desde cero, con la animación de arranque. Útil si algo se ha quedado raro. No se pierde nada.</Help>
-          <button onClick={v.restartApp} disabled={v.restarting} style={{ ...mainBtn, height: '52px', fontSize: '16px', opacity: v.restarting ? .6 : 1 }}>{v.restarting ? 'Reiniciando…' : 'Reiniciar NEXUS'}</button>
+          <Help>«Ver la animación» repite el arranque entero desde el principio, sin cerrar nada. «Reiniciar NEXUS» cierra el programa y lo vuelve a abrir desde cero: útil si algo se ha quedado raro. No se pierde nada.</Help>
+          <div style={{ display: 'flex', gap: '12px' }}>
+            <button onClick={v.replayIntro} style={{ ...ghostBtn, flex: 1, height: '52px', fontSize: '16px' }}>Ver la animación de arranque</button>
+            <button onClick={v.restartApp} disabled={v.restarting} style={{ ...mainBtn, flex: 1, height: '52px', fontSize: '16px', opacity: v.restarting ? .6 : 1 }}>{v.restarting ? 'Reiniciando…' : 'Reiniciar NEXUS'}</button>
+          </div>
         </Group>
       </>
     )
