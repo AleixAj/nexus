@@ -15,7 +15,7 @@ import { systemSnapshot } from './sysinfo'
 import { cancelReminders, listReminders } from './reminders'
 import { addFact, approveFact, clearMemory, deleteExchange, deleteFact, getMemory } from './memory'
 import { currentExtra, currentMedia, mediaControl } from './media'
-import { HOTKEY, closeExtras, extrasRefresh, isDev, listDisplays, openExtras, restartApp, switchMode, wallClicksChanged, wallDisplayChanged } from './window'
+import { HOTKEY, closeExtras, coreDisplay, extrasRefresh, isDev, listDisplays, openExtras, restartApp, switchMode, wallClicksChanged, wallDisplayChanged } from './window'
 import { typeText } from './dictation'
 import { ensureModel, feedWakeWord, modelReady, startWakeWord, stopWakeWord, transcribeWake } from './wakeword'
 import { broadcast } from './window'
@@ -168,7 +168,7 @@ export function registerIpc() {
     openEditBox(owner, {
       id: str(r.id, 40), x: n(r.x), y: n(r.y), w: n(r.w), h: n(r.h), value: str(r.value, 20000), placeholder: str(r.placeholder, 200),
       secret: !!r.secret, multiline: !!r.multiline, fontSize: Math.min(40, Math.max(10, n(r.fontSize))), accent: /^[0-9 ]+$/.test(String(r.accent)) ? String(r.accent) : '254 215 170'
-    })
+    }, coreDisplay().bounds)
   })
   handle('quota:get', () => quotaToday(loadSettings()))
   handle('approvals:list', () => listApprovals())

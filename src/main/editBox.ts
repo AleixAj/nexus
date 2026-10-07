@@ -6,7 +6,7 @@ import { join } from 'path'
 
 export type EditReq = {
   id: string
-  x: number; y: number; w: number; h: number // page pixels, the page covers the primary monitor
+  x: number; y: number; w: number; h: number // page pixels, the page covers the monitor with the core
   value: string; placeholder: string; secret: boolean; multiline: boolean
   fontSize: number; accent: string
 }
@@ -46,9 +46,9 @@ export function closeEditBox() {
   if (b && !b.isDestroyed()) b.destroy()
 }
 
-export function openEditBox(owner: BrowserWindow, r: EditReq) {
+/** d: the monitor the wallpaper page is on (the user picks which one shows the core). */
+export function openEditBox(owner: BrowserWindow, r: EditReq, d: Electron.Rectangle = screen.getPrimaryDisplay().bounds) {
   closeEditBox()
-  const d = screen.getPrimaryDisplay().bounds
   const b = new BrowserWindow({
     x: Math.round(d.x + r.x), y: Math.round(d.y + r.y), width: Math.max(80, Math.round(r.w)), height: Math.max(30, Math.round(r.h)),
     frame: false, transparent: true, hasShadow: false, alwaysOnTop: true, skipTaskbar: true,
