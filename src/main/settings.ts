@@ -43,6 +43,8 @@ export type Settings = {
   wallExtend: boolean
   /** always start as the wallpaper (at login too), whatever the last mode was */
   bootWall: boolean
+  /** the monitor (Electron display id) that shows the core as the wallpaper; '' = the primary */
+  wallDisplay: string
   wakeWord: string
   // how the recogniser writes the phrase in the user's own voice (training), and the loudness
   // from which the microphone sound is worth recognising (0 = automatic)
@@ -126,6 +128,7 @@ const DEFAULTS: Settings = {
   wallClicks: true,
   wallExtend: false,
   bootWall: false,
+  wallDisplay: '',
   // the phrase that wakes it: whatever the user likes ("Oye Jarvis", "Hola Viernes"…)
   wakeWord: 'Oye Nexus',
   wakeLearnt: [],

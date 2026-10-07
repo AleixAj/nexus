@@ -15,7 +15,7 @@ import { systemSnapshot } from './sysinfo'
 import { cancelReminders, listReminders } from './reminders'
 import { addFact, approveFact, clearMemory, deleteExchange, deleteFact, getMemory } from './memory'
 import { currentExtra, currentMedia, mediaControl } from './media'
-import { HOTKEY, closeExtras, extrasRefresh, isDev, openExtras, restartApp, switchMode, wallClicksChanged } from './window'
+import { HOTKEY, closeExtras, extrasRefresh, isDev, listDisplays, openExtras, restartApp, switchMode, wallClicksChanged, wallDisplayChanged } from './window'
 import { typeText } from './dictation'
 import { ensureModel, feedWakeWord, modelReady, startWakeWord, stopWakeWord, transcribeWake } from './wakeword'
 import { broadcast } from './window'
@@ -68,6 +68,7 @@ export function registerIpc() {
     azurePaused: azureVoicesPaused(),
     hasAzure: !!getKey('Azure'),
     autostart: app.getLoginItemSettings().openAtLogin,
+    displays: listDisplays(),
     providers: Object.fromEntries(Object.entries(PROVIDERS).map(([k, p]) => [k, { models: p.models, needsKey: p.needsKey, hasKey: !!getKey(k) }]))
   }))
   handle('settings:set', (_e, patch) => {
@@ -76,6 +77,7 @@ export function registerIpc() {
     if ('wallClicks' in p) wallClicksChanged()
     if ('disabled' in p) applyHotkeys()
     if ('wallExtend' in p) { if (out.wallExtend) openExtras(); else closeExtras() }
+    if ('wallDisplay' in p) wallDisplayChanged()
     if (['theme', 'quality', 'reduced', 'bgMotion'].some(k => k in p)) extrasRefresh()
     return out
   })

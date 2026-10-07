@@ -352,7 +352,10 @@ function Tab({ v }: { v: any }) {
           {v.showEveningTime && <Row label="Hora del resumen de la noche"><div style={{ width: '540px' }}><Segments opts={v.eveningTimes} /></div></Row>}
         </Group>
         <Group title="FONDO DE ESCRITORIO"><Toggles list={[t.wallpaper]} />
-          <Row label="En qué pantallas" note="Con varias, las secundarias muestran la misma galaxia sin el núcleo, estén donde estén (izquierda, derecha, arriba o abajo)">
+          {v.showWallCore && <Row label="Pantalla del núcleo" note="Dónde se pone NEXUS, con su núcleo, detrás de los iconos. Si está activo, se mueve al momento">
+            <div style={{ width: '420px' }}><Segments opts={v.wallCoreScreens} /></div>
+          </Row>}
+          <Row label="En qué pantallas" note="Con «Todas», las demás pantallas muestran la misma galaxia sin el núcleo, estén donde estén (izquierda, derecha, arriba o abajo)">
             <div style={{ width: '360px' }}><Segments opts={v.wallScreens} /></div>
           </Row>
           <Toggles list={[t.wallDock, t.wallClicks, t.bgMotion]} /></Group>

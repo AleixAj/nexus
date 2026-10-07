@@ -207,6 +207,8 @@ En **modo fondo de escritorio** la animación sustituye a tu fondo de pantalla, 
 - **Al encender el PC:** con *Iniciar con Windows* activado, NEXUS vuelve como lo dejaste; con *Empezar como fondo de
   escritorio* (Ajustes → Sistema) arranca siempre detrás de los iconos. Si Windows aún no ha preparado el escritorio,
   lo reintenta unos segundos en vez de quedarse en ventana.
+- **En qué pantalla:** con varios monitores, Ajustes → Sistema → *Pantalla del núcleo* elige dónde va NEXUS con su
+  núcleo (la principal o una secundaria). Con *Todas las pantallas*, las demás muestran solo la galaxia.
 - **El lado izquierdo queda libre para tus iconos:** los paneles de música y de sistema, la vista de lo que NEXUS está
   mirando y el texto del arranque salen a la derecha.
 

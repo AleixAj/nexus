@@ -120,7 +120,13 @@ export function settingsView(app, c) {
     showEveningTime: S.eveningReview !== false,
     tryBar: () => api && api.openBar(),
     // on which monitors the wallpaper shows (the others get only the galaxy, without the core)
-    wallScreens: [['Solo la principal', false], ['Todas las pantallas', true]].map(([label, all]) => ({
+    // which monitor gets NEXUS with its core (the rest, if extended, only the galaxy)
+    wallCoreScreens: (S.displays || []).map(d => {
+      const cur = S.wallDisplay ? Number(S.wallDisplay) : (S.displays.find(x => x.primary) || {}).id;
+      return { label: d.label, ...seg(cur === d.id), pick: () => { const v = d.primary ? '' : String(d.id); if (v !== (S.wallDisplay || '')) { app.setState({ wallDisplay: v }); app.save({ wallDisplay: v }); } } };
+    }),
+    showWallCore: (S.displays || []).length > 1,
+    wallScreens: [['Solo la del núcleo', false], ['Todas las pantallas', true]].map(([label, all]) => ({
       label, ...seg(!!S.wallExtend === all), pick: () => { if (!!S.wallExtend !== all) app.flip('wallExtend'); },
     })),
     // the voice itself is chosen (and heard) in the Voice panel

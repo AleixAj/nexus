@@ -31,6 +31,28 @@ function secondaryArea() {
   return SECONDARY ? screen.getAllDisplays().find(d => d.id !== primary.id)?.workArea || null : null
 }
 
+/** The monitor that shows NEXUS with its core when it is the wallpaper (the user's choice, or the primary). */
+export function coreDisplay() {
+  const id = Number(loadSettings().wallDisplay)
+  return (id && screen.getAllDisplays().find(d => d.id === id)) || screen.getPrimaryDisplay()
+}
+
+/** Where a monitor is, seen from another (the primary by default). */
+function sideOf(d: Electron.Display, from = screen.getPrimaryDisplay()) {
+  const p = from.bounds, b = d.bounds
+  const dx = b.x + b.width / 2 - (p.x + p.width / 2), dy = b.y + b.height / 2 - (p.y + p.height / 2)
+  return Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'top' : 'bottom')
+}
+
+/** The monitors, for Settings: the primary one first. */
+export function listDisplays() {
+  const primary = screen.getPrimaryDisplay()
+  const side = { left: 'izquierda', right: 'derecha', top: 'arriba', bottom: 'abajo' } as const
+  return screen.getAllDisplays()
+    .sort((a, b) => (a.id === primary.id ? -1 : b.id === primary.id ? 1 : a.bounds.x - b.bounds.x))
+    .map(d => ({ id: d.id, label: d.id === primary.id ? 'Principal' : `Secundaria (${side[sideOf(d)]})`, size: `${d.size.width}×${d.size.height}`, primary: d.id === primary.id }))
+}
+
 /** Sends an event to every open window. */
 export const broadcast = (channel: string, ...data: unknown[]) =>
   BrowserWindow.getAllWindows().forEach(w => { if (!w.isDestroyed()) w.webContents.send(channel, ...data) })
@@ -57,10 +79,16 @@ export function notify(title: string, body: string) {
 // user allows it, the clicks made on the desktop
 function attachWall(w: BrowserWindow) {
   const send = (ch: string, data: unknown) => { if (!w.isDestroyed()) w.webContents.send(ch, data) }
+  const d = coreDisplay()
   return attachToDesktop(w, {
     onFront: state => send('app:covered', state),
     onPointer: loadSettings().wallClicks ? p => pointerTo(w, p) : undefined,
-  })
+  }, d.id === screen.getPrimaryDisplay().id ? undefined : d)
+}
+
+/** Another monitor was chosen for the core: move the wallpaper there. */
+export function wallDisplayChanged() {
+  if (mode === 'wallpaper') switchMode('wallpaper')
 }
 
 // The mouse on the desktop, given to the page as real input: hover effects, clicks and the
@@ -82,7 +110,7 @@ export function wallClicksChanged() {
 export function createWindow(m: Mode, query: Record<string, string> = {}) {
   mode = m
   const wall = m === 'wallpaper'
-  const { width, height } = screen.getPrimaryDisplay().bounds
+  const { width, height } = (wall ? coreDisplay() : screen.getPrimaryDisplay()).bounds
   const w = new BrowserWindow({
     ...(wall
       // off-screen until it is moved behind the desktop icons
@@ -160,13 +188,6 @@ function loadPage(w: BrowserWindow, q: Record<string, string>) {
 let extras: BrowserWindow[] = []
 let watchingDisplays = false
 
-/** Where a monitor is, seen from the primary one (the galaxy glows from that side). */
-function sideOf(d: Electron.Display) {
-  const p = screen.getPrimaryDisplay().bounds, b = d.bounds
-  const dx = b.x + b.width / 2 - (p.x + p.width / 2), dy = b.y + b.height / 2 - (p.y + p.height / 2)
-  return Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'top' : 'bottom')
-}
-
 export function closeExtras() {
   for (const w of extras) { stopDesktop(w); if (!w.isDestroyed()) w.destroy() }
   extras = []
@@ -180,11 +201,13 @@ export function openExtras() {
     let t: NodeJS.Timeout | undefined
     const again = () => { clearTimeout(t); t = setTimeout(() => { if (mode === 'wallpaper' && win) openExtras() }, 1500) }
     screen.on('display-added', again); screen.on('display-removed', again); screen.on('display-metrics-changed', again)
+    // the monitor with the core was unplugged: the core goes back to the primary one
+    screen.on('display-removed', (_e, d) => { if (String(d.id) === loadSettings().wallDisplay) wallDisplayChanged() })
   }
   if (mode !== 'wallpaper' || !loadSettings().wallExtend) return
-  const primary = screen.getPrimaryDisplay()
+  const core = coreDisplay()
   for (const d of screen.getAllDisplays()) {
-    if (d.id === primary.id) continue
+    if (d.id === core.id) continue
     const w = new BrowserWindow({
       x: -32000, y: -32000, width: d.bounds.width, height: d.bounds.height, frame: false, skipTaskbar: true, resizable: false,
       movable: false, focusable: false, show: false, backgroundColor: '#05030A', title: 'NEXUS',
@@ -202,7 +225,7 @@ export function openExtras() {
       }
     })
     w.webContents.on('will-navigate', e => e.preventDefault())
-    loadPage(w, { mode: 'wallpaper', screen: 'extra', side: sideOf(d), quiet: '1' })
+    loadPage(w, { mode: 'wallpaper', screen: 'extra', side: sideOf(d, core), quiet: '1' })
   }
 }
 
